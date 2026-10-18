@@ -44,17 +44,6 @@
         radius="240"
     ></LightComponent>
 
-    <MaterialInventoryComponent
-        _tags="enabled_in_world"
-        _enabled="1"
-        drop_as_item="0"
-        on_death_spill="1"
-        leak_on_damage_percent="0.999"
-    >
-        <count_per_material_type>
-            <Material material="oil" count="5" />
-        </count_per_material_type>
-    </MaterialInventoryComponent>
 
     <DamageModelComponent
         _tags="enabled_in_world"
@@ -138,7 +127,7 @@
 
     <LuaComponent script_physics_body_modified="data/scripts/props/physics_lantern_damaged.lua" />
 
-    <LuaComponent script_death="data/scripts/props/lantern_death.lua" />
+    <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/lantern_death.lua" />
 
     <AudioComponent
         _tags="enabled_in_world"
