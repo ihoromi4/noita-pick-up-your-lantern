@@ -1,0 +1,9 @@
+{
+  "format.defaultConfig": {
+    "indent_style": "space",
+    "indent_size": "4",
+    "quote_style": "Double",
+    "continuation_indent_size": "4"
+  }
+}
+
