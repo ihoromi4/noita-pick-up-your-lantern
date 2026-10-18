@@ -1,0 +1,1 @@
+-- Pick Up Your Lantern mod entry point
