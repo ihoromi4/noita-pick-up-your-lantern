@@ -1,0 +1,229 @@
+<Entity tags="mortal,hittable,teleportable_NOT,prop,prop_physics,item_physics,item_pickup" >
+
+    <!-- mortal is required so it can explode -->
+
+    <PhysicsBodyComponent
+        _tags="enabled_in_world"
+        allow_sleep="1"
+        angular_damping="0.01"
+        fixed_rotation="0"
+        gridworld_box2d="1"
+        hax_fix_going_through_ground="1"
+        is_bullet="1"
+        linear_damping="0.1"
+        auto_clean="0"
+        on_death_leave_physics_body="0"
+        on_death_really_leave_body="0"
+    ></PhysicsBodyComponent>
+
+    <PhysicsImageShapeComponent
+        centered="0"
+        offset_x="4.5"
+        offset_y="3.5"
+        image_file="data/props_gfx/lantern_small.png"
+        material="glass_box2d"
+    ></PhysicsImageShapeComponent>
+
+    <PhysicsJointComponent
+        nail_to_wall="1"
+        breakable="1"
+        pos_x="4.5"
+        pos_y="1"
+    ></PhysicsJointComponent>
+
+    <LightComponent
+        _tags="enabled_in_world,enabled_in_hand"
+        _enabled="1"
+        radius="240"
+    ></LightComponent>
+
+    <MaterialInventoryComponent
+        _tags="enabled_in_world"
+        _enabled="1"
+        drop_as_item="0"
+        on_death_spill="1"
+        leak_on_damage_percent="0.999"
+    >
+        <count_per_material_type>
+            <Material material="oil" count="4" />
+        </count_per_material_type>
+    </MaterialInventoryComponent>
+
+    <DamageModelComponent
+        _tags="enabled_in_world"
+        air_needed="0"
+        blood_material="oil"
+        drop_items_on_death="0"
+        falling_damage_damage_max="1.2"
+        falling_damage_damage_min="0.1"
+        falling_damage_height_max="250"
+        falling_damage_height_min="70"
+        falling_damages="0"
+        fire_damage_amount="0.2"
+        fire_probability_of_ignition="0"
+        hp="0.15"
+        is_on_fire="0"
+        materials_create_messages="0"
+        materials_damage="0"
+        ragdoll_filenames_file=""
+        ragdoll_material=""
+        critical_damage_resistance="1"
+        ui_report_damage="0"
+    ></DamageModelComponent>
+
+    <ExplodeOnDamageComponent
+        _tags="enabled_in_world"
+        explode_on_death_percent="1"
+        explode_on_damage_percent="0.0"
+        physics_body_modified_death_probability="0.75"
+        physics_body_destruction_required="0.5"
+    >
+        <config_explosion
+            never_cache="0"
+            damage="0.2"
+            camera_shake="1"
+            explosion_radius="5"
+            explosion_sprite="data/particles/explosion_008.xml"
+            explosion_sprite_lifetime="8"
+            create_cell_probability="50"
+            hole_destroy_liquid="0"
+            hole_enabled="1"
+            ray_energy="10000"
+            particle_effect="1"
+            damage_mortals="1"
+            physics_explosion_power.min="0.05"
+            physics_explosion_power.max="0.1"
+            physics_throw_enabled="1"
+            shake_vegetation="1"
+            sparks_count_min="5"
+            sparks_count_max="10"
+            sparks_enabled="1"
+            stains_enabled="1"
+            stains_radius="10"
+        ></config_explosion>
+    </ExplodeOnDamageComponent>
+
+    <PhysicsBodyCollisionDamageComponent
+        _tags="enabled_in_world"
+        speed_threshold="80.0"
+    ></PhysicsBodyCollisionDamageComponent>
+
+    <CameraBoundComponent
+        _tags="enabled_in_world"
+        max_count="100"
+        distance="1000"
+    ></CameraBoundComponent>
+
+    <SpriteComponent
+        _tags="character,enabled_in_world"
+        alpha="1"
+        image_file="data/props_gfx/lantern_small_flame.xml"
+        offset_x="4.45"
+        offset_y="3.5"
+        emissive="0"
+        additive="0"
+        next_rect_animation=""
+        rect_animation="default"
+        z_index="-1"
+    ></SpriteComponent>
+
+    <SpriteAnimatorComponent
+        _tags="enabled_in_world,enabled_in_hand"
+    ></SpriteAnimatorComponent>
+
+    <LuaComponent script_physics_body_modified="data/scripts/props/physics_lantern_damaged.lua" />
+
+    <LuaComponent script_death="data/scripts/props/lantern_small_death.lua" />
+
+    <AudioComponent
+        _tags="enabled_in_world"
+        file="data/audio/Desktop/materials.bank"
+        event_root="collision/lantern"
+        set_latest_event_position="1"
+    ></AudioComponent>
+
+    <PhysicsThrowableComponent
+        max_throw_speed="180"
+        throw_force_coeff="1.5"
+    ></PhysicsThrowableComponent>
+
+    <ProjectileComponent
+        _tags="enabled_in_world"
+        lifetime="-1"
+        damage="0"
+        penetrate_entities="1"
+        never_hit_player="1"
+    ></ProjectileComponent>
+
+    <VelocityComponent
+        _tags="enabled_in_world"
+    ></VelocityComponent>
+
+    <SpriteComponent
+        _tags="character,enabled_in_hand"
+        _enabled="0"
+        alpha="1"
+        image_file="mods/pick_up_your_lantern/files/props_gfx/lantern_small_in_hand.xml"
+        offset_x="4.5"
+        offset_y="3.5"
+        emissive="0"
+        additive="0"
+        next_rect_animation=""
+        rect_animation="default"
+        z_index="-1.1"
+        has_special_scale="1"
+        special_scale_x="1"
+        special_scale_y="1"
+    ></SpriteComponent>
+
+    <ItemComponent
+        _tags="enabled_in_world"
+        item_name="Small Lantern"
+        ui_description="A small glass lantern filled with oil"
+        ui_sprite="mods/pick_up_your_lantern/files/props_gfx/ui_lantern_small.png"
+        max_child_items="0"
+        is_pickable="1"
+        is_equipable_forced="1"
+        preferred_inventory="QUICK"
+        drinkable="0"
+    ></ItemComponent>
+
+    <UIInfoComponent
+        _tags="enabled_in_world"
+        name="Small Lantern"
+    ></UIInfoComponent>
+
+    <AbilityComponent
+        ui_name="Small Lantern"
+        throw_as_item="1"
+    >
+        <gun_config deck_capacity="0" />
+    </AbilityComponent>
+
+    <VariableStorageComponent
+        _tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
+        name="lantern_swing_angle"
+        value_float="0"
+    ></VariableStorageComponent>
+
+    <VariableStorageComponent
+        _tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
+        name="lantern_swing_vel"
+        value_float="0"
+    ></VariableStorageComponent>
+
+    <VariableStorageComponent
+        _tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
+        name="lantern_swing_phase"
+        value_float="0"
+    ></VariableStorageComponent>
+
+    <LuaComponent
+        _tags="enabled_in_hand"
+        _enabled="0"
+        execute_every_n_frame="1"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_in_hand.lua"
+    ></LuaComponent>
+
+</Entity>
+
