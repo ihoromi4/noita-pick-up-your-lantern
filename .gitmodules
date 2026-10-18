@@ -1,0 +1,3 @@
+[submodule "tools/noita-mod-tools"]
+	path = tools/noita-mod-tools
+	url = git@github.com:ihoromi4/noita-mod-tools.git
