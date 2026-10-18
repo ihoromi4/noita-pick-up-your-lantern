@@ -15,6 +15,7 @@ Follow LuaLS (Lua Language Server):
 - Use 4 spaces indentation.
 - Document function signatures using LDoc.
 - Variables names should use snake case.
+- Constants should use upper snake case.
 - Function names should use upper camel case.
 - Add a trailing comma to all fields in tables, including the last one.
 
