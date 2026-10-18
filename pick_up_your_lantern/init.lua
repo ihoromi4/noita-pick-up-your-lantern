@@ -1,5 +1,7 @@
 --- Pick Up Your Lantern mod entry point.
 
+dofile_once("mods/pick_up_your_lantern/files/scripts/patch_lighting.lua")
+
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
     local translations = ModTextFileGetContent("data/translations/common.csv")
@@ -12,3 +14,4 @@ local function AppendTranslations()
 end
 
 AppendTranslations()
+PatchLighting()
