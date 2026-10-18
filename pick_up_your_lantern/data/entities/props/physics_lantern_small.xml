@@ -185,8 +185,8 @@
 
     <ItemComponent
         _tags="enabled_in_world"
-        item_name="Small Lantern"
-        ui_description="A small glass lantern filled with oil"
+        item_name="$item_lantern_small"
+        ui_description="$item_description_lantern_small"
         ui_sprite="mods/pick_up_your_lantern/files/props_gfx/ui_lantern_small.png"
         max_child_items="0"
         is_pickable="1"
@@ -197,11 +197,11 @@
 
     <UIInfoComponent
         _tags="enabled_in_world"
-        name="Small Lantern"
+        name="$item_lantern_small"
     ></UIInfoComponent>
 
     <AbilityComponent
-        ui_name="Small Lantern"
+        ui_name="$item_lantern_small"
         throw_as_item="1"
     >
         <gun_config deck_capacity="0" />
