@@ -111,6 +111,7 @@ function PatchShaderVision()
     -- - The fragment is above ground (fade == 0.0), preserving the surface sky.
     -- - The fragment is illuminated by an active light source (light_tex_sample.rgb or alpha hole),
     --   allowing held or thrown lanterns, torches, fires, and explosions to pierce the darkness.
+    -- - The fragment is illuminated by glowing materials (glow buffer), allowing fire, lava, and acid to shine.
     -- If `pul_vision.y == 0.0` (Pitch Black), `pul_edge` defaults to 1.0 to eliminate the foot halo.
     local fog_target = "fog_of_war_sky_ambient_amount *= 1.0-fade;"
     local fog_replacement = [[fog_of_war_sky_ambient_amount *= 1.0-fade;
@@ -118,6 +119,8 @@ function PatchShaderVision()
 	{
 		float pul_dist = distance(world_pos, pul_player_pos.xy);
 		float pul_light = max(max(light_tex_sample.r, light_tex_sample.g), max(light_tex_sample.b, light_tex_sample.a));
+		float pul_glow = max(max(glow.r, glow.g), glow.b);
+		pul_light = max(pul_light, pul_glow * 1.5);
 		float pul_edge = pul_vision.y > 0.0 ? smoothstep(pul_vision.y * 0.75, pul_vision.y, pul_dist) : 1.0;
 		float pul_darken = pul_edge * fade * (1.0 - clamp(pul_light * 2.0, 0.0, 1.0));
 		fog_of_war_amount = clamp(fog_of_war_amount + pul_darken, 0.0, 1.0);

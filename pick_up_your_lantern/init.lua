@@ -4,6 +4,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_lighting.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/player_vision.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_materials.lua")
 
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
@@ -20,6 +21,9 @@ AppendTranslations()
 PatchLighting()
 PatchPlayerBaseVision()
 PatchShaderVision()
+PatchMaterialsGlow()
+PatchBurningEntity()
+PatchGlowShaders()
 
 ---Called when the player entity is spawned.
 ---@param player_entity number Entity ID of the spawned player.
