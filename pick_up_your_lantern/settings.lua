@@ -142,6 +142,25 @@ mod_settings = {
                 scope = MOD_SETTING_SCOPE_NEW_GAME,
                 ui_fn = ModSettingEnum,
             },
+            {
+                id = "player_vision",
+                ui_name = "$pick_up_your_lantern_player_vision_name",
+                ui_description = "$pick_up_your_lantern_player_vision_desc",
+                name_fallback = "Player vision",
+                desc_fallback =
+                "Controls the player's personal visibility and lighting radius in dark biomes.\nLower settings make handheld lanterns vital for exploration.",
+                value_default = "1.0",
+                values = {
+                    { "1.0",  "$pick_up_your_lantern_vision_vanilla",     "Vanilla (100%)", },
+                    { "0.75", "$pick_up_your_lantern_vision_dim",         "Dim (75%)", },
+                    { "0.5",  "$pick_up_your_lantern_vision_dark",        "Dark (50%)", },
+                    { "0.25", "$pick_up_your_lantern_vision_very_dark",   "Very Dark (25%)", },
+                    { "0.1",  "$pick_up_your_lantern_vision_minimal",     "Minimal (10%)", },
+                    { "0.0",  "$pick_up_your_lantern_vision_pitch_black", "Pitch Black (0%)", },
+                },
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingEnum,
+            },
         },
     },
 }

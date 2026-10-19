@@ -12,4 +12,12 @@ pick_up_your_lantern_scale_standard,Standard (100%),Стандартный (100%
 pick_up_your_lantern_scale_expanded,Expanded (200%),Расширенный (200%),,,,,,Rozszerzony (200%),扩大 (200%),,,,,,,,,,,,,,,
 pick_up_your_lantern_scale_huge,Huge (300%),Огромный (300%),,,,,,Ogromny (300%),巨大 (300%),,,,,,,,,,,,,,,
 pick_up_your_lantern_scale_massive,Massive (500%),Массивный (500%),,,,,,Masywny (500%),超大 (500%),,,,,,,,,,,,,,,
+pick_up_your_lantern_player_vision_name,Player vision,Зрение игрока,,,,,,Wzrok gracza,玩家视野,,,,,,,,,,,,,,,
+pick_up_your_lantern_player_vision_desc,"Controls the player's personal visibility and lighting radius in dark biomes.\nLower settings make handheld lanterns vital for exploration.","Настройка дальности обзора и личного освещения игрока в темных биомах.\nПри низких значениях фонари в руках становятся жизненно важными.",,,,,,"Reguluje pole widzenia i promień oświetlenia gracza w ciemnych biomach.\nNiższe wartości sprawiają, że trzymane latarnie są niezbędne do przetrwania.","控制玩家在黑暗生物群落中的个人视野和照明范围。\n较低的设置使手持提灯成为探索的必需品。",,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_vanilla,Vanilla (100%),Ванильный (100%),,,,,,Zwykły (100%),原版 (100%),,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_dim,Dim (75%),Приглушенный (75%),,,,,,Przyciemniony (75%),昏暗 (75%),,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_dark,Dark (50%),Темный (50%),,,,,,Ciemny (50%),黑暗 (50%),,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_very_dark,Very Dark (25%),Очень темный (25%),,,,,,Bardzo ciemny (25%),极暗 (25%),,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_minimal,Minimal (10%),Минимальный (10%),,,,,,Minimalny (10%),微弱 (10%),,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_pitch_black,Pitch Black (0%),Кромешная тьма (0%),,,,,,Nieprzenikniona ciemność (0%),漆黑 (0%),,,,,,,,,,,,,,,
 
