@@ -1,0 +1,8 @@
+<Mod
+    name="Pick Up Your Lantern"
+    description="Pick up, hold, and throw lanterns."
+    tags="gameplay,items,tweaks"
+    dont_upload_folders="docs"
+    dont_upload_files="*.bak|*.swp"
+>
+</Mod>

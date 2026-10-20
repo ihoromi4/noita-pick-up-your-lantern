@@ -168,7 +168,6 @@ mod_settings = {
 ---Updates mod settings when entering menus or starting a game.
 ---@param init_scope number
 function ModSettingsUpdate(init_scope)
-    local old_version = mod_settings_get_version(MOD_ID)
     mod_settings_update(MOD_ID, mod_settings, init_scope)
 end
 
