@@ -1,0 +1,21 @@
+# Restricts fog of war radius underground based on player vision settings,
+# while allowing active light sources and glowing materials to pierce the darkness.
+# Template variables:
+# - GLOW_BOOST: Multiplier for material glow contribution (mod uses 1.5).
+# - LIGHT_CLAMP_MULT: Multiplier for clamping light intensity (mod uses 2.0).
+--- data/shaders/post_final.frag
++++ data/shaders/post_final.frag
+@@ -401,3 +401,14 @@
+ 	float fade = clamp( (world_pos.y - 250.0) / 100.0, 0.0, 1.0 );
+ 	fog_of_war_sky_ambient_amount *= 1.0-fade;
++	if (pul_vision.w > 0.5)
++	{
++		float pul_dist = distance(world_pos, pul_player_pos.xy);
++		float pul_light = max(max(light_tex_sample.r, light_tex_sample.g), max(light_tex_sample.b, light_tex_sample.a));
++		float pul_glow = max(max(glow.r, glow.g), glow.b);
++		pul_light = max(pul_light, pul_glow * {{GLOW_BOOST}});
++		float pul_edge = pul_vision.y > 0.0 ? smoothstep(pul_vision.y * 0.75, pul_vision.y, pul_dist) : 1.0;
++		float pul_darken = pul_edge * fade * (1.0 - clamp(pul_light * {{LIGHT_CLAMP_MULT}}, 0.0, 1.0));
++		fog_of_war_amount = clamp(fog_of_war_amount + pul_darken, 0.0, 1.0);
++	}
+ 	float sky_ambient2 = sqrt( fog_of_war_sky_ambient_amount );

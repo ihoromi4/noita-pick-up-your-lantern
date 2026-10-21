@@ -5,11 +5,15 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
+local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
 
 local MATERIALS_PATH = "data/materials.xml"
 local EFFECT_ON_FIRE_PATH = "data/entities/misc/effect_on_fire.xml"
 local POST_GLOW1_PATH = "data/shaders/post_glow1.frag"
 local POST_GLOW2_PATH = "data/shaders/post_glow2.frag"
+local GLOW_PATCH_DIR = "mods/" .. MOD_ID .. "/files/patches/glow/"
+local POST_GLOW1_PATCH_PATH = GLOW_PATCH_DIR .. "post_glow1.patch.txt"
+local POST_GLOW2_PATCH_PATH = GLOW_PATCH_DIR .. "post_glow2.patch.txt"
 
 ---Table of materials to patch with enhanced glow and glow colors.
 ---@type table<string, {gfx_glow: string, gfx_glow_color?: string}>
@@ -47,19 +51,6 @@ local GLOW_PATCHES = {
     spark_white = { gfx_glow = "200", },
     spark_player = { gfx_glow = "200", },
 }
-
----Replaces the first occurrence of a plain substring in haystack.
----@param haystack string
----@param needle string
----@param replacement string
----@return string result, boolean replaced
-local function ReplaceOnce(haystack, needle, replacement)
-    local start_pos, end_pos = string.find(haystack, needle, 1, true)
-    if not start_pos then
-        return haystack, false
-    end
-    return string.sub(haystack, 1, start_pos - 1) .. replacement .. string.sub(haystack, end_pos + 1), true
-end
 
 ---Patches data/materials.xml to add or boost glow attributes for glowing materials.
 ---@return nil
@@ -130,39 +121,21 @@ end
 ---Patches post_glow1.frag and post_glow2.frag to increase blur radius to 10.0.
 ---@return nil
 function PatchGlowShaders()
-    local glow1 = ModTextFileGetContent(POST_GLOW1_PATH)
-    if glow1 ~= nil and glow1 ~= "" and string.find(glow1, "BLUR_RADIUS = 10.0;", 1, true) == nil then
-        local replaced1, replaced2
-        glow1, replaced1 = ReplaceOnce(glow1, "const float BLUR_RADIUS = 5.0;", "const float BLUR_RADIUS = 10.0;")
-        glow1, replaced2 = ReplaceOnce(glow1, "decayed *= 0.1;", "decayed *= 0.05;")
-        if replaced1 and replaced2 then
-            ModTextFileSetContent(POST_GLOW1_PATH, glow1)
-        else
-            print(string.format(
-                "[%s] ERROR: Failed to patch %s (r1=%s, r2=%s)",
-                MOD_ID,
-                POST_GLOW1_PATH,
-                tostring(replaced1),
-                tostring(replaced2)
-            ))
-        end
+    local config1 = {
+        BLUR_RADIUS = "10.0",
+        DECAY_MULT = "0.05",
+    }
+    local ok1, err1 = DiffPatch.PatchFile(POST_GLOW1_PATH, POST_GLOW1_PATCH_PATH, config1)
+    if not ok1 then
+        print(string.format("[%s] ERROR: %s", MOD_ID, err1))
     end
 
-    local glow2 = ModTextFileGetContent(POST_GLOW2_PATH)
-    if glow2 ~= nil and glow2 ~= "" and string.find(glow2, "BLUR_RADIUS = 10.0;", 1, true) == nil then
-        local replaced1, replaced2
-        glow2, replaced1 = ReplaceOnce(glow2, "const float BLUR_RADIUS = 5.0;", "const float BLUR_RADIUS = 10.0;")
-        glow2, replaced2 = ReplaceOnce(glow2, "decayed *= 1.0 / 12.2;", "decayed *= 1.0 / 23.0;")
-        if replaced1 and replaced2 then
-            ModTextFileSetContent(POST_GLOW2_PATH, glow2)
-        else
-            print(string.format(
-                "[%s] ERROR: Failed to patch %s (r1=%s, r2=%s)",
-                MOD_ID,
-                POST_GLOW2_PATH,
-                tostring(replaced1),
-                tostring(replaced2)
-            ))
-        end
+    local config2 = {
+        BLUR_RADIUS = "10.0",
+        DECAY_MULT = "1.0 / 23.0",
+    }
+    local ok2, err2 = DiffPatch.PatchFile(POST_GLOW2_PATH, POST_GLOW2_PATCH_PATH, config2)
+    if not ok2 then
+        print(string.format("[%s] ERROR: %s", MOD_ID, err2))
     end
 end

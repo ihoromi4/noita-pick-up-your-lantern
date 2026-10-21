@@ -1,0 +1,15 @@
+# Expands vertical blur radius and adjusts decay multiplier for glow pass 2.
+# Template variables:
+# - BLUR_RADIUS: Blur radius constant (vanilla is 5.0, mod uses 10.0).
+# - DECAY_MULT: Decay factor after vertical pass (vanilla is 1.0 / 12.2, mod uses 1.0 / 23.0).
+--- data/shaders/post_glow2.frag
++++ data/shaders/post_glow2.frag
+@@ -12,3 +12,3 @@
+
+-const float BLUR_RADIUS = 5.0;
++const float BLUR_RADIUS = {{BLUR_RADIUS}};
+ const float EDGE_AFTER_IMAGE_REDUCTION_AMOUNT   = 2.0;
+@@ -55,3 +55,3 @@
+
+-	decayed *= 1.0 / 12.2;
++	decayed *= {{DECAY_MULT}};

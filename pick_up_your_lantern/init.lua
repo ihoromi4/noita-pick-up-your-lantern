@@ -25,10 +25,22 @@ PatchMaterialsGlow()
 PatchBurningEntity()
 PatchGlowShaders()
 
+local has_logged_init = false
+
 ---Called when the player entity is spawned.
 ---@param player_entity number Entity ID of the spawned player.
 function OnPlayerSpawned(player_entity)
     ApplyPlayerVision(player_entity)
+
+    if not has_logged_init then
+        has_logged_init = true
+        local err = GetShaderPatchError()
+        if err ~= nil then
+            print(string.format("[%s] ERROR: Shader patch failed: %s", MOD_ID, err))
+        else
+            print(string.format("[%s] Shader patch status: OK", MOD_ID))
+        end
+    end
 end
 
 ---Called when mod settings are changed in the pause menu.

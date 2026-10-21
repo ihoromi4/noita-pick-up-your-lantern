@@ -1,0 +1,11 @@
+# Injects uniforms for player vision scaling and player world position.
+# Uniforms:
+# - pul_vision: vec4(scale, fog_radius, ambient_mult, enabled)
+# - pul_player_pos: vec4(player_x, player_y, 0, 0)
+--- data/shaders/post_final.frag
++++ data/shaders/post_final.frag
+@@ -54,3 +54,5 @@
+ varying vec2 tex_coord_skylight;
+ varying vec2 tex_coord_fogofwar;
++uniform vec4 pul_vision;
++uniform vec4 pul_player_pos;

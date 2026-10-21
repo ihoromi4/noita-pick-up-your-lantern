@@ -5,28 +5,24 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
+local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
 
 local SETTING_ID = MOD_ID .. ".player_vision"
 local PLAYER_BASE_PATH = "data/entities/player_base.xml"
 local POST_FINAL_SHADER_PATH = "data/shaders/post_final.frag"
 
+local PATCH_DIR = "mods/" .. MOD_ID .. "/files/patches/vision/"
+local VISION_SHADER_PATCHES = {
+    PATCH_DIR .. "01_uniforms.patch.txt",
+    PATCH_DIR .. "02_fog_restriction.patch.txt",
+    PATCH_DIR .. "03_ambient_baseline.patch.txt",
+    PATCH_DIR .. "04_bg_leakage.patch.txt",
+}
+
 local VANILLA_FOG_RADIUS = 256
 local VANILLA_LIGHT_RADIUS = 350
 
 local last_applied_scale = nil
-
----Replaces the first occurrence of a plain substring in haystack.
----@param haystack string
----@param needle string
----@param replacement string
----@return string result, boolean replaced
-local function ReplaceOnce(haystack, needle, replacement)
-    local start_pos, end_pos = string.find(haystack, needle, 1, true)
-    if not start_pos then
-        return haystack, false
-    end
-    return string.sub(haystack, 1, start_pos - 1) .. replacement .. string.sub(haystack, end_pos + 1), true
-end
 
 ---Retrieves the active player vision scale multiplier from mod settings.
 ---@return number
@@ -68,6 +64,8 @@ local function CalculateVisionParams(scale)
     return fog_radius, light_radius, ambient_mult, shader_fog_radius, enabled
 end
 
+local shader_patch_error = nil
+
 ---Patches data/shaders/post_final.frag to inject limited vision and ambient lighting uniforms.
 ---Why this is necessary:
 ---1. Vanilla post_final.frag adds a hardcoded 0.35 (35%) ambient baseline to all explored areas:
@@ -81,93 +79,23 @@ end
 ---- Darken background cutouts in caves when fog of war is active.
 ---@return nil
 function PatchShaderVision()
-    local content = ModTextFileGetContent(POST_FINAL_SHADER_PATH)
-    if content == nil or content == "" then
-        return
+    local shader_config = {
+        GLOW_BOOST = "1.5",
+        LIGHT_CLAMP_MULT = "2.0",
+        AMBIENT_BASE = "0.35",
+    }
+
+    local ok, err = DiffPatch.PatchFileBatch(POST_FINAL_SHADER_PATH, VISION_SHADER_PATCHES, shader_config)
+    if not ok then
+        shader_patch_error = err
+        print(string.format("[%s] ERROR: %s", MOD_ID, err))
     end
+end
 
-    -- Idempotency check: avoid double-patching if already injected
-    if string.find(content, "pul_vision", 1, true) ~= nil then
-        return
-    end
-
-    -- Block 1: Uniform declarations
-    -- `pul_vision`:
-    --   x: Vision scale (1.0 = vanilla, 0.0 = pitch black)
-    --   y: Shader fog radius in world pixels (0.0 on pitch black, scales up to 256.0)
-    --   z: Underground ambient brightness multiplier (0.0 on pitch black, 1.0 on vanilla)
-    --   w: Feature switch (1.0 = active, 0.0 = disabled / bypass to vanilla)
-    -- `pul_player_pos`:
-    --   xy: Player world coordinates (px, py), updated every frame in OnWorldPreUpdate
-    local decl_target = "varying vec2 tex_coord_fogofwar;"
-    local decl_replacement =
-    "varying vec2 tex_coord_fogofwar;\r\nuniform vec4 pul_vision;\r\nuniform vec4 pul_player_pos;"
-    local replaced1
-    content, replaced1 = ReplaceOnce(content, decl_target, decl_replacement)
-
-    -- Block 2: Dynamic fog of war restriction
-    -- Injected right after `fade` calculation (fade = 0.0 at surface Y <= 250, 1.0 deep underground).
-    -- Outside `pul_vision.y` distance from the player, re-imposes fog of war unless:
-    -- - The fragment is above ground (fade == 0.0), preserving the surface sky.
-    -- - The fragment is illuminated by an active light source (light_tex_sample.rgb or alpha hole),
-    --   allowing held or thrown lanterns, torches, fires, and explosions to pierce the darkness.
-    -- - The fragment is illuminated by glowing materials (glow buffer), allowing fire, lava, and acid to shine.
-    -- If `pul_vision.y == 0.0` (Pitch Black), `pul_edge` defaults to 1.0 to eliminate the foot halo.
-    local fog_target = "fog_of_war_sky_ambient_amount *= 1.0-fade;"
-    local fog_replacement = [[fog_of_war_sky_ambient_amount *= 1.0-fade;
-	if (pul_vision.w > 0.5)
-	{
-		float pul_dist = distance(world_pos, pul_player_pos.xy);
-		float pul_light = max(max(light_tex_sample.r, light_tex_sample.g), max(light_tex_sample.b, light_tex_sample.a));
-		float pul_glow = max(max(glow.r, glow.g), glow.b);
-		pul_light = max(pul_light, pul_glow * 1.5);
-		float pul_edge = pul_vision.y > 0.0 ? smoothstep(pul_vision.y * 0.75, pul_vision.y, pul_dist) : 1.0;
-		float pul_darken = pul_edge * fade * (1.0 - clamp(pul_light * 2.0, 0.0, 1.0));
-		fog_of_war_amount = clamp(fog_of_war_amount + pul_darken, 0.0, 1.0);
-	}]]
-    local replaced2
-    content, replaced2 = ReplaceOnce(content, fog_target, fog_replacement)
-
-    -- Block 3: Underground ambient baseline scaling
-    -- Modulates the vanilla hardcoded 0.35 underground ambient lighting.
-    -- When `pul_vision.z` is 0.0 (Pitch Black), ambient lighting drops to 0.0,
-    -- producing true pitch black darkness in unlit explored caves.
-    -- When `pul_vision.w <= 0.5` (vanilla / player dead), falls back to 100% (0.35).
-    local ambient_target =
-    "lights += max(0.35 - fog_of_war_sky_ambient_amount, 0.0) * dither_srgb( fog_of_war, noise.b, 128.0 );"
-    local ambient_replacement = [[float pul_ambient_base = 0.35 * (pul_vision.w > 0.5 ? pul_vision.z : 1.0);
-	lights += max(pul_ambient_base - fog_of_war_sky_ambient_amount, 0.0) * dither_srgb( fog_of_war, noise.b, 128.0 );]]
-    local replaced3
-    content, replaced3 = ReplaceOnce(content, ambient_target, ambient_replacement)
-
-    -- Block 4: Background leakage prevention
-    -- In cave areas where foreground materials have transparent holes (color_fg.a < 1.0),
-    -- tex_bg (parallax/sky) could peek through in unexplored dark areas.
-    -- This blends the background color with fog_of_war underground (scaled by 1.0 - pul_vision.z),
-    -- ensuring background voids are completely black when fog is active.
-    local bg_target = "color = mix(color , dither_srgb(color, noise.a, 64.0 ), fog_amount );"
-    local bg_replacement = [[color = mix(color , dither_srgb(color, noise.a, 64.0 ), fog_amount );
-	if (pul_vision.w > 0.5)
-	{
-		color = mix(color, color * fog_of_war, fade * (1.0 - pul_vision.z));
-	}]]
-    local replaced4
-    content, replaced4 = ReplaceOnce(content, bg_target, bg_replacement)
-
-    -- Only commit changes if all 4 anchors matched and were replaced successfully
-    if replaced1 and replaced2 and replaced3 and replaced4 then
-        ModTextFileSetContent(POST_FINAL_SHADER_PATH, content)
-    else
-        print(string.format(
-            "[%s] ERROR: Failed to patch %s (block status: b1=%s, b2=%s, b3=%s, b4=%s)",
-            MOD_ID,
-            POST_FINAL_SHADER_PATH,
-            tostring(replaced1),
-            tostring(replaced2),
-            tostring(replaced3),
-            tostring(replaced4)
-        ))
-    end
+---Returns any error encountered during post_final shader patching.
+---@return string?
+function GetShaderPatchError()
+    return shader_patch_error
 end
 
 ---Patches data/entities/player_base.xml with initial FogOfWarRadiusComponent and LightComponent.
