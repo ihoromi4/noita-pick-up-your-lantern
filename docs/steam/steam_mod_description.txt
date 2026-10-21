@@ -1,0 +1,49 @@
+[h1]Noita, Pick Up Your Lantern![/h1]
+
+Those oil lanterns hanging from the ceilings of the Mines are no longer just decoration. Kick them down, pick them up, carry them through the darkness, and throw them at anything that lurks in it.
+
+[h2]Features[/h2]
+
+[h3]Pick Up and Carry[/h3]
+[list]
+[*] Pick up a lantern with the interaction key ([b]E[/b]) when standing next to it.
+[*] Lanterns go into your regular item slots alongside flasks and stones (one lantern per slot, no stacking).
+[*] Custom inventory icons with a glowing flame.
+[*] You cannot drink the oil out of a lantern. Please don't try.
+[*] The lantern lights up the area around you.
+[*] Holding a lantern is safe: it will not burn you, ignite the ground, or break in your hand.
+[*] Throw a lantern with the [b]Left[/b] or [b]Right Mouse Button[/b], or drop it from the inventory.
+[*] On a hard impact the glass shatters with a small explosion, spilling burning oil.
+[*] Lanterns and world light sources clear the fog of war around them - both hanging in the world and held in your hand.
+[*] Adjustable size of the illuminated area: 100%, 200%, 300% or 500%.
+[/list]
+
+[h3]Player Vision and Darkness[/h3]
+Make the depths truly dark and turn your lantern into a survival tool!
+[list]
+[*] Player vision presets: [b]Vanilla [100%](/b), [b]Dim [75%](/b), [b]Dark [50%](/b), [b]Very Dark [25%](/b), [b]Minimal [10%](/b) and [b]Pitch Black [0%](/b).
+[*] Lower settings shrink both your personal light and the area of the map you reveal.
+[*] [b]Pitch Black[/b] mode leaves unlit caves completely dark - you only see what your lantern, fires and other light sources illuminate.
+[*] Fire, lava, molten metals, toxic sludge, acid and sparks glow more brightly, and burning creatures light up their surroundings.
+[*] Vision can be changed at any time from the pause menu, no restart required.
+[/list]
+
+[h2]Languages[/h2]
+English, Russian, Polish, Simplified Chinese.
+
+[h2]Compatibility[/h2]
+The mod replaces vanilla lantern entities and modifies shader files, so mods that change the same files may conflict. Unfortunately, the widely beloved "Light-Up Lanterns" is incompatible.
+
+[h2]Planned[/h2]
+[list]
+[*] Carrying a lantern on your belt as a dimmer passive light source.
+[*] Support for more light fixtures and open-flame torches.
+[*] Extinguishing lanterns in water and relighting them with fire.
+[/list]
+
+[h2]Credits[/h2]
+The dynamic lighting approach is inspired by [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2316356772]Light-Up Lanterns[/url]. We stand on the shoulders of giants...
+
+[i]Disclaimer: This mod was developed with the assistance of AI coding agents.[/i]
+
+Feedback and bug reports are welcome in the comments and on [url=https://github.com/ihoromi4/noita-pick-up-your-lantern]GitHub[/url]!
