@@ -34,6 +34,13 @@ The primary goal of version 0.1 is to deliver a fully functional, stable core ga
   - Research and integrate true dynamic lighting options based on the "Light-Up Lanterns" mod (workshop ID: `2316356772`).
   - Provide a toggle in Mod Settings for enhanced lighting shaders/raycasts.
 
+## Version 0.1.1 - Item Radar Fix
+
+Version 0.1.1 is a patch release that improves compatibility with vanilla perks.
+
+- **Item Radar Compatibility**:
+  - Hide lanterns from the Item Radar perk by default, with a Mod Settings toggle to show them.
+
 ## Version 0.2 - Passive Carrying and Atmosphere
 
 Version 0.2 focuses on visual polish, passive utility, and atmospheric difficulty enhancement.
