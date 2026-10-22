@@ -163,6 +163,26 @@ mod_settings = {
             },
         },
     },
+    {
+        category_id = "gameplay",
+        ui_name = "$pick_up_your_lantern_category_gameplay",
+        ui_description = "$pick_up_your_lantern_category_gameplay_desc",
+        foldable = true,
+        _folded = false,
+        settings = {
+            {
+                id = "show_lanterns_on_item_radar",
+                ui_name = "$pick_up_your_lantern_show_lanterns_on_item_radar_name",
+                ui_description = "$pick_up_your_lantern_show_lanterns_on_item_radar_desc",
+                name_fallback = "Show lanterns on Item Radar",
+                desc_fallback =
+                "Allows the Item Radar perk to point to nearby lanterns.",
+                value_default = false,
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingBool,
+            },
+        },
+    },
 }
 
 ---Updates mod settings when entering menus or starting a game.
@@ -188,6 +208,14 @@ function ModSettingsGui(gui, in_main_menu)
     mod_settings[1].ui_description = GetText(
         "$pick_up_your_lantern_category_lighting_desc",
         "Configure illumination and dynamic light mechanics."
+    )
+    mod_settings[2].ui_name = GetText(
+        "$pick_up_your_lantern_category_gameplay",
+        "Gameplay"
+    )
+    mod_settings[2].ui_description = GetText(
+        "$pick_up_your_lantern_category_gameplay_desc",
+        "Configure how lanterns interact with other game mechanics."
     )
     mod_settings_gui(MOD_ID, mod_settings, gui, in_main_menu)
 end

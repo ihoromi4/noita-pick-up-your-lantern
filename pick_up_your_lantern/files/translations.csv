@@ -21,3 +21,7 @@ pick_up_your_lantern_vision_very_dark,Very Dark (25%),Очень темный (2
 pick_up_your_lantern_vision_minimal,Minimal (10%),Минимальный (10%),,,,,,Minimalny (10%),微弱 (10%),,,,,,,,,,,,,,,
 pick_up_your_lantern_vision_pitch_black,Pitch Black (0%),Кромешная тьма (0%),,,,,,Nieprzenikniona ciemność (0%),漆黑 (0%),,,,,,,,,,,,,,,
 
+pick_up_your_lantern_category_gameplay,Gameplay,Геймплей,,,,,,Rozgrywka,游戏玩法,,,,,,,,,,,,,,,
+pick_up_your_lantern_category_gameplay_desc,Configure how lanterns interact with other game mechanics.,"Настройка взаимодействия фонарей с другими игровыми механиками.",,,,,,Konfiguracja interakcji latarni z innymi mechanikami gry.,配置提灯与其他游戏机制的交互。,,,,,,,,,,,,,,,
+pick_up_your_lantern_show_lanterns_on_item_radar_name,Show lanterns on Item Radar,Фонари на радаре предметов,,,,,,Latarnie na radarze przedmiotów,在物品雷达上显示提灯,,,,,,,,,,,,,,,
+pick_up_your_lantern_show_lanterns_on_item_radar_desc,Allows the Item Radar perk to point to nearby lanterns.,"Перк «Радар предметов» указывает на ближайшие фонари.",,,,,,Atut Radar przedmiotów wskazuje pobliskie latarnie.,物品雷达天赋会指向附近的提灯。,,,,,,,,,,,,,,,
