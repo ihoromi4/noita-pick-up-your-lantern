@@ -61,17 +61,19 @@ def check_preview_image() -> None:
     print(f"Preview image OK ({size} bytes).")
 
 
-def escape_attribute(text: str) -> str:
-    """Escape text for a double-quoted XML attribute.
+def check_attribute(text: str) -> None:
+    """Fail if text cannot be stored in a double-quoted Noita XML attribute.
 
-    Line breaks are kept as literal newlines.
+    Noita's XML parser reads attribute values literally up to the next `"`
+    and does not decode entities such as `&quot;`, so a double quote cannot
+    be escaped. `&`, `<`, `>` and line breaks are kept as is.
     """
-    return (
-        text.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-    )
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if '"' in line:
+            raise PublishError(
+                f"{DESCRIPTION_FILE.name}:{line_number}: double quote (\") is not allowed, "
+                "use typographic quotes (“”) instead."
+            )
 
 
 def sync_description() -> None:
@@ -86,10 +88,11 @@ def sync_description() -> None:
             f"Description is {len(description)} characters, Steam limit is {DESCRIPTION_MAX_LENGTH}."
         )
 
+    check_attribute(description)
+
     workshop_xml = WORKSHOP_XML.read_text(encoding="utf-8")
-    escaped = escape_attribute(description)
     updated, count = DESCRIPTION_ATTR_RE.subn(
-        lambda match: f'{match.group(1)}"{escaped}"', workshop_xml, count=1
+        lambda match: f'{match.group(1)}"{description}"', workshop_xml, count=1
     )
     if count == 0:
         raise PublishError(f"No description attribute in {WORKSHOP_XML}.")

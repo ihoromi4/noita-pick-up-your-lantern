@@ -70,7 +70,9 @@ In this project the source of truth is [steam_mod_description.txt](./steam_mod_d
 scripts/publish_workshop.py --sync-only
 ```
 
-The script normalizes line endings, escapes `&`, `<`, `>`, and `"` for the XML attribute, keeps line breaks as literal newlines, checks the 8000-character Steam limit, and leaves all other attributes unchanged. A full run of [`scripts/publish_workshop.py`](#one-command-automation) does this automatically.
+The script normalizes line endings, keeps `&`, `<`, `>`, and line breaks as is, rejects straight double quotes (`"`), checks the 8000-character Steam limit, and leaves all other attributes unchanged. A full run of [`scripts/publish_workshop.py`](#one-command-automation) does this automatically.
+
+> **Note:** Noita's XML parser reads attribute values literally up to the next `"` and does not decode entities, so `&quot;` or `&amp;` appear on the Workshop page as is. Use typographic quotes (`“”`) in the description instead of `"`.
 
 > **Note:** Edit the description in `steam_mod_description.txt`, not in `workshop.xml` - the attribute is overwritten on each sync.
 

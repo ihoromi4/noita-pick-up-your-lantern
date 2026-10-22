@@ -12,7 +12,3 @@ Tracking document for features, implementation progress, and known issues for **
 
 - Lanterns no longer show up on the Item Radar perk. A new "Show lanterns on Item Radar" option in Mod Settings turns them back on.
 - Start a new game for the Item Radar fix to take effect. Lanterns that already exist in a run started with an older version of the mod still show up on the radar.
-
-## Known Issues and Next Steps
-
-- None.

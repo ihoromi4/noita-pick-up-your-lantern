@@ -32,7 +32,7 @@ Make the depths truly dark and turn your lantern into a survival tool!
 English, Russian, Polish, Simplified Chinese.
 
 [h2]Compatibility[/h2]
-The mod replaces vanilla lantern entities and modifies shader files, so mods that change the same files may conflict. Unfortunately, the widely beloved "Light-Up Lanterns" is incompatible.
+The mod replaces vanilla lantern entities and modifies shader files, so mods that change the same files may conflict. Unfortunately, the widely beloved “Light-Up Lanterns” is incompatible.
 
 [h2]Planned[/h2]
 [list]
