@@ -38,6 +38,12 @@
         script_kick="mods/pick_up_your_lantern/files/scripts/lantern_anchor.lua"
     ></LuaComponent>
 
+    <LuaComponent
+        _tags="enabled_in_world"
+        execute_every_n_frame="1"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_in_world.lua"
+    ></LuaComponent>
+
     <LightComponent
         _tags="enabled_in_world,enabled_in_hand"
         _enabled="1"
