@@ -3,6 +3,7 @@
 local MOD_ID = "pick_up_your_lantern"
 
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_lighting.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/player_vision.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_materials.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_item_radar.lua")
@@ -48,9 +49,11 @@ end
 ---Called when mod settings are changed in the pause menu.
 function OnModSettingsChanged()
     UpdatePlayerVision(true)
+    UpdateLanternIllumination(true)
 end
 
 ---Called once every frame before the game world is updated.
 function OnWorldPreUpdate()
     UpdatePlayerVision()
+    UpdateLanternIllumination()
 end

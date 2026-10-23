@@ -131,7 +131,7 @@ mod_settings = {
                 ui_description = "$pick_up_your_lantern_illumination_scale_desc",
                 name_fallback = "Illuminated area size",
                 desc_fallback =
-                "Scale of the fog of war hole dispelled by lanterns and light sources.\nRequires starting a new game.",
+                "Scale of the light radius and the fog of war area dispelled by lanterns and light sources.\nLanterns update immediately, other light sources after restarting the game.",
                 value_default = "1.0",
                 values = {
                     { "1.0", "$pick_up_your_lantern_scale_standard", "Standard (100%)", },
@@ -139,7 +139,7 @@ mod_settings = {
                     { "3.0", "$pick_up_your_lantern_scale_huge",     "Huge (300%)", },
                     { "5.0", "$pick_up_your_lantern_scale_massive",  "Massive (500%)", },
                 },
-                scope = MOD_SETTING_SCOPE_NEW_GAME,
+                scope = MOD_SETTING_SCOPE_RUNTIME,
                 ui_fn = ModSettingEnum,
             },
             {

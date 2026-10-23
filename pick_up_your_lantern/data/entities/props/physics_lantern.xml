@@ -48,6 +48,7 @@
         _tags="enabled_in_world,enabled_in_hand"
         _enabled="1"
         radius="240"
+        update_properties="1"
     ></LightComponent>
 
 

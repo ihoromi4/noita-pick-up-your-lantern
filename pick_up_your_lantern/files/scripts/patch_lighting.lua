@@ -3,15 +3,16 @@
 
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/pick_up_your_lantern/files/scripts/libs/nxml.lua")
+dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_illumination.lua")
 
 local SETTING_ID = "pick_up_your_lantern.illuminate_the_darkness"
-local SCALE_SETTING_ID = "pick_up_your_lantern.illumination_scale"
 
 ---Target entity definitions for dynamic lighting injection.
----@type table<number, {path: string, tags: string, enabled: string, alpha: string, image_file: string, offset_x?: number, offset_y?: number, scale?: number}>
+---@type table<number, {path: string, tags: string, enabled: string, alpha: string, image_file: string, offset_x?: number, offset_y?: number, scale?: number, scales_light?: boolean}>
 local TARGET_ENTITIES = {
     {
         path = "data/entities/props/physics/lantern_small.xml",
+        scales_light = true,
         tags = "enabled_in_world,enabled_in_hand",
         enabled = "1",
         alpha = "0.55",
@@ -21,6 +22,7 @@ local TARGET_ENTITIES = {
     },
     {
         path = "data/entities/props/physics_lantern.xml",
+        scales_light = true,
         tags = "enabled_in_world,enabled_in_hand",
         enabled = "1",
         alpha = "0.55",
@@ -28,6 +30,7 @@ local TARGET_ENTITIES = {
     },
     {
         path = "data/entities/props/physics_lantern_small.xml",
+        scales_light = true,
         tags = "enabled_in_world,enabled_in_hand",
         enabled = "1",
         alpha = "0.55",
@@ -157,15 +160,10 @@ local function BuildSpriteAttributes(target, global_scale)
 
     local target_scale = target.scale or 1.0
     local total_scale = target_scale * global_scale
-    if total_scale ~= 1.0 or target.scale ~= nil then
-        attrs.has_special_scale = "1"
-        attrs.special_scale_x = tostring(total_scale)
-        attrs.special_scale_y = tostring(total_scale)
-    else
-        attrs.has_special_scale = "0"
-        attrs.special_scale_x = "1"
-        attrs.special_scale_y = "1"
-    end
+    -- Always enabled so the scale can be changed at runtime via special_scale_x/y.
+    attrs.has_special_scale = "1"
+    attrs.special_scale_x = tostring(total_scale)
+    attrs.special_scale_y = tostring(total_scale)
 
     return attrs
 end
@@ -216,22 +214,14 @@ local function PatchTarget(target, global_scale)
         InjectFogOfWarHole(xml, target, global_scale)
     end
 
+    if target.scales_light then
+        local light_comp = xml:first_of("LightComponent")
+        if light_comp ~= nil then
+            light_comp.attr.radius = tostring(GetLanternLightRadius(global_scale))
+        end
+    end
+
     ModTextFileSetContent(target.path, nxml.tostring(xml))
-end
-
----Retrieves the illumination scale multiplier from mod settings.
----@return number
-local function GetSettingScale()
-    local val = ModSettingGet(SCALE_SETTING_ID)
-    if val == nil then
-        val = ModSettingGetNextValue(SCALE_SETTING_ID)
-    end
-    local scale_num = tonumber(val)
-    if scale_num == nil or scale_num <= 0 then
-        return 1.0
-    end
-
-    return scale_num
 end
 
 ---Patches light fixture entity XML files to pierce fog of war when enabled in mod settings.
@@ -242,7 +232,7 @@ function PatchLighting()
         return
     end
 
-    local global_scale = GetSettingScale()
+    local global_scale = GetIlluminationScale()
 
     for _, target in ipairs(TARGET_ENTITIES) do
         PatchTarget(target, global_scale)
