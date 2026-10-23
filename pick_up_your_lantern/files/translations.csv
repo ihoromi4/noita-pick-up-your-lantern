@@ -20,6 +20,9 @@ pick_up_your_lantern_vision_dark,Dark (50%),Темный (50%),,,,,,Ciemny (50%)
 pick_up_your_lantern_vision_very_dark,Very Dark (25%),Очень темный (25%),,,,,,Bardzo ciemny (25%),极暗 (25%),,,,,,,,,,,,,,,
 pick_up_your_lantern_vision_minimal,Minimal (10%),Минимальный (10%),,,,,,Minimalny (10%),微弱 (10%),,,,,,,,,,,,,,,
 pick_up_your_lantern_vision_pitch_black,Pitch Black (0%),Кромешная тьма (0%),,,,,,Nieprzenikniona ciemność (0%),漆黑 (0%),,,,,,,,,,,,,,,
+pick_up_your_lantern_polymorph_vision_name,Polymorphed vision,Зрение при превращении,,,,,,Wzrok po przemianie,变形视野,,,,,,,,,,,,,,,
+pick_up_your_lantern_polymorph_vision_desc,Controls visibility while the player is polymorphed into another creature.,"Настройка видимости, пока игрок превращен в другое существо.",,,,,,"Reguluje widoczność, gdy gracz jest zamieniony w inne stworzenie.",控制玩家变形为其他生物时的视野。,,,,,,,,,,,,,,,
+pick_up_your_lantern_vision_same_as_player,Same as player,Как у игрока,,,,,,Jak u gracza,与玩家相同,,,,,,,,,,,,,,,
 
 pick_up_your_lantern_category_gameplay,Gameplay,Геймплей,,,,,,Rozgrywka,游戏玩法,,,,,,,,,,,,,,,
 pick_up_your_lantern_category_gameplay_desc,Configure how lanterns interact with other game mechanics.,"Настройка взаимодействия фонарей с другими игровыми механиками.",,,,,,Konfiguracja interakcji latarni z innymi mechanikami gry.,配置提灯与其他游戏机制的交互。,,,,,,,,,,,,,,,

@@ -161,6 +161,26 @@ mod_settings = {
                 scope = MOD_SETTING_SCOPE_RUNTIME,
                 ui_fn = ModSettingEnum,
             },
+            {
+                id = "polymorph_vision",
+                ui_name = "$pick_up_your_lantern_polymorph_vision_name",
+                ui_description = "$pick_up_your_lantern_polymorph_vision_desc",
+                name_fallback = "Polymorphed vision",
+                desc_fallback =
+                "Controls visibility while the player is polymorphed into another creature.",
+                value_default = "player",
+                values = {
+                    { "player", "$pick_up_your_lantern_vision_same_as_player", "Same as player", },
+                    { "1.0",    "$pick_up_your_lantern_vision_vanilla",        "Vanilla (100%)", },
+                    { "0.75",   "$pick_up_your_lantern_vision_dim",            "Dim (75%)", },
+                    { "0.5",    "$pick_up_your_lantern_vision_dark",           "Dark (50%)", },
+                    { "0.25",   "$pick_up_your_lantern_vision_very_dark",      "Very Dark (25%)", },
+                    { "0.1",    "$pick_up_your_lantern_vision_minimal",        "Minimal (10%)", },
+                    { "0.0",    "$pick_up_your_lantern_vision_pitch_black",    "Pitch Black (0%)", },
+                },
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingEnum,
+            },
         },
     },
     {

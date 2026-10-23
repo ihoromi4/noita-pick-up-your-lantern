@@ -8,6 +8,13 @@ local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
 local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
 
 local SETTING_ID = MOD_ID .. ".player_vision"
+local POLYMORPH_SETTING_ID = MOD_ID .. ".polymorph_vision"
+local SAME_AS_PLAYER = "player"
+local PLAYER_TAG = "player_unit"
+local POLYMORPHED_TAGS = {
+    "polymorphed_player",
+    "polymorphed_cessation",
+}
 local PLAYER_BASE_PATH = "data/entities/player_base.xml"
 local POST_FINAL_SHADER_PATH = "data/shaders/post_final.frag"
 
@@ -23,24 +30,67 @@ local VANILLA_FOG_RADIUS = 256
 local VANILLA_LIGHT_RADIUS = 350
 
 local last_applied_scale = nil
+local last_applied_entity = nil
 
----Retrieves the active player vision scale multiplier from mod settings.
+---Retrieves a raw mod setting value, falling back to the pending value.
+---@param setting_id string
+---@return any
+local function GetSettingValue(setting_id)
+    local val = ModSettingGet(setting_id)
+    if val == nil then
+        val = ModSettingGetNextValue(setting_id)
+    end
+
+    return val
+end
+
+---Converts a vision setting value into a scale multiplier.
+---@param val any
 ---@return number
-local function GetVisionScale()
-    local val = ModSettingGet(SETTING_ID)
-    if val == nil then
-        val = ModSettingGetNextValue(SETTING_ID)
-    end
-    if val == nil then
-        return 1.0
-    end
-
+local function ParseVisionScale(val)
     local num = tonumber(val)
     if num == nil or num < 0 then
         return 1.0
     end
 
     return num
+end
+
+---Retrieves the active player vision scale multiplier from mod settings.
+---@return number
+local function GetVisionScale()
+    return ParseVisionScale(GetSettingValue(SETTING_ID))
+end
+
+---Retrieves the vision scale multiplier used while the player is polymorphed.
+---@return number
+local function GetPolymorphVisionScale()
+    local val = GetSettingValue(POLYMORPH_SETTING_ID)
+    if val == nil or val == SAME_AS_PLAYER then
+        return GetVisionScale()
+    end
+
+    return ParseVisionScale(val)
+end
+
+---Finds the entity currently controlled by the player.
+---While polymorphed, the player entity is replaced by a creature tagged `polymorphed_player`
+---(or `polymorphed_cessation`) instead of `player_unit`.
+---@return number? entity_id, boolean is_polymorphed
+local function FindPlayerEntity()
+    local players = EntityGetWithTag(PLAYER_TAG)
+    if players ~= nil and #players > 0 then
+        return players[1], false
+    end
+
+    for _, tag in ipairs(POLYMORPHED_TAGS) do
+        local polymorphed = EntityGetWithTag(tag)
+        if polymorphed ~= nil and #polymorphed > 0 then
+            return polymorphed[1], true
+        end
+    end
+
+    return nil, false
 end
 
 ---Computes calibrated vision parameters for a given multiplier.
@@ -62,6 +112,14 @@ local function CalculateVisionParams(scale)
     local enabled = 1.0
 
     return fog_radius, light_radius, ambient_mult, shader_fog_radius, enabled
+end
+
+---Passes vision parameters for a given multiplier to the post_final shader.
+---@param scale number Multiplier from 0.0 to 1.0+.
+---@return nil
+local function ApplyShaderVision(scale)
+    local _, _, ambient_mult, shader_fog_radius, enabled = CalculateVisionParams(scale)
+    GameSetPostFxParameter("pul_vision", scale, shader_fog_radius, ambient_mult, enabled)
 end
 
 local shader_patch_error = nil
@@ -149,7 +207,7 @@ function ApplyPlayerVision(player_entity)
     end
 
     local scale = GetVisionScale()
-    local fog_radius, light_radius, ambient_mult, shader_fog_radius, enabled = CalculateVisionParams(scale)
+    local fog_radius, light_radius = CalculateVisionParams(scale)
 
     local light_comp = EntityGetFirstComponentIncludingDisabled(player_entity, "LightComponent")
     if light_comp ~= nil then
@@ -169,28 +227,38 @@ function ApplyPlayerVision(player_entity)
         })
     end
 
-    GameSetPostFxParameter("pul_vision", scale, shader_fog_radius, ambient_mult, enabled)
+    ApplyShaderVision(scale)
     last_applied_scale = scale
+    last_applied_entity = player_entity
 end
 
 ---Updates player position and vision parameters every frame in OnWorldPreUpdate.
+---Shader parameters are refreshed every frame, so they cannot get stuck after a polymorph.
+---Player components are re-applied only when the setting or the player entity changes.
+---Polymorphed creatures only receive shader parameters, their own components are left untouched.
 ---@param force_refresh boolean? Whether to force re-evaluating settings and components.
 ---@return nil
 function UpdatePlayerVision(force_refresh)
-    local players = EntityGetWithTag("player_unit")
-    if players == nil or #players == 0 then
-        GameSetPostFxParameter("pul_vision", 1.0, 256.0, 1.0, 0.0)
+    local entity, is_polymorphed = FindPlayerEntity()
+    if entity == nil then
+        ApplyShaderVision(1.0)
         return
     end
 
-    local player = players[1]
-    local px, py = EntityGetTransform(player)
+    local px, py = EntityGetTransform(entity)
     if px ~= nil and py ~= nil then
         GameSetPostFxParameter("pul_player_pos", px, py, 0.0, 0.0)
     end
 
+    if is_polymorphed then
+        ApplyShaderVision(GetPolymorphVisionScale())
+        return
+    end
+
     local scale = GetVisionScale()
-    if force_refresh or scale ~= last_applied_scale then
-        ApplyPlayerVision(player)
+    if force_refresh or scale ~= last_applied_scale or entity ~= last_applied_entity then
+        ApplyPlayerVision(entity)
+    else
+        ApplyShaderVision(scale)
     end
 end
