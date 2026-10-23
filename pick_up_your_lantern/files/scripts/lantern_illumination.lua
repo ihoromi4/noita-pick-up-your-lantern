@@ -1,10 +1,12 @@
 --- Runtime illumination scaling for lanterns.
---- Keeps LightComponent radius and fog of war hole scale of every loaded lantern in sync with mod settings.
+--- Keeps LightComponent radius and fog of war hole scale of every loaded lantern in sync with mod settings
+--- and the lantern quality tier.
 
 local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 
 local SCALE_SETTING_ID = MOD_ID .. ".illumination_scale"
 local LANTERN_TAG = "lantern"
@@ -39,7 +41,15 @@ function GetLanternLightRadius(scale)
     return math.floor(BASE_LIGHT_RADIUS * scale)
 end
 
----Applies the illumination scale to the light and fog of war hole of a lantern entity.
+---Returns the full light radius of a lantern for the currently applied scale and its quality tier.
+---@param entity_id number Lantern entity ID.
+---@return number radius Light radius, or 0 if no scale has been applied yet.
+function GetLanternAppliedLightRadius(entity_id)
+    local scale = GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE)
+    return GetLanternLightRadius(scale * GetLanternTierMultiplier(entity_id))
+end
+
+---Applies the illumination scale, multiplied by the quality tier, to the light and fog of war hole of a lantern.
 ---Lanterns stored in the inventory are skipped: touching their disabled components makes them render
 ---again, so they are updated once the lantern is held or returned to the world.
 ---@param entity_id number Lantern entity ID.
@@ -51,10 +61,11 @@ function ApplyLanternIllumination(entity_id, scale)
         return false
     end
 
+    local tier_scale = scale * GetLanternTierMultiplier(entity_id)
     ComponentSetValue2(light_comp, "update_properties", true)
-    ComponentSetValue2(light_comp, "radius", GetLanternLightRadius(scale))
+    ComponentSetValue2(light_comp, "radius", GetLanternLightRadius(tier_scale))
 
-    local fog_hole_scale = BASE_FOG_HOLE_SCALE * scale
+    local fog_hole_scale = BASE_FOG_HOLE_SCALE * tier_scale
     local sprites = EntityGetComponent(entity_id, "SpriteComponent") or {}
     for _, sprite_comp in ipairs(sprites) do
         if ComponentGetValue2(sprite_comp, "fog_of_war_hole") then
@@ -85,6 +96,7 @@ end
 ---Applies the current illumination scale to loaded lanterns that are out of sync.
 ---Runs every frame while a transition is in progress, otherwise every UPDATE_INTERVAL_FRAMES frames
 ---to catch lanterns streamed in from saved chunks or taken out of the inventory.
+---Freshly spawned lanterns get their quality tier and modifier rolled here.
 ---@param force_refresh boolean? Whether to start a transition immediately regardless of the frame interval.
 ---@return nil
 function UpdateLanternIllumination(force_refresh)
@@ -98,8 +110,12 @@ function UpdateLanternIllumination(force_refresh)
     local target_scale = GetIlluminationScale()
     local has_pending = false
     for _, entity_id in ipairs(EntityGetWithTag(LANTERN_TAG) or {}) do
+        if EnsureLanternTraits(entity_id) then
+            -- Snap to the new tier instead of easing from the radius applied before the roll.
+            SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
+        end
         local current_scale = GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE)
-        if current_scale ~= target_scale then
+        if current_scale ~= target_scale and not IsLanternExtinguished(entity_id) then
             local next_scale = StepScale(current_scale, target_scale)
             if ApplyLanternIllumination(entity_id, next_scale) and next_scale ~= target_scale then
                 has_pending = true
