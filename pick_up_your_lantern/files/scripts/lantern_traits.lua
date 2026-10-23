@@ -49,6 +49,11 @@ local MODIFIERS = {
 local BURN_FRAMES_MIN = 3 * 60 * 60
 local BURN_FRAMES_MAX = 8 * 60 * 60
 
+local FLICKER_DEPTH = 0.45
+local SPUTTER_FRAMES = 20 * 60
+local SPUTTER_DEPTH = 0.6
+local SPUTTER_MIN_FACTOR = 0.3
+
 ---Checks whether lantern progression is enabled in mod settings.
 ---@return boolean
 function IsLanternProgressionEnabled()
@@ -104,6 +109,61 @@ end
 ---@return boolean
 function IsLanternExtinguished(entity_id)
     return GetStorageFloat(entity_id, EXTINGUISHED_STORAGE) > 0
+end
+
+---Calculates a smooth pseudo-random flicker factor from layered sine waves with rare deep dips.
+---@param frame number Current game frame.
+---@param phase number Per-lantern phase offset.
+---@param depth number Maximum relative brightness drop.
+---@return number factor Light multiplier in the range [1 - depth, 1].
+local function GetFlickerFactor(frame, phase, depth)
+    local wave = math.sin(frame * 0.11 + phase) * 0.5
+        + math.sin(frame * 0.27 + phase * 2.3) * 0.3
+        + math.sin(frame * 0.63 + phase * 1.1) * 0.2
+    local dip = math.max(0, math.sin(frame * 0.031 + phase)) ^ 12
+    local amount = math.min(1, 0.35 * (0.5 + 0.5 * wave) + 0.65 * dip)
+
+    return 1 - depth * amount
+end
+
+---Burns one frame of fuel of a short-lived lantern. Lanterns without the modifier burn forever.
+---@param entity_id number Lantern entity ID.
+---@return boolean has_fuel Whether the lantern still has fuel left.
+function ConsumeLanternFuel(entity_id)
+    if GetLanternModifier(entity_id) ~= LANTERN_MODIFIER_SHORT_LIVED then
+        return true
+    end
+
+    local burn_frames = GetLanternBurnFrames(entity_id) - 1
+    if burn_frames <= 0 then
+        SetLanternBurnFrames(entity_id, 0)
+        return false
+    end
+    SetLanternBurnFrames(entity_id, burn_frames)
+
+    return true
+end
+
+---Calculates the light multiplier of the lantern modifier for the current frame:
+---Flickering wavers constantly, Short-lived sputters near the end of its burn time.
+---@param entity_id number Lantern entity ID.
+---@return number factor Light multiplier in the range (0, 1].
+function GetLanternModifierFactor(entity_id)
+    local frame = GameGetFrameNum()
+    local phase = entity_id * 1.7
+    local modifier_id = GetLanternModifier(entity_id)
+
+    if modifier_id == LANTERN_MODIFIER_FLICKERING then
+        return GetFlickerFactor(frame, phase, FLICKER_DEPTH)
+    elseif modifier_id == LANTERN_MODIFIER_SHORT_LIVED then
+        local burn_frames = GetLanternBurnFrames(entity_id)
+        if burn_frames < SPUTTER_FRAMES then
+            local fuel = math.max(0, burn_frames) / SPUTTER_FRAMES
+            return (SPUTTER_MIN_FACTOR + (1 - SPUTTER_MIN_FACTOR) * fuel) * GetFlickerFactor(frame, phase, SPUTTER_DEPTH)
+        end
+    end
+
+    return 1.0
 end
 
 ---Picks a tier according to the weights of the depth band.

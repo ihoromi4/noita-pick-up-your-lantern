@@ -7,6 +7,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/player_vision.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_materials.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_item_radar.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_belt.lua")
 
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
@@ -56,4 +57,9 @@ end
 function OnWorldPreUpdate()
     UpdatePlayerVision()
     UpdateLanternIllumination()
+end
+
+---Called once every frame after the game world is updated.
+function OnWorldPostUpdate()
+    UpdateLanternBelt()
 end

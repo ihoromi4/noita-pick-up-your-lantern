@@ -143,6 +143,24 @@ mod_settings = {
                 ui_fn = ModSettingEnum,
             },
             {
+                id = "belt_light_scale",
+                ui_name = "$pick_up_your_lantern_belt_light_scale_name",
+                ui_description = "$pick_up_your_lantern_belt_light_scale_desc",
+                name_fallback = "Belt lantern light",
+                desc_fallback =
+                "Light radius and fog of war area of a lantern carried on the belt, relative to holding it in hand.",
+                value_default = "0.5",
+                values = {
+                    { "0.0",  "$pick_up_your_lantern_belt_light_off",      "Off (0%)", },
+                    { "0.25", "$pick_up_your_lantern_belt_light_faint",    "Faint (25%)", },
+                    { "0.5",  "$pick_up_your_lantern_belt_light_moderate", "Moderate (50%)", },
+                    { "0.75", "$pick_up_your_lantern_belt_light_bright",   "Bright (75%)", },
+                    { "1.0",  "$pick_up_your_lantern_belt_light_full",     "Full (100%)", },
+                },
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingEnum,
+            },
+            {
                 id = "player_vision",
                 ui_name = "$pick_up_your_lantern_player_vision_name",
                 ui_description = "$pick_up_your_lantern_player_vision_desc",
