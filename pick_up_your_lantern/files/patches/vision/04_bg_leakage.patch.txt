@@ -1,11 +1,12 @@
 # Prevents background parallax and sky leakage through transparent material voids
 # in dark caves when fog of war is active.
+# Areas revealed by the All-Seeing Eye spell or perk keep the vanilla background.
 --- data/shaders/post_final.frag
 +++ data/shaders/post_final.frag
-@@ -429,3 +429,7 @@
+@@ -436,3 +436,7 @@
  	color = mix(color, fog_color_bg, fog_amount_background);
  	color = mix(color , dither_srgb(color, noise.a, 64.0 ), fog_amount );
 +	if (pul_vision.w > 0.5)
 +	{
-+		color = mix(color, color * fog_of_war, fade * (1.0 - pul_vision.z));
++		color = mix(color, color * fog_of_war, fade * (1.0 - pul_vision.z) * (1.0 - pul_reveal_amount));
 +	}

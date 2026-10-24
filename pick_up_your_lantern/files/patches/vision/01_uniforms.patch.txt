@@ -1,11 +1,15 @@
-# Injects uniforms for player vision scaling and player world position.
+# Injects uniforms for player vision scaling, player world position and All-Seeing Eye reveals.
 # Uniforms:
 # - pul_vision: vec4(scale, fog_radius, ambient_mult, enabled)
 # - pul_player_pos: vec4(player_x, player_y, 0, 0)
+# - pul_xray: vec4(center_x, center_y, radius, strength) of the active All-Seeing Eye spell
+# - pul_reveal: vec4(global_strength, 0, 0, 0) of the All-Seeing Eye perk
 --- data/shaders/post_final.frag
 +++ data/shaders/post_final.frag
-@@ -54,3 +54,5 @@
+@@ -54,3 +54,7 @@
  varying vec2 tex_coord_skylight;
  varying vec2 tex_coord_fogofwar;
 +uniform vec4 pul_vision;
 +uniform vec4 pul_player_pos;
++uniform vec4 pul_xray;
++uniform vec4 pul_reveal;

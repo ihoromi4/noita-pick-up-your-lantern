@@ -1,13 +1,20 @@
 # Restricts fog of war radius underground based on player vision settings,
 # while allowing active light sources and glowing materials to pierce the darkness.
+# Areas revealed by the All-Seeing Eye spell or perk are excluded from the restriction.
 # Template variables:
 # - GLOW_BOOST: Multiplier for material glow contribution (mod uses 1.5).
 # - LIGHT_CLAMP_MULT: Multiplier for clamping light intensity (mod uses 2.0).
 --- data/shaders/post_final.frag
 +++ data/shaders/post_final.frag
-@@ -401,3 +401,14 @@
+@@ -401,3 +401,20 @@
  	float fade = clamp( (world_pos.y - 250.0) / 100.0, 0.0, 1.0 );
  	fog_of_war_sky_ambient_amount *= 1.0-fade;
++	float pul_reveal_amount = pul_reveal.x;
++	if (pul_xray.w > 0.0 && pul_xray.z > 0.0)
++	{
++		float pul_xray_edge = 1.0 - smoothstep(pul_xray.z * 0.85, pul_xray.z, distance(world_pos, pul_xray.xy));
++		pul_reveal_amount = max(pul_reveal_amount, pul_xray.w * pul_xray_edge);
++	}
 +	if (pul_vision.w > 0.5)
 +	{
 +		float pul_dist = distance(world_pos, pul_player_pos.xy);
@@ -15,7 +22,7 @@
 +		float pul_glow = max(max(glow.r, glow.g), glow.b);
 +		pul_light = max(pul_light, pul_glow * {{GLOW_BOOST}});
 +		float pul_edge = pul_vision.y > 0.0 ? smoothstep(pul_vision.y * 0.75, pul_vision.y, pul_dist) : 1.0;
-+		float pul_darken = pul_edge * fade * (1.0 - clamp(pul_light * {{LIGHT_CLAMP_MULT}}, 0.0, 1.0));
++		float pul_darken = pul_edge * fade * (1.0 - clamp(pul_light * {{LIGHT_CLAMP_MULT}}, 0.0, 1.0)) * (1.0 - pul_reveal_amount);
 +		fog_of_war_amount = clamp(fog_of_war_amount + pul_darken, 0.0, 1.0);
 +	}
  	float sky_ambient2 = sqrt( fog_of_war_sky_ambient_amount );

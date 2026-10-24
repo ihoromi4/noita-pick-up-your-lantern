@@ -240,6 +240,7 @@ end
 ---@return nil
 function UpdatePlayerVision(force_refresh)
     local entity, is_polymorphed = FindPlayerEntity()
+    UpdateAllSeeingEye(entity)
     if entity == nil then
         ApplyShaderVision(1.0)
         return

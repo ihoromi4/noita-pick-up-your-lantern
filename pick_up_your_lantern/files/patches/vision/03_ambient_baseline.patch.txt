@@ -1,11 +1,12 @@
 # Modulates the vanilla hardcoded underground ambient baseline (0.35)
 # with pul_vision.z to achieve true pitch black darkness in unexplored caves.
+# Areas revealed by the All-Seeing Eye spell or perk get the vanilla baseline back.
 # Template variables:
 # - AMBIENT_BASE: Base underground ambient brightness multiplier (mod uses 0.35).
 --- data/shaders/post_final.frag
 +++ data/shaders/post_final.frag
-@@ -409,3 +409,4 @@
+@@ -415,3 +415,4 @@
  	lights *= fog_of_war;
 -	lights += max(0.35 - fog_of_war_sky_ambient_amount, 0.0) * dither_srgb( fog_of_war, noise.b, 128.0 );
-+	float pul_ambient_base = {{AMBIENT_BASE}} * (pul_vision.w > 0.5 ? pul_vision.z : 1.0);
++	float pul_ambient_base = {{AMBIENT_BASE}} * (pul_vision.w > 0.5 ? mix(pul_vision.z, 1.0, pul_reveal_amount) : 1.0);
 +	lights += max(pul_ambient_base - fog_of_war_sky_ambient_amount, 0.0) * dither_srgb( fog_of_war, noise.b, 128.0 );
