@@ -1,6 +1,7 @@
 --- Runtime illumination scaling for lanterns.
 --- Keeps LightComponent radius and fog of war hole scale of every loaded lantern in sync with mod settings
---- and the lantern quality tier.
+--- and the lantern quality tier. Base values of each lantern type are declared in its XML file and captured
+--- into VariableStorageComponents on first sight, as the components themselves are rescaled at runtime.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -11,8 +12,11 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 local SCALE_SETTING_ID = MOD_ID .. ".illumination_scale"
 local LANTERN_TAG = "lantern"
 local APPLIED_SCALE_STORAGE = "lantern_illumination_scale"
-local BASE_LIGHT_RADIUS = 240
-local BASE_FOG_HOLE_SCALE = 1.0
+local BASE_LIGHT_RADIUS_STORAGE = "lantern_base_light_radius"
+local BASE_FOG_HOLE_SCALE_STORAGE = "lantern_base_fog_hole_scale"
+-- Base values shared by all lanterns before they were declared per type, used for lanterns from older saves.
+local LEGACY_LIGHT_RADIUS = 240
+local LEGACY_FOG_HOLE_SCALE = 1.0
 local UPDATE_INTERVAL_FRAMES = 30
 local TRANSITION_SPEED = 0.03
 local SNAP_EPSILON = 0.01
@@ -34,11 +38,61 @@ function GetIlluminationScale()
     return scale_num
 end
 
+---Finds the fog of war hole SpriteComponent of an entity, present when dynamic lighting is enabled.
+---@param entity_id number Entity ID.
+---@return number|nil sprite_comp
+function GetFogHoleSprite(entity_id)
+    for _, sprite_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "SpriteComponent") or {}) do
+        if ComponentGetValue2(sprite_comp, "fog_of_war_hole") then
+            return sprite_comp
+        end
+    end
+
+    return nil
+end
+
+---Captures the base light radius and fog of war hole scale declared in the lantern XML file.
+---Lanterns already scaled by an older version of the mod get the legacy base values instead.
+---@param entity_id number Lantern entity ID.
+---@return nil
+function EnsureLanternBaseIllumination(entity_id)
+    if GetStorageFloat(entity_id, BASE_LIGHT_RADIUS_STORAGE) > 0 then
+        return
+    end
+
+    local base_radius = LEGACY_LIGHT_RADIUS
+    local base_fog_hole_scale = LEGACY_FOG_HOLE_SCALE
+    if GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE) <= 0 then
+        local light_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "LightComponent")
+        if light_comp ~= nil then
+            base_radius = ComponentGetValue2(light_comp, "radius")
+        end
+        local fog_hole_sprite = GetFogHoleSprite(entity_id)
+        if fog_hole_sprite ~= nil then
+            base_fog_hole_scale = ComponentGetValue2(fog_hole_sprite, "special_scale_x")
+        end
+    end
+
+    SetStorageFloat(entity_id, BASE_LIGHT_RADIUS_STORAGE, base_radius)
+    SetStorageFloat(entity_id, BASE_FOG_HOLE_SCALE_STORAGE, base_fog_hole_scale)
+end
+
 ---Calculates the lantern LightComponent radius for the given illumination scale.
+---@param entity_id number Lantern entity ID.
 ---@param scale number Illumination scale multiplier.
 ---@return number
-function GetLanternLightRadius(scale)
-    return math.floor(BASE_LIGHT_RADIUS * scale)
+function GetLanternLightRadius(entity_id, scale)
+    EnsureLanternBaseIllumination(entity_id)
+    return math.floor(GetStorageFloat(entity_id, BASE_LIGHT_RADIUS_STORAGE) * scale)
+end
+
+---Calculates the lantern fog of war hole scale for the given illumination scale.
+---@param entity_id number Lantern entity ID.
+---@param scale number Illumination scale multiplier.
+---@return number
+function GetLanternFogHoleScale(entity_id, scale)
+    EnsureLanternBaseIllumination(entity_id)
+    return GetStorageFloat(entity_id, BASE_FOG_HOLE_SCALE_STORAGE) * scale
 end
 
 ---Returns the full light radius of a lantern for the currently applied scale and its quality tier.
@@ -46,7 +100,7 @@ end
 ---@return number radius Light radius, or 0 if no scale has been applied yet.
 function GetLanternAppliedLightRadius(entity_id)
     local scale = GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE)
-    return GetLanternLightRadius(scale * GetLanternTierMultiplier(entity_id))
+    return GetLanternLightRadius(entity_id, scale * GetLanternTierMultiplier(entity_id))
 end
 
 ---Applies the illumination scale, multiplied by the quality tier, to the light and fog of war hole of a lantern.
@@ -63,9 +117,9 @@ function ApplyLanternIllumination(entity_id, scale)
 
     local tier_scale = scale * GetLanternTierMultiplier(entity_id)
     ComponentSetValue2(light_comp, "update_properties", true)
-    ComponentSetValue2(light_comp, "radius", GetLanternLightRadius(tier_scale))
+    ComponentSetValue2(light_comp, "radius", GetLanternLightRadius(entity_id, tier_scale))
 
-    local fog_hole_scale = BASE_FOG_HOLE_SCALE * tier_scale
+    local fog_hole_scale = GetLanternFogHoleScale(entity_id, tier_scale)
     local sprites = EntityGetComponent(entity_id, "SpriteComponent") or {}
     for _, sprite_comp in ipairs(sprites) do
         if ComponentGetValue2(sprite_comp, "fog_of_war_hole") then
@@ -110,6 +164,8 @@ function UpdateLanternIllumination(force_refresh)
     local target_scale = GetIlluminationScale()
     local has_pending = false
     for _, entity_id in ipairs(EntityGetWithTag(LANTERN_TAG) or {}) do
+        -- Captured before any scale is applied, while the components still hold the XML values.
+        EnsureLanternBaseIllumination(entity_id)
         if EnsureLanternTraits(entity_id) then
             -- Snap to the new tier instead of easing from the radius applied before the roll.
             SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)

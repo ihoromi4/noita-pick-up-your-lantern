@@ -106,19 +106,6 @@ local function GetHandSprite(lantern_id)
     return nil
 end
 
----Finds the fog of war hole SpriteComponent of a lantern, present when dynamic lighting is enabled.
----@param entity_id number Entity ID.
----@return number|nil sprite_comp
-local function GetFogHoleSprite(entity_id)
-    for _, sprite_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "SpriteComponent") or {}) do
-        if ComponentGetValue2(sprite_comp, "fog_of_war_hole") then
-            return sprite_comp
-        end
-    end
-
-    return nil
-end
-
 ---Spawns the belt lantern and attaches it to the player.
 ---The sprite, light and fog of war hole are copied from the carried lantern.
 ---@param player_id number Player entity ID.
@@ -150,8 +137,12 @@ local function SpawnBelt(player_id, lantern_id, is_lit)
     })
 
     if is_lit then
+        local lantern_light = EntityGetFirstComponentIncludingDisabled(lantern_id, "LightComponent")
         EntityAddComponent2(belt_id, "LightComponent", {
             radius = 0,
+            r = lantern_light ~= nil and ComponentGetValue2(lantern_light, "r") or 255,
+            g = lantern_light ~= nil and ComponentGetValue2(lantern_light, "g") or 255,
+            b = lantern_light ~= nil and ComponentGetValue2(lantern_light, "b") or 255,
             update_properties = true,
         })
 
@@ -197,15 +188,16 @@ local function UpdateBeltLight(belt_id, lantern_id)
 
     local light_comp = EntityGetFirstComponent(belt_id, "LightComponent")
     if light_comp ~= nil then
-        local radius = math.floor(GetLanternLightRadius(scale) * GetLanternModifierFactor(lantern_id))
+        local radius = math.floor(GetLanternLightRadius(lantern_id, scale) * GetLanternModifierFactor(lantern_id))
         ComponentSetValue2(light_comp, "update_properties", true)
         ComponentSetValue2(light_comp, "radius", radius)
     end
 
     local fog_hole_sprite = GetFogHoleSprite(belt_id)
-    if fog_hole_sprite ~= nil and ComponentGetValue2(fog_hole_sprite, "special_scale_x") ~= scale then
-        ComponentSetValue2(fog_hole_sprite, "special_scale_x", scale)
-        ComponentSetValue2(fog_hole_sprite, "special_scale_y", scale)
+    local fog_hole_scale = GetLanternFogHoleScale(lantern_id, scale)
+    if fog_hole_sprite ~= nil and ComponentGetValue2(fog_hole_sprite, "special_scale_x") ~= fog_hole_scale then
+        ComponentSetValue2(fog_hole_sprite, "special_scale_x", fog_hole_scale)
+        ComponentSetValue2(fog_hole_sprite, "special_scale_y", fog_hole_scale)
         EntityRefreshSprite(belt_id, fog_hole_sprite)
     end
 end

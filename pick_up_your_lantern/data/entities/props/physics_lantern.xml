@@ -44,12 +44,29 @@
         script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_in_world.lua"
     ></LuaComponent>
 
+    <!-- Base light of this lantern type. Radius is scaled at runtime by settings, quality tier and modifier. -->
     <LightComponent
         _tags="enabled_in_world,enabled_in_hand"
         _enabled="1"
-        radius="240"
+        radius="280"
+        r="255"
+        g="225"
+        b="180"
         update_properties="1"
     ></LightComponent>
+
+    <!-- Base fog of war hole of this lantern type. Removed on init when dynamic lighting is disabled. -->
+    <SpriteComponent
+        _tags="enabled_in_world,enabled_in_hand"
+        _enabled="1"
+        alpha="0.55"
+        image_file="data/particles/fog_of_war_hole_64.xml"
+        smooth_filtering="1"
+        fog_of_war_hole="1"
+        has_special_scale="1"
+        special_scale_x="1.2"
+        special_scale_y="1.2"
+    ></SpriteComponent>
 
 
     <DamageModelComponent

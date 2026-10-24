@@ -7,37 +7,17 @@ dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_illumination.lua")
 
 local SETTING_ID = "pick_up_your_lantern.illuminate_the_darkness"
 
+---Lantern entity files that declare their own fog of war hole SpriteComponent.
+local LANTERN_ENTITIES = {
+    "data/entities/props/physics/lantern_small.xml",
+    "data/entities/props/physics_lantern.xml",
+    "data/entities/props/physics_lantern_small.xml",
+}
+
 ---Target entity definitions for dynamic lighting injection.
----@type table<number, {path: string, tags: string, enabled: string, alpha: string, image_file: string, offset_x?: number, offset_y?: number, scale?: number, scales_light?: boolean}>
+---Lanterns are not listed: their light and fog of war hole are declared in their own XML files.
+---@type table<number, {path: string, tags: string, enabled: string, alpha: string, image_file: string, offset_x?: number, offset_y?: number, scale?: number}>
 local TARGET_ENTITIES = {
-    {
-        path = "data/entities/props/physics/lantern_small.xml",
-        scales_light = true,
-        tags = "enabled_in_world,enabled_in_hand",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-        offset_y = 6,
-        scale = 1.0,
-    },
-    {
-        path = "data/entities/props/physics_lantern.xml",
-        scales_light = true,
-        tags = "enabled_in_world,enabled_in_hand",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics_lantern_small.xml",
-        scales_light = true,
-        tags = "enabled_in_world,enabled_in_hand",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-        offset_y = 6,
-        scale = 1.0,
-    },
     {
         path = "data/entities/props/physics/chain_torch.xml",
         tags = "enabled_in_world",
@@ -214,21 +194,41 @@ local function PatchTarget(target, global_scale)
         InjectFogOfWarHole(xml, target, global_scale)
     end
 
-    if target.scales_light then
-        local light_comp = xml:first_of("LightComponent")
-        if light_comp ~= nil then
-            light_comp.attr.radius = tostring(GetLanternLightRadius(global_scale))
-        end
-    end
-
     ModTextFileSetContent(target.path, nxml.tostring(xml))
 end
 
+---Removes the fog of war hole SpriteComponent declared in a lantern XML file.
+---@param path string Lantern entity file path.
+---@return nil
+local function RemoveLanternFogOfWarHole(path)
+    local content = ModTextFileGetContent(path)
+    if content == nil or content == "" then
+        return
+    end
+
+    local success, xml = pcall(nxml.parse, content)
+    if not success or xml == nil then
+        return
+    end
+
+    local sprite_elem = FindFogOfWarHole(xml)
+    if sprite_elem == nil then
+        return
+    end
+
+    xml:remove_child(sprite_elem)
+    ModTextFileSetContent(path, nxml.tostring(xml))
+end
+
 ---Patches light fixture entity XML files to pierce fog of war when enabled in mod settings.
+---When disabled, removes the fog of war holes declared in lantern XML files instead.
 ---@return nil
 function PatchLighting()
     local is_enabled = IsSettingEnabled()
     if not is_enabled then
+        for _, path in ipairs(LANTERN_ENTITIES) do
+            RemoveLanternFogOfWarHole(path)
+        end
         return
     end
 
