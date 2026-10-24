@@ -225,7 +225,7 @@ mod_settings = {
                 ui_description = "$pick_up_your_lantern_lantern_progression_desc",
                 name_fallback = "Lantern progression",
                 desc_fallback =
-                "Lanterns spawn with a quality tier from 1 to 4 shown in their name; deeper biomes hold brighter lanterns.\nRarely a lantern gets a modifier: F - flickering, S - short-lived.\nRequires starting a new game.",
+                "Lanterns spawn with a quality from dim to masterwork; deeper biomes hold brighter lanterns.\nRarely a lantern gets a modifier: it may flicker or slowly burn out.\nThe quality and modifier of a lantern are told in its description.\nRequires starting a new game.",
                 value_default = true,
                 scope = MOD_SETTING_SCOPE_NEW_GAME,
                 ui_fn = ModSettingBool,

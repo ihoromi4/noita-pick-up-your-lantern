@@ -216,7 +216,13 @@ function UpdateLanternBelt()
         end
     end
 
-    local is_lit = lantern_id ~= 0 and not IsLanternExtinguished(lantern_id) and ConsumeLanternFuel(lantern_id)
+    -- Oil leaking from the belt lantern drips at the player, as the lantern itself is in the inventory.
+    local player_x, player_y = 0, 0
+    if player_id ~= 0 then
+        player_x, player_y = EntityGetTransform(player_id)
+    end
+    local is_lit = lantern_id ~= 0 and not IsLanternExtinguished(lantern_id)
+        and ConsumeLanternFuel(lantern_id, player_x, player_y)
 
     -- Belt lanterns restored with the player after loading or polymorph refer to stale lantern IDs.
     local belt_id = 0

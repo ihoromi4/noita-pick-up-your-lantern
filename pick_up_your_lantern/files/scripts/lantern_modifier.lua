@@ -1,7 +1,7 @@
 --- Lantern modifier behaviour, attached at runtime to lanterns that rolled a modifier.
 --- Runs only while the lantern is lit in the world or in hand:
---- - Flickering: the light radius wavers with occasional dips.
---- - Short-lived: the lantern burns for a limited time, sputters near the end and goes out.
+--- - Flickering: the light radius is wider but wavers with occasional dips.
+--- - Short-lived: the lantern leaks oil, fades as it burns, sputters near the end and goes out.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -17,7 +17,8 @@ if light_comp == nil or full_radius <= 0 then
     return
 end
 
-if not ConsumeLanternFuel(entity_id) then
+local x, y = EntityGetTransform(entity_id)
+if not ConsumeLanternFuel(entity_id, x, y) then
     ExtinguishLantern(entity_id)
     return
 end

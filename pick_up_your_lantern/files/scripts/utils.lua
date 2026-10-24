@@ -39,3 +39,20 @@ function SetStorageFloat(entity_id, name, value)
     ComponentSetValue2(comp, "value_float", value)
 end
 
+---Reads a string value from a named VariableStorageComponent.
+---@param entity_id number The target entity ID.
+---@param name string The variable storage name.
+---@return string value The string value stored, or an empty string if not found.
+function GetStorageString(entity_id, name)
+    local comp = GetOrCreateVariableStorage(entity_id, name)
+    return ComponentGetValue2(comp, "value_string") or ""
+end
+
+---Writes a string value to a named VariableStorageComponent.
+---@param entity_id number The target entity ID.
+---@param name string The variable storage name.
+---@param value string The string value to write.
+function SetStorageString(entity_id, name, value)
+    local comp = GetOrCreateVariableStorage(entity_id, name)
+    ComponentSetValue2(comp, "value_string", value)
+end
