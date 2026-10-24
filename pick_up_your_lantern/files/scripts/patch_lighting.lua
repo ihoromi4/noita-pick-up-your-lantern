@@ -26,6 +26,13 @@ local TARGET_ENTITIES = {
         image_file = "data/particles/fog_of_war_hole_64.xml",
     },
     {
+        path = "data/entities/props/physics_chain_torch.xml",
+        tags = "enabled_in_world",
+        enabled = "1",
+        alpha = "0.55",
+        image_file = "data/particles/fog_of_war_hole_64.xml",
+    },
+    {
         path = "data/entities/props/physics/chain_torch_blue.xml",
         tags = "enabled_in_world",
         enabled = "1",
@@ -33,7 +40,21 @@ local TARGET_ENTITIES = {
         image_file = "data/particles/fog_of_war_hole_64.xml",
     },
     {
+        path = "data/entities/props/physics_chain_torch_blue.xml",
+        tags = "enabled_in_world",
+        enabled = "1",
+        alpha = "0.55",
+        image_file = "data/particles/fog_of_war_hole_64.xml",
+    },
+    {
         path = "data/entities/props/physics/chain_torch_ghostly.xml",
+        tags = "enabled_in_world",
+        enabled = "1",
+        alpha = "0.55",
+        image_file = "data/particles/fog_of_war_hole_64.xml",
+    },
+    {
+        path = "data/entities/props/physics_chain_torch_ghostly.xml",
         tags = "enabled_in_world",
         enabled = "1",
         alpha = "0.55",
