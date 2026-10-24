@@ -9,7 +9,6 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 
-local PLAYER_TAG = "player_unit"
 local LANTERN_TAG = "lantern"
 local BELT_TAG = "pul_belt"
 local BELT_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/lantern_belt.xml"
@@ -37,29 +36,6 @@ local function GetBeltLightScale()
     end
 
     return scale_num
-end
----Finds the player entity, ignoring polymorphed forms that have no inventory.
----@return number player_id Player entity ID, or 0 if not found.
-local function FindPlayer()
-    local players = EntityGetWithTag(PLAYER_TAG) or {}
-    return players[1] or 0
-end
-
----Returns the item currently held by the player.
----@param player_id number Player entity ID.
----@return number item_id Held item entity ID, or 0 if the hands are empty.
-local function GetHeldItem(player_id)
-    local inventory_comp = EntityGetFirstComponentIncludingDisabled(player_id, "Inventory2Component")
-    if inventory_comp == nil then
-        return 0
-    end
-
-    local item_id = ComponentGetValue2(inventory_comp, "mActiveItem") or 0
-    if item_id ~= 0 and not EntityGetIsAlive(item_id) then
-        return 0
-    end
-
-    return item_id
 end
 
 ---Finds the lantern in the lowest quick inventory slot.
@@ -179,12 +155,13 @@ local function IsBeltUpToDate(belt_id, player_id, lantern_id, is_lit)
         and (GetStorageFloat(belt_id, LANTERN_LIT_STORAGE) > 0) == is_lit
 end
 
----Scales the belt light and fog of war hole by the lantern tier, illumination setting and modifier.
+---Scales the belt light and fog of war hole by the lantern tier, liquid state, illumination setting and modifier.
 ---@param belt_id number Belt lantern entity ID.
 ---@param lantern_id number Carried lantern entity ID.
 ---@return nil
 local function UpdateBeltLight(belt_id, lantern_id)
-    local scale = GetIlluminationScale() * GetLanternTierMultiplier(lantern_id) * GetBeltLightScale()
+    local scale = GetIlluminationScale() * GetLanternTierMultiplier(lantern_id)
+        * GetLanternLiquidStateMultiplier(lantern_id) * GetBeltLightScale()
 
     local light_comp = EntityGetFirstComponent(belt_id, "LightComponent")
     if light_comp ~= nil then

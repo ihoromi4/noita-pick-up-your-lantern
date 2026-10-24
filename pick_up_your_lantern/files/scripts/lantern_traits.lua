@@ -1,6 +1,7 @@
 --- Lantern progression: quality tiers and modifiers rolled once when a lantern appears in the world.
 --- Better tiers become more likely in deeper biomes. Traits are kept in VariableStorageComponents,
 --- so they survive moving the lantern between the world, inventory and hand, and saving the game.
+--- Liquid states (oil-soaked, wet) are taken on later while the lantern is held, see lantern_liquid_state.lua.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -14,11 +15,16 @@ local BURN_FRAMES_STORAGE = "lantern_burn_frames"
 local BURN_FRAMES_TOTAL_STORAGE = "lantern_burn_frames_total"
 local EXTINGUISHED_STORAGE = "lantern_extinguished"
 local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
+local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
 
 LANTERN_MODIFIER_NONE = 0
 LANTERN_MODIFIER_FLICKERING = 1
 LANTERN_MODIFIER_SHORT_LIVED = 2
+
+LANTERN_LIQUID_STATE_NONE = 0
+LANTERN_LIQUID_STATE_OIL_SOAKED = 1
+LANTERN_LIQUID_STATE_WET = 2
 
 ---Illumination multipliers of quality tiers, from the dimmest to the brightest.
 local TIER_MULTIPLIERS = {
@@ -55,6 +61,30 @@ local TIER_WEIGHTS_BY_DEPTH = {
 local MODIFIERS = {
     { id = LANTERN_MODIFIER_FLICKERING,  description = "$item_description_lantern_flickering",  chance = 70, },
     { id = LANTERN_MODIFIER_SHORT_LIVED, description = "$item_description_lantern_short_lived", chance = 70, },
+}
+
+---@class LanternLiquidState
+---@field id number Liquid state ID.
+---@field materials table<string, boolean> Names of the liquid materials that cause the state.
+---@field multiplier number Light radius and fog of war hole multiplier.
+---@field description string Translation key of the description sentence.
+
+---Liquid states a held lantern takes on when the player dives into a liquid. A state lasts until another one
+---replaces it and multiplies the light radius and fog of war hole of the lantern.
+---@type LanternLiquidState[]
+local LIQUID_STATES = {
+    {
+        id = LANTERN_LIQUID_STATE_OIL_SOAKED,
+        materials = { oil = true, },
+        multiplier = 1.3,
+        description = "$item_description_lantern_oil_soaked",
+    },
+    {
+        id = LANTERN_LIQUID_STATE_WET,
+        materials = { water = true, water_salt = true, water_ice = true, water_fading = true, swamp = true, },
+        multiplier = 0.8,
+        description = "$item_description_lantern_wet",
+    },
 }
 
 ---Burn time range of short-lived lanterns, in frames while lit (60 frames per second).
@@ -128,6 +158,55 @@ end
 ---@return boolean
 function IsLanternExtinguished(entity_id)
     return GetStorageFloat(entity_id, EXTINGUISHED_STORAGE) > 0
+end
+
+---Returns the liquid state of a lantern.
+---@param entity_id number Lantern entity ID.
+---@return number
+function GetLanternLiquidState(entity_id)
+    return math.floor(GetStorageFloat(entity_id, LIQUID_STATE_STORAGE))
+end
+
+---Sets the liquid state of a lantern.
+---@param entity_id number Lantern entity ID.
+---@param state_id number Liquid state.
+---@return nil
+function SetLanternLiquidState(entity_id, state_id)
+    SetStorageFloat(entity_id, LIQUID_STATE_STORAGE, state_id)
+end
+
+---Returns the liquid state a lantern takes on in the given material.
+---@param material_name string Material name.
+---@return number state_id Liquid state, or LANTERN_LIQUID_STATE_NONE if the material has no effect.
+function GetLiquidStateByMaterial(material_name)
+    for _, state in ipairs(LIQUID_STATES) do
+        if state.materials[material_name] then
+            return state.id
+        end
+    end
+
+    return LANTERN_LIQUID_STATE_NONE
+end
+
+---Returns the definition of a liquid state.
+---@param state_id number
+---@return LanternLiquidState|nil
+local function GetLiquidStateDefinition(state_id)
+    for _, state in ipairs(LIQUID_STATES) do
+        if state.id == state_id then
+            return state
+        end
+    end
+
+    return nil
+end
+
+---Returns the illumination multiplier of the lantern liquid state.
+---@param entity_id number Lantern entity ID.
+---@return number
+function GetLanternLiquidStateMultiplier(entity_id)
+    local state = GetLiquidStateDefinition(GetLanternLiquidState(entity_id))
+    return state ~= nil and state.multiplier or 1.0
 end
 
 ---Calculates a smooth pseudo-random flicker factor from layered sine waves with rare deep dips.
@@ -280,7 +359,7 @@ local function GetModifierDescription(modifier_id)
     return nil
 end
 
----Lists the description sentences of the current lantern properties: quality tier, then modifier.
+---Lists the description sentences of the current lantern properties: quality tier, modifier, then liquid state.
 ---@param entity_id number Lantern entity ID.
 ---@return string[] descriptions Translation keys.
 local function GetLanternPropertyDescriptions(entity_id)
@@ -299,7 +378,10 @@ local function GetLanternPropertyDescriptions(entity_id)
         table.insert(descriptions, modifier_description)
     end
 
-    -- Dynamic states from the environment (e.g. oil-soaked) add their sentences here.
+    local liquid_state = GetLiquidStateDefinition(GetLanternLiquidState(entity_id))
+    if liquid_state ~= nil and not IsLanternExtinguished(entity_id) then
+        table.insert(descriptions, liquid_state.description)
+    end
 
     return descriptions
 end

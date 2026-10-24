@@ -1,5 +1,7 @@
 ---Utility functions for Pick Up Your Lantern mod.
 
+local PLAYER_TAG = "player_unit"
+
 ---Retrieves an existing VariableStorageComponent by name, or creates a new one.
 ---@param entity_id number The target entity ID.
 ---@param name string The unique name of the variable storage.
@@ -55,4 +57,28 @@ end
 function SetStorageString(entity_id, name, value)
     local comp = GetOrCreateVariableStorage(entity_id, name)
     ComponentSetValue2(comp, "value_string", value)
+end
+
+---Finds the player entity, ignoring polymorphed forms that have no inventory.
+---@return number player_id Player entity ID, or 0 if not found.
+function FindPlayer()
+    local players = EntityGetWithTag(PLAYER_TAG) or {}
+    return players[1] or 0
+end
+
+---Returns the item currently held by the player.
+---@param player_id number Player entity ID.
+---@return number item_id Held item entity ID, or 0 if the hands are empty.
+function GetHeldItem(player_id)
+    local inventory_comp = EntityGetFirstComponentIncludingDisabled(player_id, "Inventory2Component")
+    if inventory_comp == nil then
+        return 0
+    end
+
+    local item_id = ComponentGetValue2(inventory_comp, "mActiveItem") or 0
+    if item_id ~= 0 and not EntityGetIsAlive(item_id) then
+        return 0
+    end
+
+    return item_id
 end

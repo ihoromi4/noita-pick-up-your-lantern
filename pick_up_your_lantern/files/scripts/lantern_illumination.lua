@@ -1,7 +1,7 @@
 --- Runtime illumination scaling for lanterns.
---- Keeps LightComponent radius and fog of war hole scale of every loaded lantern in sync with mod settings
---- and the lantern quality tier. Base values of each lantern type are declared in its XML file and captured
---- into VariableStorageComponents on first sight, as the components themselves are rescaled at runtime.
+--- Keeps LightComponent radius and fog of war hole scale of every loaded lantern in sync with mod settings,
+--- the lantern quality tier and liquid state. Base values of each lantern type are declared in its XML file
+--- and captured into VariableStorageComponents on first sight, as the components themselves are rescaled at runtime.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -11,6 +11,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 
 local SCALE_SETTING_ID = MOD_ID .. ".illumination_scale"
 local LANTERN_TAG = "lantern"
+-- Applied illumination setting multiplied by the liquid state, without the quality tier.
 local APPLIED_SCALE_STORAGE = "lantern_illumination_scale"
 local BASE_LIGHT_RADIUS_STORAGE = "lantern_base_light_radius"
 local BASE_FOG_HOLE_SCALE_STORAGE = "lantern_base_fog_hole_scale"
@@ -95,7 +96,7 @@ function GetLanternFogHoleScale(entity_id, scale)
     return GetStorageFloat(entity_id, BASE_FOG_HOLE_SCALE_STORAGE) * scale
 end
 
----Returns the full light radius of a lantern for the currently applied scale and its quality tier.
+---Returns the full light radius of a lantern for the currently applied scale, liquid state and quality tier.
 ---@param entity_id number Lantern entity ID.
 ---@return number radius Light radius, or 0 if no scale has been applied yet.
 function GetLanternAppliedLightRadius(entity_id)
@@ -161,7 +162,7 @@ function UpdateLanternIllumination(force_refresh)
         return
     end
 
-    local target_scale = GetIlluminationScale()
+    local setting_scale = GetIlluminationScale()
     local has_pending = false
     for _, entity_id in ipairs(EntityGetWithTag(LANTERN_TAG) or {}) do
         -- Captured before any scale is applied, while the components still hold the XML values.
@@ -170,6 +171,8 @@ function UpdateLanternIllumination(force_refresh)
             -- Snap to the new tier instead of easing from the radius applied before the roll.
             SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
         end
+        -- The liquid state is part of the eased scale, so the lantern changes smoothly when it takes one on.
+        local target_scale = setting_scale * GetLanternLiquidStateMultiplier(entity_id)
         local current_scale = GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE)
         if current_scale ~= target_scale and not IsLanternExtinguished(entity_id) then
             local next_scale = StepScale(current_scale, target_scale)
