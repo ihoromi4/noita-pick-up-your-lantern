@@ -26,13 +26,18 @@ The primary goal of version 0.1 is to deliver a fully functional, stable core ga
   - Guarantee player and environmental safety for closed lanterns in hand (no accidental fires or self-damage).
   - Prevent lantern durability loss or breakage while held in hand.
 - **Throwing and Combat**:
-  - Support throwing via Right Mouse Button (RMB) aim or dropping from inventory.
+  - Support throwing via Right Mouse Button (RMB).
   - Apply physics impact damage to enemies upon collision prior to shattering.
-  - Shatter on hard collisions, spilling oil and igniting it into a fire hazard (including high-velocity impacts in water).
+  - Shatter on hard collisions, spilling oil and igniting it into a fire hazard.
   - Preserve fixture intactness on soft landings, allowing re-pickup and kicking.
 - **True Dynamic Lighting**:
   - Research and integrate true dynamic lighting options based on the "Light-Up Lanterns" mod (workshop ID: `2316356772`).
   - Provide a toggle in Mod Settings for enhanced lighting shaders/raycasts.
+- **Player Vision and Limited Visibility**:
+  - Configurable player vision presets in Mod Settings (Vanilla 100%, Dim 75%, Dark 50%, Very Dark 25%, Minimal 10%, Pitch Black 0%).
+  - Dual-system vision scaling: proportional reduction of personal illumination and persistent map fog reveal radius.
+  - Runtime settings synchronization without game restart.
+  - Material illumination and burning entity lighting enhancements cutting through darkness.
 
 ## Version 0.1.1 - Item Radar Fix
 
@@ -43,21 +48,34 @@ Version 0.1.1 is a patch release that improves compatibility with vanilla perks.
 
 ## Version 0.2 - Passive Carrying and Atmosphere
 
-Version 0.2 focuses on visual polish, passive utility, and atmospheric difficulty enhancement.
+Version 0.2 focuses on passive utility and atmospheric carrying mechanics.
 
 - **Belt Attachment and Passive Illumination**:
   - Automatically display the first available lantern from `Quick Inventory` on the character's belt/waist when hands are holding wands, flasks, or items (reference: "Extra Backpack", Steam ID: `3807317449`).
   - Emit moderate passive ambient light from the belt (dimmer than active hand holding, but brighter than unlit player vision).
-  - Hide belt lantern sprite when a lantern is selected as the active held item.
+  - `Belt lantern light` option in Mod Settings to scale the belt light relative to the lantern in hand (0-100%, 50% by default).
+  - Hide the belt lantern (sprite and light) whenever any lantern is the active held item, even if other lanterns remain in the inventory.
   - Synchronize belt lantern movement with player locomotion.
-- **Limited Visibility Mode**:
-  - Mod settings toggle reducing the player's innate vision radius in dark biomes.
-  - Enhances survival atmosphere and makes handheld and belt-mounted lanterns critical for navigation.
+- **Lantern Properties and Dynamic States**:
+  - Distinct properties per lantern: light radius, fog of war hole size, light color, and durability differ between lantern types and are declared in the lantern XML files.
+  - Lantern quality tiers rolled on spawn, with better tiers becoming more likely in deeper biomes; tier is described by an atmospheric sentence in the item description.
+  - Rare lantern modifiers rolled independently of the tier, each described by a sentence in the item description: Flickering (20% wider but unstable light) and Short-lived (leaks a drop of oil every 5 seconds, fades over its limited burn time and goes out).
+  - `Lantern progression` option in Mod Settings to turn tiers and modifiers off (enabled by default).
+  - Oil-soaked state: diving into oil with a lantern in hand makes its light and fog of war hole 30% wider until it is submerged in water. The state is described by a sentence in the item description.
+  - Wet state: diving under water with a lantern in hand makes its light and fog of war hole 20% narrower until it is submerged in oil. The state is described by a sentence in the item description.
+- **Vision Fixes and Compatibility**:
+  - Restore limited vision after returning from polymorph, with a separate `Polymorphed vision` option in Mod Settings for the polymorphed form (`Same as player` by default).
+  - Dispel fog of war with duplicate chain torch variants spawned in some biomes (e.g., ghostly torches in Coal Pits).
+  - All-Seeing Eye spell (`X_RAY`) compatibility: reveal a slowly expanding circle around the cast point at vanilla brightness, then fade back to the previous lighting.
+  - All-Seeing Eye perk (`REMOVE_FOG_OF_WAR`) compatibility: reveal the whole level as in vanilla; holding Sunseed or Sunstone has the same effect.
+  - Fix flame sprite desync after throwing a held lantern while facing left.
 
 ## Version 0.3 - Variety and World Interactions
 
-Version 0.3 expands the scope to other environmental light fixtures, danger mechanics, and world incentives.
+Version 0.3 expands the scope to other environmental light fixtures, danger mechanics, world incentives, and visual polish.
 
+- **Visual Polish and UI**:
+  - Custom UI icons redesign: create dedicated pixel-art icons visually matching physical lantern props (`ui_lantern.png`, `ui_lantern_small.png`) with clear illumination.
 - **Extended Light Fixture Support**:
   - Support hanging chain torches (`chain_torch.xml`, `chain_torch_blue.xml`, `chain_torch_ghostly.xml`).
   - Support mining lamps (`physics_mining_lamp.xml`) and temple lanterns (`temple_lantern.xml`).
@@ -68,6 +86,10 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
 - **Strategic World Incentives**:
   - Implement gameplay incentives for leaving light fixtures hanging in the world (e.g., safe illumination zones, stations to reignite unlit lanterns, enemy debuff zones, or fog of war landmarks).
   - Counteract the tendency to treat lanterns purely as disposable weapons.
+- **Fire Enemies Lighting Rework**:
+  - Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness.
+  - Cover vanilla fire enemies: Fire Mage (Stendari), Fire Spirit (Liekkiö), Hell Spitter (Helvetin sylkijä), Hell Gazer (Helvetinkatse), Hellfire Mage (Eldari), perhaps some others.
+  - Implement a procedural patch that automatically detects similar fire-related enemies added by other mods and applies the same lighting enhancements.
 - **Natural Fear Mode**:
   - Mod settings toggle where wild beast and animal enemy categories (`herd_id`) actively avoid lantern light and maintain distance from the player.
 
@@ -80,6 +102,8 @@ Version 1.0 delivers complete physical and chemical state transitions, edge case
   - Dynamic state tracking: switch inventory icon to an unlit flask when extinguished.
   - Update in-hand and belt sprites to render unlit containers without flame animations.
   - Magical and hermetic lanterns remain lit underwater.
+- **Additional Liquid Interactions**:
+  - React to other liquids besides oil and water (e.g., alcohol flicker, toxic sludge tint, blood dimming).
 - **Reignition Mechanics**:
   - Reignite unlit lanterns when exposed to open fire, burning materials, or high environmental heat.
 - **Full Release Polish**:

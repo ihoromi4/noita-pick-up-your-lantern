@@ -18,15 +18,40 @@ Those oil lanterns hanging from the ceilings of the Mines are no longer just dec
 [*] Adjustable size of the illuminated area: 100%, 200%, 300% or 500%.
 [/list]
 
+[h3]Lantern on Your Belt[/h3]
+Your hands are busy with a wand or a flask? Your lantern stays with you anyway.
+[list]
+[*] The first lantern in your inventory hangs on your belt and sways as you move.
+[*] It softly lights the way - dimmer than a lantern in your hand, but enough not to stumble in the dark.
+[*] Take any lantern in your hand, and the belt lantern steps aside.
+[*] Adjust its brightness in the settings, from [b]Off[/b] to as bright as in hand.
+[/list]
+
+[h3]Every Lantern Is Different[/h3]
+Look closely before you grab the first lantern you see!
+[list]
+[*] The large Lantern shines wider and is sturdier than the fragile Small Lantern.
+[*] Lanterns come in four qualities, from a soot-clouded lamp to a masterwork that drives the darkness far away. The deeper you go, the better lanterns you find.
+[*] Rarely a lantern has a quirk: a [b]Flickering[/b] one shines wider but wavers, and a [b]Short-lived[/b] one leaks oil and slowly burns out for good.
+[*] Dive into oil with a lantern in your hand, and it blazes wider. A swim in water leaves it dim until you find oil again.
+[*] The item description tells you everything about the lantern you carry.
+[*] Prefer all lanterns to be equal? Turn lantern quality and quirks off in the settings.
+[/list]
+
 [h3]Player Vision and Darkness[/h3]
 Make the depths truly dark and turn your lantern into a survival tool!
 [list]
-[*] Player vision presets: [b]Vanilla [100%](/b), [b]Dim [75%](/b), [b]Dark [50%](/b), [b]Very Dark [25%](/b), [b]Minimal [10%](/b) and [b]Pitch Black [0%](/b).
+[*] Player vision presets: [b]Vanilla (100%)[/b], [b]Dim (75%)[/b], [b]Dark (50%)[/b], [b]Very Dark (25%)[/b], [b]Minimal (10%)[/b] and [b]Pitch Black (0%)[/b].
 [*] Lower settings shrink both your personal light and the area of the map you reveal.
 [*] [b]Pitch Black[/b] mode leaves unlit caves completely dark - you only see what your lantern, fires and other light sources illuminate.
 [*] Fire, lava, molten metals, toxic sludge, acid and sparks glow more brightly, and burning creatures light up their surroundings.
+[*] The darkness stays with you while polymorphed, and you can pick a separate vision for your polymorphed form.
+[*] All-Seeing Eye, Sunseed and Sunstone reveal the world just like in the vanilla game.
 [*] Vision can be changed at any time from the pause menu, no restart required.
 [/list]
+
+[h2]Documentation[/h2]
+Want to know exactly how lanterns, their quality and the darkness work, or what every setting does? Read the detailed [url=https://github.com/ihoromi4/noita-pick-up-your-lantern/blob/main/docs/index.md]documentation[/url] on GitHub.
 
 [h2]Languages[/h2]
 English, Russian, Polish, Simplified Chinese.
@@ -36,13 +61,17 @@ The mod replaces vanilla lantern entities and modifies shader files, so mods tha
 
 [h2]Planned[/h2]
 [list]
-[*] Carrying a lantern on your belt as a dimmer passive light source.
 [*] Support for more light fixtures and open-flame torches.
 [*] Extinguishing lanterns in water and relighting them with fire.
+[*] More liquids that change your lantern.
 [/list]
 
 [h2]Credits[/h2]
-The dynamic lighting approach is inspired by [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2316356772]Light-Up Lanterns[/url]. We stand on the shoulders of giants...
+[list]
+[*] The dynamic lighting approach is inspired by [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2316356772]Light-Up Lanterns[/url].
+[*] The belt lantern approach is inspired by [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3807317449]Extra Backpack[/url].
+[/list]
+We stand on the shoulders of giants...
 
 [i]Disclaimer: This mod was developed with the assistance of AI coding agents.[/i]
 
