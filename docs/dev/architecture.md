@@ -51,7 +51,7 @@ The vision and glow patches are described in [Vision and Lighting](vision-and-li
 | --- | --- | --- |
 | `OnPlayerSpawned` | `ApplyPlayerVision` | Applies the vision preset to the new player entity and logs the shader patch status once. |
 | `OnModSettingsChanged` | `UpdatePlayerVision(true)`, `UpdateLanternIllumination(true)` | Applies changed settings without restarting the run. |
-| `OnWorldPreUpdate` | `UpdatePlayerVision`, `UpdateLanternIllumination` | Sends shader parameters every frame. Scales lantern light; the lantern scan runs every 30 frames. |
+| `OnWorldPreUpdate` | `UpdatePlayerVision`, `UpdateLanternHang`, `UpdateLanternIllumination` | Sends shader parameters every frame. Hangs a held lantern on the ceiling on a left click, or returns a lantern thrown with the left button to the hand. Scales lantern light; the lantern scan runs every 30 frames. |
 | `OnWorldPostUpdate` | `UpdateLanternBelt`, `UpdateLanternLiquidState` | Updates the belt lantern in the same frame before rendering. Checks liquid states every 10 frames. |
 
 ## Entity Scripts
@@ -62,6 +62,7 @@ Scripts attached to lantern entities through `LuaComponent`:
 | --- | --- | --- |
 | `lantern_anchor.lua` | In the world, every 20 frames and on kick | Detaches the lantern from the ceiling when kicked or when the ceiling is destroyed, then removes itself. |
 | `lantern_in_world.lua` | Once each time the lantern returns to the world | Resets the mirrored transform scale after a throw or drop. |
+| `lantern_throw.lua` | On throw (`Message_ThrowItem`) | Marks a lantern thrown with the left mouse button, so `UpdateLanternHang` returns it to the hand on the next frame. |
 | `lantern_in_hand.lua` | In hand, every frame | Swings the lantern like a damped pendulum. Also drives the belt lantern. |
 | `lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering and Short-lived modifiers. |
 | `lantern_death.lua`, `lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |

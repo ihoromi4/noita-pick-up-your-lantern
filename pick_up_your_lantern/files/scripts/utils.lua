@@ -2,6 +2,9 @@
 
 local PLAYER_TAG = "player_unit"
 
+-- Player storage with a lantern thrown with the left mouse button, to be returned to the hand.
+RETURN_LANTERN_STORAGE = "pul_return_lantern_id"
+
 ---Retrieves an existing VariableStorageComponent by name, or creates a new one.
 ---@param entity_id number The target entity ID.
 ---@param name string The unique name of the variable storage.
@@ -81,4 +84,25 @@ function GetHeldItem(player_id)
     end
 
     return item_id
+end
+
+---Puts an inventory item into the player's hands.
+---The engine switches from mActualActiveItem to mActiveItem, unequipping the item that was in hand.
+---When that item is gone, resetting mActualActiveItem makes the engine equip mActiveItem anyway,
+---as vanilla perk_list.lua does. Resetting it while an item is still equipped leaves that item
+---stuck in its in-hand state.
+---@param player_id number Player entity ID.
+---@param item_id number Item entity ID from the player's inventory.
+---@param is_held_item_gone boolean Whether the item currently in hand has been removed.
+---@return nil
+function SelectHeldItem(player_id, item_id, is_held_item_gone)
+    local inventory_comp = EntityGetFirstComponentIncludingDisabled(player_id, "Inventory2Component")
+    if inventory_comp == nil then
+        return
+    end
+
+    ComponentSetValue2(inventory_comp, "mActiveItem", item_id)
+    if is_held_item_gone then
+        ComponentSetValue2(inventory_comp, "mActualActiveItem", 0)
+    end
 end

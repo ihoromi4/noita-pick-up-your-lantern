@@ -48,8 +48,10 @@ When your hands are busy with a wand, a flask or another item, the first lantern
 
 Throw a held lantern with the right mouse button. It flies along the dotted aiming line like any other thrown item.
 
+The left mouse button does not throw a held lantern. It hangs the lantern on the ceiling right above your head, and your hands take the first wand from your Quick Inventory, or the first item if you carry no wands. A lantern hung this way behaves like any other hanging lantern: you can pick it up again, kick it down, and it falls when the ceiling is destroyed.
+
 > [!NOTE]
-> The left mouse button also throws a held lantern. The game does not allow limiting throwing to the right button only.
+> With no ceiling just above your head, the left mouse button keeps the lantern in your hand. The throw animation and sound still play, as the game does not allow canceling the throw.
 
 - A thrown lantern keeps burning where it lands.
 - A hard hit shatters it: it explodes, spills burning oil and sets the area on fire. Enemies it hits on the way take damage.

@@ -153,6 +153,11 @@
 
     <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/lantern_death.lua" />
 
+    <LuaComponent
+        script_throw_item="mods/pick_up_your_lantern/files/scripts/lantern_throw.lua"
+        execute_every_n_frame="-1"
+    ></LuaComponent>
+
     <AudioComponent
         _tags="enabled_in_world"
         file="data/audio/Desktop/materials.bank"

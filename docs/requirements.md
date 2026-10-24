@@ -98,6 +98,7 @@ List of light fixtures in the game; only specific ones are pickable items, while
 
 - Controls:
   - Behaving like vanilla throwable items (e.g., flasks), lanterns can be dropped from the inventory or thrown toward the cursor using the standard throw action (Right Mouse Button / aim).
+  - The Left Mouse Button never throws a held lantern. It hangs the lantern on the ceiling directly above the player, as if it had just spawned there: on a joint, swinging, kickable, and falling when the ceiling is destroyed. The hands then take the first wand from the Quick Inventory, or the first item if there are no wands. If there is no ceiling within reach, the lantern stays in hand.
 - Trajectory and flight:
   - A thrown fixture is completely untethered from any ceiling anchors and travels along a free physical trajectory.
   - Correctly collides with walls, floors, and ceilings without clipping or vibrating inside geometry.

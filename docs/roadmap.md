@@ -86,6 +86,7 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
 - **Strategic World Incentives**:
   - Implement gameplay incentives for leaving light fixtures hanging in the world (e.g., safe illumination zones, stations to reignite unlit lanterns, enemy debuff zones, or fog of war landmarks).
   - Counteract the tendency to treat lanterns purely as disposable weapons.
+  - Hang a held lantern on the ceiling above the player with the Left Mouse Button (LMB); without a ceiling within reach the lantern stays in hand. The Right Mouse Button (RMB) keeps the vanilla throw.
 - **Fire Enemies Lighting Rework**:
   - Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness.
   - Cover vanilla fire enemies: Fire Mage (Stendari), Fire Spirit (Liekkiö), Hell Spitter (Helvetin sylkijä), Hell Gazer (Helvetinkatse), Hellfire Mage (Eldari), perhaps some others.
