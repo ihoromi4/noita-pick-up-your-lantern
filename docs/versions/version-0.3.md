@@ -31,8 +31,8 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Settings Presets
 
-- [ ] Add a `Preset` option as the first entry in Mod Settings that sets all other options at once: Light Touch (default, minimal changes: vanilla vision, lantern progression off), Atmospheric (Dark 50% vision), Survival (Minimal 10% vision, 25% belt light) and Pitch Black (0% vision, 25% belt light). Lantern progression is on in every preset except Light Touch.
-- [ ] Changing any option by hand switches the preset to `Custom`; new-game options of a preset take effect in the next run.
+- [x] Add a `Preset` option as the first entry in Mod Settings that sets all other options at once: Light Touch (default, minimal changes: vanilla vision, lantern progression off), Atmospheric (Dark 50% vision), Survival (Minimal 10% vision, 25% belt light) and Pitch Black (0% vision, 25% belt light). Lantern progression is on in every preset except Light Touch.
+- [x] Changing any option by hand switches the preset to `Custom`; new-game options of a preset take effect in the next run.
 
 ## Fire Enemies Lighting Rework
 

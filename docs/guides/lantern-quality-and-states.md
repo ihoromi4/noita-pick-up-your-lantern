@@ -66,4 +66,4 @@ A state lasts until you dive with the lantern into the opposite liquid. It stays
 
 The description of a lantern tells its story: one sentence for its quality, and one more for each modifier or liquid state it has. The description updates as soon as the lantern changes, for example when it gets wet or burns out.
 
-The `Lantern progression` setting turns quality and modifiers off. All lanterns are then ordinary, have no modifiers and never crack. Oil and water states still work.
+The `Lantern progression` setting turns quality and modifiers on or off. It is off in the default Light Touch preset and on in all other presets, see [Preset](settings.md#preset). When it is off, all lanterns are ordinary, have no modifiers and never crack. Oil and water states still work.

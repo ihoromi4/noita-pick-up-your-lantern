@@ -18,7 +18,7 @@ How the **Pick Up Your Lantern** mod is put together: what runs at startup, what
 All mod files live in `pick_up_your_lantern/`:
 
 - `init.lua`: entry point. Applies startup patches and registers frame hooks.
-- `settings.lua`: Mod Settings definitions. See [Settings](../guides/settings.md) for the player-facing description.
+- `settings.lua`: Mod Settings definitions and settings presets (`PRESETS`, each listing only the values that differ from the option defaults). Each option's `change_fn` re-syncs the `preset` setting to the matching preset or `custom`. `ModSettingsUpdate` also stores `false` defaults, which vanilla `mod_settings_update` skips. See [Settings](../guides/settings.md) for the player-facing description.
 - `data/entities/props/`: full overrides of the three vanilla lantern entities. See [Lantern Entities](lantern-entities.md).
 - `files/entities/lantern_belt.xml`: the belt lantern entity. See [Holding and Belt](holding-and-belt.md).
 - `files/scripts/`: Lua modules and entity scripts.

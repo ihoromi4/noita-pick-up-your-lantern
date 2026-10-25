@@ -46,7 +46,7 @@ function IsLanternProgressionEnabled()
         is_enabled = ModSettingGetNextValue(PROGRESSION_SETTING_ID)
     end
     if is_enabled == nil then
-        is_enabled = true
+        is_enabled = false
     end
 
     return is_enabled

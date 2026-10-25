@@ -35,7 +35,7 @@ Look closely before you grab the first lantern you see!
 [*] Rarely a lantern has a quirk: a [b]Flickering[/b] one shines wider but wavers, and a [b]Short-lived[/b] one leaks oil and slowly burns out for good.
 [*] Dive into oil with a lantern in your hand, and it blazes wider. A swim in water leaves it dim until you find oil again.
 [*] The item description tells you everything about the lantern you carry.
-[*] Prefer all lanterns to be equal? Turn lantern quality and quirks off in the settings.
+[*] Lantern quality and quirks are on in every settings preset except the default [b]Light Touch[/b], and you can toggle them on their own.
 [/list]
 
 [h3]Player Vision and Darkness[/h3]
@@ -48,6 +48,7 @@ Make the depths truly dark and turn your lantern into a survival tool!
 [*] The darkness stays with you while polymorphed, and you can pick a separate vision for your polymorphed form.
 [*] All-Seeing Eye, Sunseed and Sunstone reveal the world just like in the vanilla game.
 [*] Vision can be changed at any time from the pause menu, no restart required.
+[*] Pick a settings preset to set everything at once: [b]Light Touch[/b], [b]Atmospheric[/b], [b]Survival[/b] or [b]Pitch Black[/b].
 [/list]
 
 [h2]Documentation[/h2]

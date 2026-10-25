@@ -4,8 +4,29 @@ All options of the mod are in **Options → Mod Settings → Pick Up Your Lanter
 
 ## Contents
 
+- [Preset](#preset)
 - [Lighting](#lighting)
 - [Gameplay](#gameplay)
+
+## Preset
+
+The first option sets all other options at once. Pick the one that matches how dark you want the game to be:
+
+| Option | Light Touch | Atmospheric | Survival | Pitch Black |
+|---|---|---|---|---|
+| Illuminate the Darkness | on | on | on | on |
+| Illuminated Area Size | Standard (100%) | Standard (100%) | Standard (100%) | Standard (100%) |
+| Belt Lantern Light | Moderate (50%) | Moderate (50%) | Faint (25%) | Faint (25%) |
+| Player Vision | Vanilla (100%) | Dark (50%) | Minimal (10%) | Pitch Black (0%) |
+| Polymorphed Vision | Same as player | Same as player | Same as player | Same as player |
+| Show Lanterns on Item Radar | off | off | off | off |
+| Lantern Progression | off | on | on | on |
+
+- Light Touch keeps the game close to vanilla: you can carry lanterns, but you see as usual and all lanterns are ordinary.
+- If you change any option by hand, the preset shows `Custom`. If your options match a preset again, its name comes back.
+- Left click picks the next preset, right click goes back to Light Touch.
+- Default: Light Touch.
+- Applies: immediately. New-game options of the preset, such as Lantern Progression, apply when you start a new game.
 
 ## Lighting
 
@@ -59,7 +80,7 @@ Lets the Item Radar perk point to nearby lanterns. Off by default, so the radar 
 
 ### Lantern Progression
 
-Lanterns spawn with a quality from dim to masterwork, and rarely with a modifier. See [Lantern Quality and States](lantern-quality-and-states.md). When off, all lanterns are ordinary.
+Lanterns spawn with a quality from dim to masterwork, and rarely with modifiers. See [Lantern Quality and States](lantern-quality-and-states.md). When off, all lanterns are ordinary.
 
-- Default: on.
+- Default: off (Light Touch preset). On in all other presets.
 - Applies: new game.

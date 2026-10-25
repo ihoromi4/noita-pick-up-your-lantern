@@ -81,7 +81,7 @@ Tier weights (1 / 2 / 3 / 4) depend on the depth `y`. Bands end at the Holy Moun
 | The Vault (< 10500) | 0 / 25 / 50 / 25 |
 | Deeper | 0 / 15 / 50 / 35 |
 
-`Lantern progression` (Gameplay category, on by default, `MOD_SETTING_SCOPE_NEW_GAME`) turns rolling off in new games. A lantern without a tier has a multiplier of 1.0 and no modifier.
+`Lantern progression` (Gameplay category, off by default, `MOD_SETTING_SCOPE_NEW_GAME`) turns rolling off in new games. It is off in the default Light Touch preset and on in all other presets. A lantern without a tier has a multiplier of 1.0 and no modifier.
 
 ## Modifiers
 
