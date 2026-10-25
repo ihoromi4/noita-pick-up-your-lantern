@@ -8,6 +8,10 @@ You are working in a context of the **Pick Up Your Lantern** - a mod for Noita g
 - `pick_up_your_lantern/`: Source files of the mod.
 - `pick_up_your_lantern/init.lua`: Mod initialization file.
 
+## Development
+
+- Use Conventional Commits convention for commit naming
+
 ## Code style
 
 Follow LuaLS (Lua Language Server):
