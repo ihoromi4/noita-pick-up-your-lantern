@@ -19,11 +19,18 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Strategic World Incentives
 
-- [ ] Rogue mode: a Mod Settings toggle that makes the player invisible to enemies while they stay far from light.
-- [ ] Rogue mode: investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).
-- [x] Enemy study: while an enemy is within the study radius, in direct line of sight of the player (raycast) and within the light radius of a lantern in the world or in hand (not on the belt), the player's damage against this enemy grows from 0% to the configured bonus. Each enemy type has a knowledge counter: the sum of the study progress (0 to 1) of all its enemies, so five fully studied enemies give 5. Related enemies share part of their knowledge: other variants of the same enemy (e.g. a weak and a normal zombie) give half of theirs, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth. The study takes the base study time at knowledge 0 and shrinks linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge. An enemy whose study has begun has a small semi-transparent dot above its head: yellow while it is being studied, red while its study is paused (out of light or sight), green once it is fully studied. The accumulated bonus is kept after the enemy leaves the light or the line of sight. Details: [enemy-study.md](../rnd/enemy-study.md).
-- [x] Enemy study settings: a separate `Enemy Study` category in Mod Settings, not affected by presets, with an `Enemy study` option (off by default), the bonus of a fully studied enemy (10%, 25%, 50%, 100%) and the base study time (3, 5, 10, 30 seconds; 10 by default).
 - [x] Hang a held lantern on the ceiling above the player (up to 16 px) with LMB, then take the first wand (or the first item) from the Quick Inventory in hand; without a ceiling the lantern stays in hand. RMB keeps the vanilla throw. Details: [throwing-mechanics-and-controls.md](../rnd/throwing-mechanics-and-controls.md).
+
+## Rogue Mode
+
+- [ ] A Mod Settings toggle that makes the player invisible to enemies while they stay far from light.
+- [ ] Investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).
+
+## Enemy Study
+
+- [x] While an enemy is within the study radius, in direct line of sight of the player (raycast) and within the light radius of a lantern in the world or in hand (not on the belt) or of a projectile with the Light spell modifier (`LIGHT`), the player's damage against this enemy grows from 0% to the configured bonus. Each enemy type has a knowledge counter: the sum of the study progress (0 to 1) of all its enemies, so five fully studied enemies give 5. Related enemies share part of their knowledge: other variants of the same enemy (e.g. a weak and a normal zombie) give half of theirs, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth. The study takes the base study time at knowledge 0 and shrinks linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge. An enemy whose study has begun has a small semi-transparent dot above its head: yellow while it is being studied, red while its study is paused (out of light or sight), green once it is fully studied. The accumulated bonus is kept after the enemy leaves the light or the line of sight. Details: [enemy-study.md](../rnd/enemy-study.md).
+- [x] Settings: a separate `Enemy Study` category in Mod Settings, not affected by presets, with an `Enemy study` option (off by default), the bonus of a fully studied enemy (10%, 25%, 50%, 100%) and the base study time (3, 5, 10, 30 seconds; 10 by default).
+- [x] Bug: projectile spells with the Light modifier (`LIGHT`) do not light enemies for study progress. The modifier adds `data/entities/misc/light.xml` (a `LightComponent` with radius 200) to the projectile, but the study only counted light from entities with the `lantern` tag. Fixed: light sources for study are marked with the `pul_light_source` tag, and `light.xml` is patched at init.
 
 ## Lantern Modifiers
 

@@ -1,4 +1,4 @@
-<Entity tags="mortal,hittable,teleportable_NOT,prop,prop_physics,item_physics,item_pickup,lantern" >
+<Entity tags="mortal,hittable,teleportable_NOT,prop,prop_physics,item_physics,item_pickup,lantern,pul_light_source" >
 
     <!-- mortal is required so it can explode -->
 
@@ -46,7 +46,7 @@
 
     <!-- Base light of this lantern type. Radius is scaled at runtime by settings, quality tier and modifier. -->
     <LightComponent
-        _tags="enabled_in_world,enabled_in_hand"
+        _tags="enabled_in_world,enabled_in_hand,pul_light_source"
         _enabled="1"
         radius="220"
         r="255"

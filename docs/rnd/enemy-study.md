@@ -25,7 +25,7 @@ Research on the "Enemy study" mechanic planned for version 0.3 (see [version-0.3
 - An enemy instance is studied only while all conditions hold:
   - it is within the study radius around the player;
   - it is in direct line of sight of the player (raycast);
-  - it stands within the light radius of a lantern in the world or in the player's hands. The belt lantern does not count.
+  - it stands within the light radius of a lantern in the world or in the player's hands, or of a projectile with the Light spell modifier (`LIGHT`). The belt lantern does not count.
 - The player studies an enemy type through its instances. Each instance has its own study progress from 0 to 1, and its speed depends on the knowledge of its type and its relatives:
   - the knowledge of a type is the sum of the study progress of all its instances, including partly studied ones: five fully studied instances give 5, two half-studied ones give 1;
   - related enemies share part of their knowledge: other variants of the same enemy give half of theirs, the rest of its herd a fifth (see [Related Enemies](#related-enemies));
@@ -126,19 +126,25 @@ The Noita API has no function that returns the light level at a world point, and
 
 ### Light Sources
 
+Everything that counts as light for study is marked with the `pul_light_source` tag twice: on the entity, so one `EntityGetWithTag` query finds all sources, and on its `LightComponent`, so the right light is read when an entity has several.
+
 | Source | Counts | How to find |
 | --- | --- | --- |
-| Lantern in the world (hanging, lying, thrown) | Yes | `EntityGetWithTag("lantern")` with an enabled `LightComponent` |
+| Lantern in the world (hanging, lying, thrown) | Yes | Tagged in the mod's lantern XML files, with an enabled tagged `LightComponent` |
 | Lantern in the player's hands | Yes | Same query: `LightComponent` is enabled in hand (`enabled_in_hand`) |
-| Lantern in the inventory | No | Its `LightComponent` is disabled: `ComponentGetIsEnabled` is false |
-| Belt lantern | No | It is a separate `pul_belt` entity without the `lantern` tag, so the query skips it |
-| Extinguished lantern | No | `IsLanternExtinguished(entity_id)` |
-| Player's own vision light, burning creatures, glowing materials | No | Not queried |
+| Projectile with the Light spell modifier (`LIGHT`) | Yes | `data/entities/misc/light.xml` is patched at init (see below) |
+| Lantern in the inventory | No | Its `LightComponent` is disabled, and `EntityGetFirstComponent` returns only enabled components |
+| Belt lantern | No | It is a separate `pul_belt` entity without the tag, so the query skips it |
+| Extinguished lantern | No | Its `LightComponent` is removed |
+| Ordinary spells, the player's own vision light, burning creatures, glowing materials | No | Not tagged |
 
-- Radius: the current `radius` of the lantern's `LightComponent`. It already includes the illumination setting, quality tier, liquid state and the per-frame changes of modifiers (flickering, fading), which `GetLanternAppliedLightRadius` from `lantern_illumination.lua` does not.
+- The Light spell modifier adds `data/entities/misc/light.xml` (a `LightComponent` with radius 200) through `extra_entities`. Extra entities are merged into the projectile entity (e.g. `homing.xml` holds only a `HomingComponent`, which must sit on the projectile), so the tag on the root of `light.xml` alone may not reach the projectile. `files/scripts/patch_light_sources.lua` therefore tags the root and the `LightComponent` and adds a `LuaComponent` (`execute_on_added`, `remove_after_executed`) that calls `EntityAddTag` on the entity the components end up on.
+- Many vanilla projectiles have their own `LightComponent`. Reading only the tagged component keeps ordinary spells out of the study and reads the radius of the Light modifier, not the projectile's own light.
+- New light sources (chain torches, mining lamps and other fixtures of version 0.3, light sources of other mods) join the study by getting the same tag: in their XML files, or by adding their path to `LIGHT_SOURCE_PATHS` in `patch_light_sources.lua`.
+- Radius: the current `radius` of the source's `LightComponent`. For lanterns it already includes the illumination setting, quality tier, liquid state and the per-frame changes of modifiers (flickering, fading), which `GetLanternAppliedLightRadius` from `lantern_illumination.lua` does not.
 - **[Needs verification]** `LightComponent.radius` is the outer radius of the light sprite with a soft falloff. The visibly lit area is smaller. An "effective radius" factor (e.g. ×0.6) should be calibrated in-game so that an enemy counts as lit only where the player actually sees it lit.
 - The player's own light is excluded on purpose. With vanilla vision every enemy near the player would be lit, and the mechanic would lose its link to lanterns.
-- Lantern positions and radii are gathered once per scan. Each enemy is then checked by squared distance, which is cheap.
+- Light source positions and radii are gathered once per scan. Each enemy is then checked by squared distance, which is cheap.
 
 ## Study Progress
 
@@ -243,6 +249,7 @@ The mechanic is implemented in the mod as follows:
 | `files/entities/study_marker.xml` | Marker entity with the yellow, red and green dot sprites |
 | `files/ui_gfx/study_dot_yellow.png`, `study_dot_red.png`, `study_dot_green.png` | Dot images |
 | `settings.lua` | `Enemy Study` category with the `enemy_study`, `enemy_study_damage_bonus` and `enemy_study_duration` options, marked `preset_excluded = true`; `GetPresetSettings()` skips them in `ApplyPreset` and `SyncPreset` |
+| `files/scripts/patch_light_sources.lua`, `light_source_tag.lua` | Mark the Light spell modifier as a light source; lanterns declare the `pul_light_source` tag in their XML files |
 | `files/scripts/utils.lua` | `FindVariableStorage()` reads study storage without adding components to enemies that were never studied |
 
 - Marker colours are synced for every loaded marker at the end of each scan: green for a fully studied enemy, yellow for an enemy studied in this scan, red for all others. Turning the option off hides all loaded markers.

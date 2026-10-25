@@ -5,6 +5,10 @@ local PLAYER_TAG = "player_unit"
 -- Player storage with a lantern thrown with the left mouse button, to be returned to the hand.
 RETURN_LANTERN_STORAGE = "pul_return_lantern_id"
 
+-- Tag of entities and their LightComponents that count as light for enemy study: lanterns, the Light spell modifier.
+-- Lantern XML files declare it directly, so a change here must be repeated there.
+LIGHT_SOURCE_TAG = "pul_light_source"
+
 ---Finds an existing VariableStorageComponent by name without creating one.
 ---@param entity_id number The target entity ID.
 ---@param name string The unique name of the variable storage.

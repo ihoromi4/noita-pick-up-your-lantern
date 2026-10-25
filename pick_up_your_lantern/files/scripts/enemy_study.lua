@@ -20,7 +20,6 @@ local DURATION_SETTING_ID = MOD_ID .. ".enemy_study_duration"
 local DEFAULT_STUDY_SECONDS = 10
 local FRAMES_PER_SECOND = 60
 
-local LANTERN_TAG = "lantern"
 local PLAYER_TAGS = {
     "player_unit",
     "polymorphed_player",
@@ -303,18 +302,19 @@ local function GetStudyDuration(globals)
     return base_frames - (base_frames - KNOWN_TYPE_STUDY_FRAMES) * knowledge
 end
 
----Gathers the areas lit by lanterns in the world and in the player's hands.
----Lanterns in the inventory have their light disabled, extinguished lanterns have none, and the belt lantern
----is a separate entity without the lantern tag, so none of them count.
+---Gathers the areas lit by light sources: lanterns in the world and in the player's hands, and projectiles with
+---the Light spell modifier. Lanterns in the inventory have their light disabled, extinguished lanterns have none,
+---and the belt lantern is a separate entity without the light source tag, so none of them count.
+---Only the tagged LightComponent is read, as a projectile may also carry its own light.
 ---@return table[] areas Lit circles as `{ x, y, radius_sq }`.
 local function CollectLitAreas()
     local areas = {}
-    for _, lantern_id in ipairs(EntityGetWithTag(LANTERN_TAG) or {}) do
-        local light_comp = EntityGetFirstComponent(lantern_id, "LightComponent")
+    for _, source_id in ipairs(EntityGetWithTag(LIGHT_SOURCE_TAG) or {}) do
+        local light_comp = EntityGetFirstComponent(source_id, "LightComponent", LIGHT_SOURCE_TAG)
         if light_comp ~= nil then
-            -- The current radius already includes the quality tier, liquid state and modifiers.
+            -- The current radius already includes the quality tier, liquid state and modifiers of lanterns.
             local radius = ComponentGetValue2(light_comp, "radius") * LIT_RADIUS_FACTOR
-            local x, y = EntityGetTransform(lantern_id)
+            local x, y = EntityGetTransform(source_id)
             if radius > 0 and x ~= nil then
                 table.insert(areas, { x, y, radius * radius, })
             end

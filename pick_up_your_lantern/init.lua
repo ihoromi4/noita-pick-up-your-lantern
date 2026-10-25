@@ -12,6 +12,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_belt.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_liquid_state.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_hang.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/enemy_study.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_light_sources.lua")
 
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
@@ -33,6 +34,7 @@ PatchMaterialsGlow()
 PatchBurningEntity()
 PatchGlowShaders()
 PatchItemRadar()
+PatchLightSources()
 
 local has_logged_init = false
 
