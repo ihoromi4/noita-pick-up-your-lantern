@@ -1,4 +1,4 @@
-# Lantern Throwing Mechanics and Controls Research
+# Lantern Throwing Mechanics and Controls
 
 [← Back to R&D Index](../rnd.md)
 

@@ -1,0 +1,11 @@
+# Ceiling Anchors, Kicking, and Support Destruction
+
+[← Back to R&D Index](../rnd.md)
+
+- **[Confirmed by documentation and testing]** A dedicated script to detach the lantern from the ceiling upon pickup (`item_pickup`) **is not needed**: when the player picks up a lantern, `PhysicsBodyComponent` (`_tags="enabled_in_world"`) is disabled. According to `component_documentation.txt` (*"if is_enabled is set to false, will destroy the physics body"*), this automatically destroys the Box2D body along with its `b2Joint` connection. When thrown from inventory later, a new physics body is created without a joint (since the `mRefreshed` flag in `PhysicsBodyComponent` only initializes the joint once upon initial spawn).
+- **[Confirmed by testing]** Contrary to initial expectations, the `breakable="1"` attribute in the legacy `PhysicsJointComponent` **does not allow** detaching the lantern via kicking (`kick`): the mass of the glass lantern is too small for a kick impulse to generate sufficient reaction force on the joint to exceed the hardcoded engine breaking threshold.
+- **[Confirmed by testing]** The `grid_joint="1"` attribute in `PhysicsJointComponent` combined with `nail_to_wall="1"` **does not solve** the floating-in-midair issue: the joint still binds to the static world body (`m_groundBody`), so when ceiling pixels are completely destroyed, the lantern continues to hang in midair.
+- **[Confirmed and implemented]** The optimal solution is the compact controller `lantern_anchor.lua`:
+  - **Kicking (`script_kick`)**: Handled via the standard `Message_Kick` message (without continuous polling). It removes `PhysicsJointComponent`, cleans up remnants via `PhysicsRemoveJoints`, applies a directional physics impulse from the kick (`PhysicsApplyForce`), and removes the `LuaComponent` itself.
+  - **Ceiling destruction**: Low-frequency check (`execute_every_n_frame="20"`, i.e., 3 times/sec) via `RaytraceSurfaces(x, y, x, y - 6.0)`. If the ceiling above the lantern is destroyed, the lantern detaches and falls under gravity.
+  - **Self-Destruct**: As soon as the lantern is detached (or if no joints are present), the script immediately removes its `LuaComponent` via `EntityRemoveComponent(entity_id, comp_id)`. Once on the ground, in hands, or in inventory, the script no longer exists and consumes zero CPU resources.

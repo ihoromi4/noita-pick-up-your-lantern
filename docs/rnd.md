@@ -34,6 +34,7 @@ This document contains an index of research, Noita engine technical details, and
 - [Lantern Throwing Mechanics and Controls](rnd/throwing-mechanics-and-controls.md) - research on throwing exclusively with RMB, LMB blocking, evaluation of tested configurations, and engine limitations.
 - [Fog of War Line-of-Sight and Shaders](rnd/line-of-sight-and-shaders.md) - analysis of vanilla fog/lighting system, 2D screen-space raymarching in `post_final.frag`, and technical limitations.
 - [Limited Player Vision and Darkness](rnd/player-vision-and-darkness.md) - architecture for overcoming vanilla 35% ambient light, patching `post_final.frag` shader, ECS interaction, and support for absolute Pitch Black.
+- [Diff Patch](rnd/diff-patch.md) - single-file library for applying unified diff patches to VFS files and shaders with variable replacement.
 - [Player Polymorph and Lighting System](rnd/polymorph-and-lighting.md) - engine polymorph mechanics, `polytools` library, bug with darkness loss after transformation, and fix options.
 - [Lantern Progression: Quality Tiers and Modifiers](rnd/lantern-progression.md) - depth-based quality tiers, rare modifiers (flickering, frail), current implementation, and future ideas.
 - [Lantern Properties and Dynamic States](rnd/lantern-properties-and-states.md) - lantern quality tiers, depth progression, and lighting changes depending on liquids (oil, water, etc.).
