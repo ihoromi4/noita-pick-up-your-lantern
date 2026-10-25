@@ -14,9 +14,11 @@ This document contains an index of research, Noita engine technical details, and
 ## Planned Features
 
 - "Limited Visibility" game mode, making handheld lanterns significantly more useful.
-- "Natural Fear" mode, where certain enemy types (wild beasts category) fear lantern light and keep their distance from the player.
+- "Natural Fear" mode, where zombies and monsters fear lantern light and keep their distance from the player, while Hiisi prefer lit areas.
 - Player can pick up open-flame oil lamps and braziers that ignite combustible materials and surrounding enemies, extinguish when submerged in liquid, and reignite near fire.
+- "Rogue" mode, where the player is invisible to enemies while they stay far from light (possibly per enemy type: e.g., zombies see in the dark, Hiisi do not).
 - Enemy study: an enemy watched in lantern light raises the player's damage against it; the more the player has studied enemies of a type and its relatives (variants of the same enemy, its herd), the faster the next ones of that type are studied.
+- Lanterns attract fire-related enemies.
 - Displaying the first lantern from the inventory on the player's belt and passive base illumination when the lantern is not equipped as the active item in hands (reference: "Extra Backpack" mod, Steam ID: 3807317449).
 - Varied lantern properties (light radius, illuminated area size, quality tiers based on depth) as internal progression.
 - Dynamic lantern states influenced by the environment: for example, after the player dips in oil, the lantern shines brighter until the player dives into water.

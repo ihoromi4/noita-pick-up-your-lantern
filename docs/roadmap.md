@@ -84,6 +84,8 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
   - Implement open-flame torches and braziers that actively ignite flammable materials, gases, and enemies on contact while held.
   - Immediate extinguishing upon liquid contact (without a delay).
 - **Strategic World Incentives**:
+  - Rogue mode: a Mod Settings toggle that makes the player invisible to enemies while they stay far from light.
+  - Rogue mode: investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).
   - Enemy study: while an enemy is within the study radius, in direct line of sight of the player (raycast) and within the light radius of a lantern in the world or in hand (not on the belt), the player's damage against this enemy grows from 0% to the configured bonus. Each enemy type has a knowledge counter: the sum of the study progress (0 to 1) of all its enemies, so five fully studied enemies give 5. Related enemies share part of their knowledge: other variants of the same enemy (e.g. a weak and a normal zombie) give half of theirs, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth. The study takes the base study time at knowledge 0 and shrinks linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge. An enemy whose study has begun has a small semi-transparent dot above its head: yellow while it is being studied, red while its study is paused (out of light or sight), green once it is fully studied. The accumulated bonus is kept after the enemy leaves the light or the line of sight.
   - Enemy study settings: a separate `Enemy Study` category in Mod Settings, not affected by presets, with an `Enemy study` option (off by default), the bonus of a fully studied enemy (10%, 25%, 50%, 100%) and the base study time (3, 5, 10, 30 seconds; 10 by default).
   - Hang a held lantern on the ceiling above the player with the Left Mouse Button (LMB); without a ceiling within reach the lantern stays in hand. The Right Mouse Button (RMB) keeps the vanilla throw.
@@ -98,8 +100,9 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
   - Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness.
   - Cover vanilla fire enemies: Fire Mage (Stendari), Fire Spirit (Liekkiö), Hell Spitter (Helvetin sylkijä), Hell Gazer (Helvetinkatse), Hellfire Mage (Eldari), perhaps some others.
   - Implement a procedural patch that automatically detects similar fire-related enemies added by other mods and applies the same lighting enhancements.
+  - Lanterns attract fire-related enemies.
 - **Natural Fear Mode**:
-  - Mod settings toggle where wild beast and animal enemy categories (`herd_id`) actively avoid lantern light and maintain distance from the player.
+  - Mod settings toggle that changes how enemy categories (`herd_id`) react to lantern light: zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas.
 
 ## Version 1.0 - Polished State Simulation
 
@@ -114,5 +117,9 @@ Version 1.0 delivers complete physical and chemical state transitions, edge case
   - React to other liquids besides oil and water (e.g., alcohol flicker, toxic sludge tint, blood dimming).
 - **Reignition Mechanics**:
   - Reignite unlit lanterns when exposed to open fire, burning materials, or high environmental heat.
+- **Full Playthrough Guarantee in Darkness**:
+  - Verify that the game can be fully completed with the mod enabled at the darkest vision presets (Minimal 10% and Pitch Black 0%).
+  - Guarantee that every biome, including the main path, side biomes, parallel worlds, and boss arenas, offers at least one reliable way to get sufficient illumination (e.g., spawned lanterns, light fixtures, glowing materials, or light sources the player can bring along).
+  - Close any biome where no light source can be obtained, by adding guaranteed lantern spawns or other light sources.
 - **Full Release Polish**:
   - Finalized balance, performance optimization, and compatibility verification.
