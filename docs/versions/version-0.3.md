@@ -25,9 +25,9 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Lantern Modifiers
 
-- [ ] Cracked glass modifier: a lantern that takes damage without breaking (e.g., a fall or a projectile hit) has a 33% chance to crack. A cracked lantern has a 50% chance every 30 frames to emit a particle of gaseous fire (`fire`), both in the world and in hand, so it can set the player on fire. Does not appear when lantern progression is disabled. Described by a sentence in the item description.
+- [x] Cracked glass modifier: a lantern that takes damage without breaking (e.g., a fall or a projectile hit) has a 33% chance to crack. A cracked lantern has a 50% chance every 20 frames to emit 2 particles of gaseous fire (`fire`), both in the world and in hand, so it can set the player on fire. Does not appear when lantern progression is disabled. Described by a sentence in the item description.
 - [x] Keep the configuration of all lantern modifiers (IDs, description keys, roll chances and behaviour parameters) in a single file.
-- [ ] Allow a lantern to carry several modifiers at once; the modifier configuration defines how modifiers interact with each other (e.g., which ones are incompatible, replace or combine with each other).
+- [x] Allow a lantern to carry several modifiers at once; the modifier configuration defines how modifiers interact with each other (e.g., which ones are incompatible, replace or combine with each other).
 
 ## Settings Presets
 

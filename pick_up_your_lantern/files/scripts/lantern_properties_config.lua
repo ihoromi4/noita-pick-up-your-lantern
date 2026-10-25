@@ -1,5 +1,6 @@
 --- Configuration of all lantern properties: quality tiers, modifiers and states.
---- - Traits are rolled once when a lantern first appears and never change: the quality tier and the modifier.
+--- - Traits are rolled once when a lantern first appears and never change: the quality tier and the modifiers.
+---   Some modifiers are never rolled and are acquired later instead (Cracked, from damage).
 --- - States are taken on later and can change: liquid states and the extinguished state.
 --- Base values of each lantern type (light radius and colour, fog of war hole, hp) are declared in its XML file:
 --- - data/entities/props/physics_lantern.xml: Lantern.
@@ -23,9 +24,9 @@ LANTERN_TIERS = {
 ---Tier weights by world depth, in the order of LANTERN_TIERS. Bands end at the Holy Mountains between biomes.
 ---@type {max_y: number, weights: number[]}[]
 LANTERN_TIER_WEIGHTS_BY_DEPTH = {
-    { max_y = 1300,      weights = { 50, 45, 5, 0, }, },  -- Mines
-    { max_y = 2850,      weights = { 35, 50, 14, 1, }, }, -- Coal Pits
-    { max_y = 4900,      weights = { 20, 50, 25, 5, }, }, -- Snowy Depths
+    { max_y = 1300,      weights = { 50, 45, 5, 0, }, },   -- Mines
+    { max_y = 2850,      weights = { 35, 50, 14, 1, }, },  -- Coal Pits
+    { max_y = 4900,      weights = { 20, 50, 25, 5, }, },  -- Snowy Depths
     { max_y = 6400,      weights = { 10, 45, 35, 10, }, }, -- Hiisi Base
     { max_y = 8450,      weights = { 5, 35, 42, 18, }, },  -- Underground Jungle
     { max_y = 10500,     weights = { 0, 25, 50, 25, }, },  -- The Vault
@@ -34,14 +35,16 @@ LANTERN_TIER_WEIGHTS_BY_DEPTH = {
 
 -- Modifiers
 
-LANTERN_MODIFIER_NONE = 0
 LANTERN_MODIFIER_FLICKERING = 1
 LANTERN_MODIFIER_SHORT_LIVED = 2
+LANTERN_MODIFIER_CRACKED = 3
 
 ---@class LanternModifier
----@field id number Modifier ID, kept in the `lantern_modifier` storage.
+---@field id number Modifier ID; bit `2^(id - 1)` of the `lantern_modifiers` storage.
 ---@field description string Translation key of the description sentence.
----@field chance number Roll chance, per mille.
+---@field chance number Roll chance when a lantern appears, per mille. 0 for modifiers that are never rolled.
+---@field incompatible number[]|nil IDs of modifiers this one cannot be combined with, checked in both directions.
+---@field replaces number[]|nil IDs of modifiers removed from the lantern when this one is added.
 
 ---@class LanternModifierFlickering : LanternModifier
 ---@field radius_bonus number Light radius multiplier.
@@ -56,8 +59,15 @@ LANTERN_MODIFIER_SHORT_LIVED = 2
 ---@field oil_drip_interval_frames number Interval between leaked oil drops, in frames.
 ---@field oil_drip_offset_y number Vertical offset of an oil drop below the lantern, in pixels.
 
----Modifiers, rolled in table order: changing the order changes which modifier a lantern at a given position gets.
----At most one modifier is applied to a lantern.
+---@class LanternModifierCracked : LanternModifier
+---@field crack_chance number Chance to crack when the lantern takes damage without breaking, per mille.
+---@field fire_interval_frames number Interval between fire leak rolls, in frames.
+---@field fire_chance number Chance to leak fire on each roll, per mille.
+---@field fire_particle_count number Number of fire particles leaked at once.
+
+---Modifiers, rolled independently in table order: changing the order changes which modifiers a lantern at a given
+---position gets. A lantern may carry several modifiers; modifiers without `incompatible` or `replaces` combine,
+---and their light factors multiply. The order also sets the order of the description sentences.
 ---@type LanternModifier[]
 LANTERN_MODIFIERS = {
     ---@type LanternModifierFlickering
@@ -80,6 +90,16 @@ LANTERN_MODIFIERS = {
         sputter_depth = 0.6,
         oil_drip_interval_frames = 5 * 60,
         oil_drip_offset_y = 4,
+    },
+    ---@type LanternModifierCracked
+    {
+        id = LANTERN_MODIFIER_CRACKED,
+        description = "$item_description_lantern_cracked",
+        chance = 0,
+        crack_chance = 330,
+        fire_interval_frames = 20,
+        fire_chance = 500,
+        fire_particle_count = 2,
     },
 }
 
@@ -113,5 +133,5 @@ LANTERN_LIQUID_STATES = {
     },
 }
 
----Description sentence of a burnt-out lantern. It replaces the modifier sentence and hides the liquid state.
+---Description sentence of a burnt-out lantern. It replaces the modifier sentences and hides the liquid state.
 LANTERN_EXTINGUISHED_DESCRIPTION = "$item_description_lantern_extinguished"

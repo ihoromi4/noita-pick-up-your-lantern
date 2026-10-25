@@ -1,4 +1,5 @@
 --- Lantern progression: quality tiers and modifiers rolled once when a lantern appears in the world.
+--- A lantern may carry several modifiers; some are acquired later instead of rolled (Cracked, from damage).
 --- Better tiers become more likely in deeper biomes. Traits are kept in VariableStorageComponents,
 --- so they survive moving the lantern between the world, inventory and hand, and saving the game.
 --- Liquid states (oil-soaked, wet) are taken on later while the lantern is held, see lantern_liquid_state.lua.
@@ -12,7 +13,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_properties_config.lua")
 
 local PROGRESSION_SETTING_ID = MOD_ID .. ".lantern_progression"
 local TIER_STORAGE = "lantern_tier"
-local MODIFIER_STORAGE = "lantern_modifier"
+local MODIFIERS_STORAGE = "lantern_modifiers"
 local BURN_FRAMES_STORAGE = "lantern_burn_frames"
 local BURN_FRAMES_TOTAL_STORAGE = "lantern_burn_frames_total"
 local EXTINGUISHED_STORAGE = "lantern_extinguished"
@@ -35,6 +36,7 @@ end
 
 local FLICKERING = GetLanternModifierDefinition(LANTERN_MODIFIER_FLICKERING) --[[@as LanternModifierFlickering]]
 local SHORT_LIVED = GetLanternModifierDefinition(LANTERN_MODIFIER_SHORT_LIVED) --[[@as LanternModifierShortLived]]
+local CRACKED = GetLanternModifierDefinition(LANTERN_MODIFIER_CRACKED) --[[@as LanternModifierCracked]]
 
 ---Checks whether lantern progression is enabled in mod settings.
 ---@return boolean
@@ -65,11 +67,76 @@ function GetLanternTierMultiplier(entity_id)
     return tier ~= nil and tier.multiplier or 1.0
 end
 
----Returns the modifier of a lantern.
+---Returns the bit of a modifier in a modifier mask.
+---@param modifier_id number
+---@return number
+local function GetModifierBit(modifier_id)
+    return 2 ^ (modifier_id - 1)
+end
+
+---Checks whether a modifier mask contains a modifier.
+---@param mask number Modifier mask.
+---@param modifier_id number
+---@return boolean
+local function MaskHasModifier(mask, modifier_id)
+    return math.floor(mask / GetModifierBit(modifier_id)) % 2 == 1
+end
+
+---Checks whether a modifier is listed in a list of modifier IDs.
+---@param modifier_ids number[]|nil
+---@param modifier_id number
+---@return boolean
+local function ListHasModifier(modifier_ids, modifier_id)
+    for _, listed_id in ipairs(modifier_ids or {}) do
+        if listed_id == modifier_id then
+            return true
+        end
+    end
+
+    return false
+end
+
+---Adds a modifier to a modifier mask according to the modifier interactions: the modifier is skipped if it is
+---already present or incompatible with a present one, and the modifiers it replaces are removed.
+---@param mask number Modifier mask.
+---@param modifier_id number
+---@return number mask New modifier mask.
+---@return boolean added Whether the modifier was added.
+local function AddModifierToMask(mask, modifier_id)
+    local modifier = GetLanternModifierDefinition(modifier_id)
+    if modifier == nil or MaskHasModifier(mask, modifier_id) then
+        return mask, false
+    end
+
+    for _, other in ipairs(LANTERN_MODIFIERS) do
+        if MaskHasModifier(mask, other.id) and not ListHasModifier(modifier.replaces, other.id)
+            and (ListHasModifier(modifier.incompatible, other.id) or ListHasModifier(other.incompatible, modifier_id)) then
+            return mask, false
+        end
+    end
+
+    for _, replaced_id in ipairs(modifier.replaces or {}) do
+        if MaskHasModifier(mask, replaced_id) then
+            mask = mask - GetModifierBit(replaced_id)
+        end
+    end
+
+    return mask + GetModifierBit(modifier_id), true
+end
+
+---Returns the modifier mask of a lantern: bit `2^(id - 1)` is set for each modifier it carries.
 ---@param entity_id number Lantern entity ID.
 ---@return number
-function GetLanternModifier(entity_id)
-    return math.floor(GetStorageFloat(entity_id, MODIFIER_STORAGE))
+function GetLanternModifiers(entity_id)
+    return math.floor(GetStorageFloat(entity_id, MODIFIERS_STORAGE))
+end
+
+---Checks whether a lantern carries a modifier.
+---@param entity_id number Lantern entity ID.
+---@param modifier_id number
+---@return boolean
+function HasLanternModifier(entity_id, modifier_id)
+    return MaskHasModifier(GetLanternModifiers(entity_id), modifier_id)
 end
 
 ---Returns the remaining burn time of a short-lived lantern, in frames.
@@ -172,7 +239,7 @@ end
 ---@param y number World Y coordinate of the lantern; the drop appears slightly below it.
 ---@return boolean has_fuel Whether the lantern still has fuel left.
 function ConsumeLanternFuel(entity_id, x, y)
-    if GetLanternModifier(entity_id) ~= LANTERN_MODIFIER_SHORT_LIVED then
+    if not HasLanternModifier(entity_id, LANTERN_MODIFIER_SHORT_LIVED) then
         return true
     end
 
@@ -211,26 +278,45 @@ local function GetFuelFactor(entity_id)
     return fade_low_factor + (1 - fade_low_factor) * fuel
 end
 
----Calculates the light multiplier of the lantern modifier for the current frame:
----Flickering shines wider but wavers constantly, Short-lived fades as its oil burns and sputters at the end.
+---Calculates the light multiplier of the lantern modifiers for the current frame, multiplying the factors of
+---all modifiers: Flickering shines wider but wavers constantly, Short-lived fades as its oil burns and sputters
+---at the end. Cracked does not change the light.
 ---@param entity_id number Lantern entity ID.
 ---@return number factor Light multiplier, above 1 for the brightest moments of Flickering lanterns.
 function GetLanternModifierFactor(entity_id)
     local frame = GameGetFrameNum()
     local phase = entity_id * 1.7
-    local modifier_id = GetLanternModifier(entity_id)
+    local factor = 1.0
 
-    if modifier_id == LANTERN_MODIFIER_FLICKERING then
-        return FLICKERING.radius_bonus * GetFlickerFactor(frame, phase, FLICKERING.flicker_depth)
-    elseif modifier_id == LANTERN_MODIFIER_SHORT_LIVED then
-        local factor = GetFuelFactor(entity_id)
+    if HasLanternModifier(entity_id, LANTERN_MODIFIER_FLICKERING) then
+        factor = factor * FLICKERING.radius_bonus * GetFlickerFactor(frame, phase, FLICKERING.flicker_depth)
+    end
+    if HasLanternModifier(entity_id, LANTERN_MODIFIER_SHORT_LIVED) then
+        factor = factor * GetFuelFactor(entity_id)
         if GetLanternBurnFrames(entity_id) < SHORT_LIVED.fade_end_frames then
             factor = factor * GetFlickerFactor(frame, phase, SHORT_LIVED.sputter_depth)
         end
-        return factor
     end
 
-    return 1.0
+    return factor
+end
+
+---Leaks particles of fire from a cracked lantern at the given position: every `fire_interval_frames`
+---frames with a `fire_chance` chance. Lanterns without the modifier never leak fire.
+---@param entity_id number Lantern entity ID.
+---@param x number World X coordinate of the fire particles.
+---@param y number World Y coordinate of the fire particles.
+---@return nil
+function EmitCrackedFire(entity_id, x, y)
+    local frame = GameGetFrameNum()
+    if not HasLanternModifier(entity_id, LANTERN_MODIFIER_CRACKED) or frame % CRACKED.fire_interval_frames ~= 0 then
+        return
+    end
+
+    SetRandomSeed(frame, entity_id)
+    if Random(1, 1000) <= CRACKED.fire_chance then
+        GameCreateParticle("fire", x, y, CRACKED.fire_particle_count, 0, 0, false, false)
+    end
 end
 
 ---Picks a tier according to the weights of the depth band.
@@ -261,29 +347,20 @@ local function RollTier(y)
     return 2
 end
 
----Picks a modifier, or LANTERN_MODIFIER_NONE.
----@return number
-local function RollModifier()
-    local roll = Random(1, 1000)
+---Rolls each modifier independently in table order, applying the modifier interactions.
+---@return number mask Modifier mask, 0 for none.
+local function RollModifiers()
+    local mask = 0
     for _, modifier in ipairs(LANTERN_MODIFIERS) do
-        roll = roll - modifier.chance
-        if roll <= 0 then
-            return modifier.id
+        if modifier.chance > 0 and Random(1, 1000) <= modifier.chance then
+            mask = AddModifierToMask(mask, modifier.id)
         end
     end
 
-    return LANTERN_MODIFIER_NONE
+    return mask
 end
 
----Returns the description sentence of a modifier.
----@param modifier_id number
----@return string|nil description Translation key, or nil for LANTERN_MODIFIER_NONE.
-local function GetModifierDescription(modifier_id)
-    local modifier = GetLanternModifierDefinition(modifier_id)
-    return modifier ~= nil and modifier.description or nil
-end
-
----Lists the description sentences of the current lantern properties: quality tier, modifier, then liquid state.
+---Lists the description sentences of the current lantern properties: quality tier, modifiers, then liquid state.
 ---@param entity_id number Lantern entity ID.
 ---@return string[] descriptions Translation keys.
 local function GetLanternPropertyDescriptions(entity_id)
@@ -294,12 +371,14 @@ local function GetLanternPropertyDescriptions(entity_id)
         table.insert(descriptions, tier.description)
     end
 
-    local modifier_description = GetModifierDescription(GetLanternModifier(entity_id))
     if IsLanternExtinguished(entity_id) then
-        modifier_description = LANTERN_EXTINGUISHED_DESCRIPTION
-    end
-    if modifier_description ~= nil then
-        table.insert(descriptions, modifier_description)
+        table.insert(descriptions, LANTERN_EXTINGUISHED_DESCRIPTION)
+    else
+        for _, modifier in ipairs(LANTERN_MODIFIERS) do
+            if HasLanternModifier(entity_id, modifier.id) then
+                table.insert(descriptions, modifier.description)
+            end
+        end
     end
 
     local liquid_state = GetLiquidStateDefinition(GetLanternLiquidState(entity_id))
@@ -370,20 +449,38 @@ local function RollLanternTraits(entity_id)
     SetRandomSeed(math.floor(x), math.floor(y))
 
     local tier = RollTier(y)
-    local modifier_id = RollModifier()
+    local modifiers = RollModifiers()
 
     SetStorageFloat(entity_id, TIER_STORAGE, tier)
-    SetStorageFloat(entity_id, MODIFIER_STORAGE, modifier_id)
-    if modifier_id == LANTERN_MODIFIER_SHORT_LIVED then
+    SetStorageFloat(entity_id, MODIFIERS_STORAGE, modifiers)
+    if HasLanternModifier(entity_id, LANTERN_MODIFIER_SHORT_LIVED) then
         local burn_frames = Random(SHORT_LIVED.burn_frames_min, SHORT_LIVED.burn_frames_max)
         SetLanternBurnFrames(entity_id, burn_frames)
         SetStorageFloat(entity_id, BURN_FRAMES_TOTAL_STORAGE, burn_frames)
     end
 end
 
----Rolls lantern traits if needed, updates the description and attaches the modifier script to lit lanterns.
+---Attaches the modifier script to a lit lantern with modifiers.
 ---The script is attached only while the light is enabled: a component added to a lantern in the
 ---inventory would run there until the engine toggles components on the next state change.
+---@param entity_id number Lantern entity ID.
+---@return nil
+local function AttachModifierScript(entity_id)
+    if GetLanternModifiers(entity_id) == 0 or IsLanternExtinguished(entity_id) then
+        return
+    end
+
+    local light_comp = EntityGetFirstComponent(entity_id, "LightComponent")
+    if light_comp ~= nil and not HasModifierScript(entity_id) then
+        EntityAddComponent2(entity_id, "LuaComponent", {
+            _tags = "enabled_in_world,enabled_in_hand",
+            execute_every_n_frame = 1,
+            script_source_file = MODIFIER_SCRIPT,
+        })
+    end
+end
+
+---Rolls lantern traits if needed, updates the description and attaches the modifier script to lit lanterns.
 ---@param entity_id number Lantern entity ID.
 ---@return boolean rolled Whether traits were rolled during this call.
 function EnsureLanternTraits(entity_id)
@@ -393,19 +490,27 @@ function EnsureLanternTraits(entity_id)
         rolled = true
     end
     UpdateLanternDescription(entity_id)
-
-    if GetLanternModifier(entity_id) ~= LANTERN_MODIFIER_NONE and not IsLanternExtinguished(entity_id) then
-        local light_comp = EntityGetFirstComponent(entity_id, "LightComponent")
-        if light_comp ~= nil and not HasModifierScript(entity_id) then
-            EntityAddComponent2(entity_id, "LuaComponent", {
-                _tags = "enabled_in_world,enabled_in_hand",
-                execute_every_n_frame = 1,
-                script_source_file = MODIFIER_SCRIPT,
-            })
-        end
-    end
+    AttachModifierScript(entity_id)
 
     return rolled
+end
+
+---Adds a modifier acquired after the lantern appeared, according to the modifier interactions,
+---then updates the description and attaches the modifier script.
+---@param entity_id number Lantern entity ID.
+---@param modifier_id number
+---@return boolean added Whether the modifier was added.
+function AddLanternModifier(entity_id, modifier_id)
+    local mask, added = AddModifierToMask(GetLanternModifiers(entity_id), modifier_id)
+    if not added then
+        return false
+    end
+
+    SetStorageFloat(entity_id, MODIFIERS_STORAGE, mask)
+    UpdateLanternDescription(entity_id)
+    AttachModifierScript(entity_id)
+
+    return true
 end
 
 ---Permanently puts out a lantern: removes its light and fog of war hole and hides the flame.

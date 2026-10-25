@@ -155,6 +155,8 @@
 
     <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/lantern_small_death.lua" />
 
+    <LuaComponent script_damage_received="mods/pick_up_your_lantern/files/scripts/lantern_damage.lua" />
+
     <LuaComponent
         script_throw_item="mods/pick_up_your_lantern/files/scripts/lantern_throw.lua"
         execute_every_n_frame="-1"

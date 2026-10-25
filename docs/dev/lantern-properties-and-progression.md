@@ -1,6 +1,6 @@
 # Lantern Properties and Progression
 
-How each lantern gets its light: the base values of its type, the quality tier, the modifier and the liquid state.
+How each lantern gets its light: the base values of its type, the quality tier, the modifiers and the liquid state.
 
 ## Contents
 
@@ -18,9 +18,9 @@ How each lantern gets its light: the base values of its type, the quality tier, 
 
 | Term | Meaning | When it is set | Code |
 | --- | --- | --- | --- |
-| Trait | Umbrella term for everything rolled once when a lantern first appears: the quality tier and the modifier. Traits do not change afterwards. | On spawn, by `RollLanternTraits` | `EnsureLanternTraits`, `RollLanternTraits` |
+| Trait | Umbrella term for everything rolled once when a lantern first appears: the quality tier and the modifiers. Rolled traits do not change afterwards. | On spawn, by `RollLanternTraits` | `EnsureLanternTraits`, `RollLanternTraits` |
 | Tier | Trait every lantern gets while progression is on. Only a light multiplier, no own behaviour. | On spawn | `LANTERN_TIERS`, `GetLanternTier` |
-| Modifier | Rare trait with its own per-frame behaviour (Flickering, Short-lived). Most lanterns have none. | On spawn | `LANTERN_MODIFIERS`, `lantern_modifier.lua` |
+| Modifier | Rare trait with its own per-frame behaviour (Flickering, Short-lived, Cracked). Most lanterns have none; a lantern may carry several. | On spawn; Cracked when damaged | `LANTERN_MODIFIERS`, `lantern_modifier.lua` |
 | Liquid state | Not a trait: taken on later in hand and replaced by another dive. | While held | `LANTERN_LIQUID_STATES`, `lantern_liquid_state.lua` |
 | Extinguished | Not a modifier: the final state of a burnt-out Short-lived lantern. | When fuel runs out | `ExtinguishLantern` |
 
@@ -85,9 +85,17 @@ Tier weights (1 / 2 / 3 / 4) depend on the depth `y`. Bands end at the Holy Moun
 
 ## Modifiers
 
-A modifier is rolled independently of the tier. A lantern gets at most one; each has a 7% chance.
+Modifiers are rolled independently of the tier and of each other: Flickering and Short-lived have a 7% chance each (`chance`, per mille). Cracked has `chance = 0`: it is never rolled and is acquired from damage instead. A lantern may carry several modifiers.
 
-All modifier configuration (IDs, description keys, roll chances per mille and behaviour parameters) lives in the `LANTERN_MODIFIERS` table in `lantern_properties_config.lua`. Modifiers are rolled in table order, so reordering them changes which modifier a lantern at a given position gets. The field names are given in parentheses below.
+All modifier configuration (IDs, description keys, roll chances per mille, interactions and behaviour parameters) lives in the `LANTERN_MODIFIERS` table in `lantern_properties_config.lua`. Modifiers are rolled in table order, so reordering them changes which modifiers a lantern at a given position gets. The table order is also the order of the description sentences. The field names are given in parentheses below.
+
+How modifiers interact is set per modifier:
+
+- `incompatible`: IDs of modifiers it cannot be combined with. The check runs in both directions: a modifier is not added if either side lists the other.
+- `replaces`: IDs of modifiers removed from the lantern when it is added.
+- Modifiers without these fields combine, and their light factors multiply. Flickering, Short-lived and Cracked all combine.
+
+The rules apply both to rolling (`RollModifiers`) and to modifiers acquired later (`AddLanternModifier`).
 
 - **Flickering**: the light radius is 20% larger (`radius_bonus`) but wavers: a sum of sine waves with rare deep dips, down to −45% (`flicker_depth`).
 - **Short-lived**: burns for 3–8 minutes (`burn_frames_min`, `burn_frames_max`). Time counts only while the lantern is lit in the world, in hand or on the belt.
@@ -96,8 +104,12 @@ All modifier configuration (IDs, description keys, roll chances per mille and be
     - `LightComponent` and the fog of war hole are removed;
     - the world flame switches to the empty vanilla `out` animation;
     - the in-hand sprite switches to `*_in_hand_out.xml`.
+- **Cracked**: a lantern that takes damage without breaking (a hard fall or throw, a weak projectile hit) cracks with a 33% chance (`crack_chance`).
+  - Detected by `damage_received` in `lantern_damage.lua` (`script_damage_received` in the lantern XMLs). Damage is dealt by `PhysicsBodyCollisionDamageComponent` on impacts and by projectiles; `falling_damages` stays off.
+  - Lanterns do not crack while `Lantern progression` is off, once burnt out, or when already cracked.
+  - Every 20 frames (`fire_interval_frames`), a lit cracked lantern has a 50% chance (`fire_chance`) to leak two particles (`fire_particle_count`) of gaseous fire (`GameCreateParticle("fire", ...)`) in the world or in hand, so it can set the player on fire.
 
-Modifier behavior runs in `lantern_modifier.lua` through a `LuaComponent` tagged `enabled_in_world,enabled_in_hand`. It is added only to a lit lantern with a modifier. Otherwise it would keep running in the inventory until the next state change.
+Modifier behavior runs in `lantern_modifier.lua` through a `LuaComponent` tagged `enabled_in_world,enabled_in_hand`. It is added only to a lit lantern with modifiers, on spawn or when a modifier is acquired. Otherwise it would keep running in the inventory until the next state change.
 
 ## Liquid States
 
@@ -127,11 +139,12 @@ The lantern name never changes; it stays the translation key from the XML. Prope
 | Tier 1–4 | `item_description_lantern_tier_1` … `_tier_4` |
 | Flickering | `item_description_lantern_flickering` |
 | Short-lived | `item_description_lantern_short_lived` |
+| Cracked | `item_description_lantern_cracked` |
 | Burnt out | `item_description_lantern_extinguished` |
 | Oil-soaked | `item_description_lantern_oil_soaked` |
 | Wet | `item_description_lantern_wet` |
 
-- The burnt-out sentence replaces the Short-lived one.
+- The burnt-out sentence replaces all modifier sentences.
 - `GetLanternPropertyDescriptions` in `lantern_traits.lua` collects the sentence keys for the current lantern state. New states add their keys there.
 - `UpdateLanternDescription` runs on every scan (`EnsureLanternTraits`), on burn-out and on liquid state changes. It writes the field only when the text changes, so the description follows both the lantern state and the game language.
 - The original description key is kept in `lantern_base_description`, because the field itself is overwritten.
@@ -143,7 +156,7 @@ All per-lantern state lives in `VariableStorageComponent` tagged for the world, 
 | Name | Meaning |
 | --- | --- |
 | `lantern_tier` | Quality tier, 1–4. |
-| `lantern_modifier` | `0` none, `1` Flickering, `2` Short-lived. |
+| `lantern_modifiers` | Bitmask of modifiers: bit `2^(id - 1)` per modifier, `1` Flickering, `2` Short-lived, `4` Cracked. |
 | `lantern_burn_frames`, `lantern_burn_frames_total` | Remaining and total burn time of a Short-lived lantern. |
 | `lantern_extinguished` | The lantern has burnt out. |
 | `lantern_liquid_state` | `0` none, `1` Oil-soaked, `2` Wet. |
@@ -156,6 +169,7 @@ All per-lantern state lives in `VariableStorageComponent` tagged for the world, 
 - `files/scripts/lantern_traits.lua`: tiers, modifiers, liquid states, rolling, fuel, descriptions, burn-out.
 - `files/scripts/lantern_properties_config.lua`: configuration of all tiers, modifiers and states.
 - `files/scripts/lantern_modifier.lua`: per-frame modifier behavior.
+- `files/scripts/lantern_damage.lua`: cracking on damage.
 - `files/scripts/lantern_illumination.lua`: base values and applying the illumination scale.
 - `files/scripts/lantern_liquid_state.lua`: liquid state detection.
 - `files/props_gfx/lantern_in_hand_out.xml`, `lantern_small_in_hand_out.xml`: burnt-out in-hand sprites.

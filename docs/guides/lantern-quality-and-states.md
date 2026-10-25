@@ -23,7 +23,7 @@ No two lanterns are quite alike. Each lantern has its own light, quality and som
 A lantern is born with its **traits** and keeps them for good:
 
 - **Quality**: every lantern has one. It only sets how far the light reaches.
-- **Modifier**: a rare quirk that changes how the lantern behaves, for example a flickering flame. Most lanterns have none.
+- **Modifiers**: rare quirks that change how the lantern behaves, for example a flickering flame. Most lanterns have none.
 
 **States** come later and can change: a lantern gets oil-soaked or wet when you dive with it, and a short-lived lantern eventually burns out.
 
@@ -42,12 +42,16 @@ The deeper you go, the better lanterns you find. In the Mines most lanterns are 
 
 ## Rare Modifiers
 
-About one lantern in seven has a modifier:
+About one lantern in seven is born with a modifier:
 
 - **Flickering**: its flame leaps higher, so the light is 20% wider, but it wavers and sometimes dips deeply.
 - **Short-lived**: oil leaks through a crack, one drop every 5 seconds. It burns for only a few minutes, slowly fading, then sputters and goes out for good. A burnt-out lantern gives no light, but you can still throw it. It only burns while lit: in your hand, on your belt or in the world, not inside your inventory.
 
-A lantern has at most one modifier.
+A lantern can also get one more modifier later:
+
+- **Cracked**: when a lantern survives a hit, for example a hard fall, a throw against a wall or a weak shot, it may crack. Now and then a tongue of fire slips out of a lit cracked lantern, both in the world and in your hand, and it can set you on fire.
+
+A lantern can have several modifiers at once, for example a flickering lantern that later cracks.
 
 ## Oil and Water
 
@@ -62,4 +66,4 @@ A state lasts until you dive with the lantern into the opposite liquid. It stays
 
 The description of a lantern tells its story: one sentence for its quality, and one more for each modifier or liquid state it has. The description updates as soon as the lantern changes, for example when it gets wet or burns out.
 
-The `Lantern progression` setting turns quality and modifiers off. All lanterns are then ordinary and have no modifiers. Oil and water states still work.
+The `Lantern progression` setting turns quality and modifiers off. All lanterns are then ordinary, have no modifiers and never crack. Oil and water states still work.
