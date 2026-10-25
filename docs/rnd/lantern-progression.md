@@ -16,12 +16,13 @@ The first iteration is implemented and tested in-game (commit `a25be6b`).
 - **Tier** — a trait every lantern gets while progression is on; only a light multiplier, without its own behaviour.
 - **Modifier** — a rare trait with its own per-frame behaviour (Flickering, Short-lived); configured in `LANTERN_MODIFIERS`, executed by `lantern_modifier.lua`.
 - Not traits: the liquid state (taken on later in hand, see [Environmental Dynamic States](lantern-properties-and-states.md#environmental-dynamic-states)) and the extinguished state (the end of a Short-lived lantern, not a separate modifier).
-- `lantern_traits.lua` is broader than its name: it also holds liquid states, the description and extinguishing.
+- All tiers, modifiers and states are configured in `lantern_properties_config.lua` (`LANTERN_TIERS`, `LANTERN_TIER_WEIGHTS_BY_DEPTH`, `LANTERN_MODIFIERS`, `LANTERN_LIQUID_STATES`, `LANTERN_EXTINGUISHED_DESCRIPTION`); base values of each lantern type stay in its XML.
+- `lantern_traits.lua` is broader than its name: it also holds liquid state logic, the description and extinguishing.
 
 ### Files
 
-- `files/scripts/lantern_modifier_config.lua` — configuration of all modifiers: IDs, description keys, roll chances and behaviour parameters.
-- `files/scripts/lantern_traits.lua` — tier definitions, tier and modifier roll, oil consumption, description, extinguishing.
+- `files/scripts/lantern_properties_config.lua` — configuration of all tiers, modifiers and states: IDs, multipliers, description keys, roll chances and weights, behaviour parameters.
+- `files/scripts/lantern_traits.lua` — tier and modifier roll, oil consumption, description, extinguishing.
 - `files/scripts/lantern_modifier.lua` — modifier behaviors (flickering, burn timer).
 - `files/scripts/lantern_illumination.lua` — applying the tier multiplier to light and fog of war hole.
 - `files/props_gfx/lantern_in_hand_out.xml`, `lantern_small_in_hand_out.xml` — sprites for an extinguished lantern in hand.
@@ -60,7 +61,7 @@ Final light radius: `base type radius × tier multiplier × illumination_scale`,
 
 At most one per lantern, 7% chance each.
 
-All modifiers are configured in the `LANTERN_MODIFIERS` table in `lantern_modifier_config.lua`: ID, description key, roll chance (per mille) and behaviour parameters (field names in parentheses below). The table is an array: modifiers are rolled in its order, so the order is part of the configuration. `GetLanternModifierDefinition(modifier_id)` in `lantern_traits.lua` returns the configuration of a modifier.
+All modifiers are configured in the `LANTERN_MODIFIERS` table in `lantern_properties_config.lua`: ID, description key, roll chance (per mille) and behaviour parameters (field names in parentheses below). The table is an array: modifiers are rolled in its order, so the order is part of the configuration. `GetLanternModifierDefinition(modifier_id)` in `lantern_traits.lua` returns the configuration of a modifier.
 
 - **Flickering.** Light radius is 20% larger (`radius_bonus`), but fluctuates (sum of sine waves with occasional deep drops) down to −45% (`flicker_depth`).
 - **Short-lived.** Burns for 3–8 minutes (`burn_frames_min`, `burn_frames_max`); time only ticks down while the lantern emits light in the world, in hand, or on the belt. Total burn time is stored in `lantern_burn_frames_total`.

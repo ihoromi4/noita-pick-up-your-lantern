@@ -19,10 +19,12 @@ How each lantern gets its light: the base values of its type, the quality tier, 
 | Term | Meaning | When it is set | Code |
 | --- | --- | --- | --- |
 | Trait | Umbrella term for everything rolled once when a lantern first appears: the quality tier and the modifier. Traits do not change afterwards. | On spawn, by `RollLanternTraits` | `EnsureLanternTraits`, `RollLanternTraits` |
-| Tier | Trait every lantern gets while progression is on. Only a light multiplier, no own behaviour. | On spawn | `TIER_MULTIPLIERS`, `GetLanternTier` |
-| Modifier | Rare trait with its own per-frame behaviour (Flickering, Short-lived). Most lanterns have none. | On spawn | `LANTERN_MODIFIERS` in `lantern_modifier_config.lua`, `lantern_modifier.lua` |
-| Liquid state | Not a trait: taken on later in hand and replaced by another dive. | While held | `LIQUID_STATES`, `lantern_liquid_state.lua` |
+| Tier | Trait every lantern gets while progression is on. Only a light multiplier, no own behaviour. | On spawn | `LANTERN_TIERS`, `GetLanternTier` |
+| Modifier | Rare trait with its own per-frame behaviour (Flickering, Short-lived). Most lanterns have none. | On spawn | `LANTERN_MODIFIERS`, `lantern_modifier.lua` |
+| Liquid state | Not a trait: taken on later in hand and replaced by another dive. | While held | `LANTERN_LIQUID_STATES`, `lantern_liquid_state.lua` |
 | Extinguished | Not a modifier: the final state of a burnt-out Short-lived lantern. | When fuel runs out | `ExtinguishLantern` |
+
+All tiers, modifiers and states are configured in one file, `lantern_properties_config.lua`, in that order. Base values of each lantern type stay in its XML file, see [Base Properties per Type](#base-properties-per-type).
 
 `lantern_traits.lua` holds more than traits: it also covers liquid states, the item description and burn-out.
 
@@ -85,7 +87,7 @@ Tier weights (1 / 2 / 3 / 4) depend on the depth `y`. Bands end at the Holy Moun
 
 A modifier is rolled independently of the tier. A lantern gets at most one; each has a 7% chance.
 
-All modifier configuration (IDs, description keys, roll chances per mille and behaviour parameters) lives in the `LANTERN_MODIFIERS` table in `lantern_modifier_config.lua`. Modifiers are rolled in table order, so reordering them changes which modifier a lantern at a given position gets. The field names are given in parentheses below.
+All modifier configuration (IDs, description keys, roll chances per mille and behaviour parameters) lives in the `LANTERN_MODIFIERS` table in `lantern_properties_config.lua`. Modifiers are rolled in table order, so reordering them changes which modifier a lantern at a given position gets. The field names are given in parentheses below.
 
 - **Flickering**: the light radius is 20% larger (`radius_bonus`) but wavers: a sum of sine waves with rare deep dips, down to −45% (`flicker_depth`).
 - **Short-lived**: burns for 3–8 minutes (`burn_frames_min`, `burn_frames_max`). Time counts only while the lantern is lit in the world, in hand or on the belt.
@@ -152,7 +154,7 @@ All per-lantern state lives in `VariableStorageComponent` tagged for the world, 
 ## Files
 
 - `files/scripts/lantern_traits.lua`: tiers, modifiers, liquid states, rolling, fuel, descriptions, burn-out.
-- `files/scripts/lantern_modifier_config.lua`: configuration of all modifiers.
+- `files/scripts/lantern_properties_config.lua`: configuration of all tiers, modifiers and states.
 - `files/scripts/lantern_modifier.lua`: per-frame modifier behavior.
 - `files/scripts/lantern_illumination.lua`: base values and applying the illumination scale.
 - `files/scripts/lantern_liquid_state.lua`: liquid state detection.

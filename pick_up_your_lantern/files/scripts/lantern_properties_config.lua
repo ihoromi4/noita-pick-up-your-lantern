@@ -1,0 +1,117 @@
+--- Configuration of all lantern properties: quality tiers, modifiers and states.
+--- - Traits are rolled once when a lantern first appears and never change: the quality tier and the modifier.
+--- - States are taken on later and can change: liquid states and the extinguished state.
+--- Base values of each lantern type (light radius and colour, fog of war hole, hp) are declared in its XML file:
+--- - data/entities/props/physics_lantern.xml: Lantern.
+--- - data/entities/props/physics_lantern_small.xml, data/entities/props/physics/lantern_small.xml: Small Lantern.
+
+-- Quality tiers
+
+---@class LanternTier
+---@field multiplier number Light radius and fog of war hole multiplier.
+---@field description string Translation key of the description sentence.
+
+---Quality tiers, from the dimmest to the brightest. The index is the tier kept in the `lantern_tier` storage.
+---@type LanternTier[]
+LANTERN_TIERS = {
+    { multiplier = 0.75, description = "$item_description_lantern_tier_1", },
+    { multiplier = 1.0,  description = "$item_description_lantern_tier_2", },
+    { multiplier = 1.5,  description = "$item_description_lantern_tier_3", },
+    { multiplier = 2.0,  description = "$item_description_lantern_tier_4", },
+}
+
+---Tier weights by world depth, in the order of LANTERN_TIERS. Bands end at the Holy Mountains between biomes.
+---@type {max_y: number, weights: number[]}[]
+LANTERN_TIER_WEIGHTS_BY_DEPTH = {
+    { max_y = 1300,      weights = { 50, 45, 5, 0, }, },  -- Mines
+    { max_y = 2850,      weights = { 35, 50, 14, 1, }, }, -- Coal Pits
+    { max_y = 4900,      weights = { 20, 50, 25, 5, }, }, -- Snowy Depths
+    { max_y = 6400,      weights = { 10, 45, 35, 10, }, }, -- Hiisi Base
+    { max_y = 8450,      weights = { 5, 35, 42, 18, }, },  -- Underground Jungle
+    { max_y = 10500,     weights = { 0, 25, 50, 25, }, },  -- The Vault
+    { max_y = math.huge, weights = { 0, 15, 50, 35, }, },  -- Temple of the Art and deeper
+}
+
+-- Modifiers
+
+LANTERN_MODIFIER_NONE = 0
+LANTERN_MODIFIER_FLICKERING = 1
+LANTERN_MODIFIER_SHORT_LIVED = 2
+
+---@class LanternModifier
+---@field id number Modifier ID, kept in the `lantern_modifier` storage.
+---@field description string Translation key of the description sentence.
+---@field chance number Roll chance, per mille.
+
+---@class LanternModifierFlickering : LanternModifier
+---@field radius_bonus number Light radius multiplier.
+---@field flicker_depth number Maximum relative brightness drop of the flicker.
+
+---@class LanternModifierShortLived : LanternModifier
+---@field burn_frames_min number Minimum burn time, in frames while lit (60 frames per second).
+---@field burn_frames_max number Maximum burn time, in frames while lit.
+---@field fade_low_factor number Light multiplier the lantern slowly fades to before the end.
+---@field fade_end_frames number Last frames of burn time over which the lantern sputters down to darkness.
+---@field sputter_depth number Maximum relative brightness drop while sputtering.
+---@field oil_drip_interval_frames number Interval between leaked oil drops, in frames.
+---@field oil_drip_offset_y number Vertical offset of an oil drop below the lantern, in pixels.
+
+---Modifiers, rolled in table order: changing the order changes which modifier a lantern at a given position gets.
+---At most one modifier is applied to a lantern.
+---@type LanternModifier[]
+LANTERN_MODIFIERS = {
+    ---@type LanternModifierFlickering
+    {
+        id = LANTERN_MODIFIER_FLICKERING,
+        description = "$item_description_lantern_flickering",
+        chance = 70,
+        radius_bonus = 1.2,
+        flicker_depth = 0.45,
+    },
+    ---@type LanternModifierShortLived
+    {
+        id = LANTERN_MODIFIER_SHORT_LIVED,
+        description = "$item_description_lantern_short_lived",
+        chance = 70,
+        burn_frames_min = 3 * 60 * 60,
+        burn_frames_max = 8 * 60 * 60,
+        fade_low_factor = 0.2,
+        fade_end_frames = 30 * 60,
+        sputter_depth = 0.6,
+        oil_drip_interval_frames = 5 * 60,
+        oil_drip_offset_y = 4,
+    },
+}
+
+-- States
+
+LANTERN_LIQUID_STATE_NONE = 0
+LANTERN_LIQUID_STATE_OIL_SOAKED = 1
+LANTERN_LIQUID_STATE_WET = 2
+
+---@class LanternLiquidState
+---@field id number Liquid state ID, kept in the `lantern_liquid_state` storage.
+---@field materials table<string, boolean> Names of the liquid materials that cause the state.
+---@field multiplier number Light radius and fog of war hole multiplier.
+---@field description string Translation key of the description sentence.
+
+---Liquid states a held lantern takes on when the player dives into a liquid. A state lasts until another one
+---replaces it and multiplies the light radius and fog of war hole of the lantern.
+---@type LanternLiquidState[]
+LANTERN_LIQUID_STATES = {
+    {
+        id = LANTERN_LIQUID_STATE_OIL_SOAKED,
+        materials = { oil = true, },
+        multiplier = 1.3,
+        description = "$item_description_lantern_oil_soaked",
+    },
+    {
+        id = LANTERN_LIQUID_STATE_WET,
+        materials = { water = true, water_salt = true, water_ice = true, water_fading = true, swamp = true, },
+        multiplier = 0.8,
+        description = "$item_description_lantern_wet",
+    },
+}
+
+---Description sentence of a burnt-out lantern. It replaces the modifier sentence and hides the liquid state.
+LANTERN_EXTINGUISHED_DESCRIPTION = "$item_description_lantern_extinguished"

@@ -2,12 +2,13 @@
 --- Better tiers become more likely in deeper biomes. Traits are kept in VariableStorageComponents,
 --- so they survive moving the lantern between the world, inventory and hand, and saving the game.
 --- Liquid states (oil-soaked, wet) are taken on later while the lantern is held, see lantern_liquid_state.lua.
+--- Tiers, modifiers and states are configured in lantern_properties_config.lua.
 
 local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_modifier_config.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_properties_config.lua")
 
 local PROGRESSION_SETTING_ID = MOD_ID .. ".lantern_progression"
 local TIER_STORAGE = "lantern_tier"
@@ -18,64 +19,6 @@ local EXTINGUISHED_STORAGE = "lantern_extinguished"
 local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
-
-LANTERN_LIQUID_STATE_NONE = 0
-LANTERN_LIQUID_STATE_OIL_SOAKED = 1
-LANTERN_LIQUID_STATE_WET = 2
-
----Illumination multipliers of quality tiers, from the dimmest to the brightest.
-local TIER_MULTIPLIERS = {
-    0.75,
-    1.0,
-    1.5,
-    2.0,
-}
-
----Description sentences of quality tiers, in the same order as TIER_MULTIPLIERS.
-local TIER_DESCRIPTIONS = {
-    "$item_description_lantern_tier_1",
-    "$item_description_lantern_tier_2",
-    "$item_description_lantern_tier_3",
-    "$item_description_lantern_tier_4",
-}
-
-local EXTINGUISHED_DESCRIPTION = "$item_description_lantern_extinguished"
-
----Tier weights by world depth. Bands end at the Holy Mountains between biomes.
----@type table<number, {max_y: number, weights: number[]}>
-local TIER_WEIGHTS_BY_DEPTH = {
-    { max_y = 1300,      weights = { 50, 45, 5, 0, }, },  -- Mines
-    { max_y = 2850,      weights = { 35, 50, 14, 1, }, }, -- Coal Pits
-    { max_y = 4900,      weights = { 20, 50, 25, 5, }, }, -- Snowy Depths
-    { max_y = 6400,      weights = { 10, 45, 35, 10, }, }, -- Hiisi Base
-    { max_y = 8450,      weights = { 5, 35, 42, 18, }, },  -- Underground Jungle
-    { max_y = 10500,     weights = { 0, 25, 50, 25, }, },  -- The Vault
-    { max_y = math.huge, weights = { 0, 15, 50, 35, }, },  -- Temple of the Art and deeper
-}
-
----@class LanternLiquidState
----@field id number Liquid state ID.
----@field materials table<string, boolean> Names of the liquid materials that cause the state.
----@field multiplier number Light radius and fog of war hole multiplier.
----@field description string Translation key of the description sentence.
-
----Liquid states a held lantern takes on when the player dives into a liquid. A state lasts until another one
----replaces it and multiplies the light radius and fog of war hole of the lantern.
----@type LanternLiquidState[]
-local LIQUID_STATES = {
-    {
-        id = LANTERN_LIQUID_STATE_OIL_SOAKED,
-        materials = { oil = true, },
-        multiplier = 1.3,
-        description = "$item_description_lantern_oil_soaked",
-    },
-    {
-        id = LANTERN_LIQUID_STATE_WET,
-        materials = { water = true, water_salt = true, water_ice = true, water_fading = true, swamp = true, },
-        multiplier = 0.8,
-        description = "$item_description_lantern_wet",
-    },
-}
 
 ---Returns the configuration of a modifier.
 ---@param modifier_id number
@@ -118,7 +61,8 @@ end
 ---@param entity_id number Lantern entity ID.
 ---@return number
 function GetLanternTierMultiplier(entity_id)
-    return TIER_MULTIPLIERS[GetLanternTier(entity_id)] or 1.0
+    local tier = LANTERN_TIERS[GetLanternTier(entity_id)]
+    return tier ~= nil and tier.multiplier or 1.0
 end
 
 ---Returns the modifier of a lantern.
@@ -169,7 +113,7 @@ end
 ---@param material_name string Material name.
 ---@return number state_id Liquid state, or LANTERN_LIQUID_STATE_NONE if the material has no effect.
 function GetLiquidStateByMaterial(material_name)
-    for _, state in ipairs(LIQUID_STATES) do
+    for _, state in ipairs(LANTERN_LIQUID_STATES) do
         if state.materials[material_name] then
             return state.id
         end
@@ -182,7 +126,7 @@ end
 ---@param state_id number
 ---@return LanternLiquidState|nil
 local function GetLiquidStateDefinition(state_id)
-    for _, state in ipairs(LIQUID_STATES) do
+    for _, state in ipairs(LANTERN_LIQUID_STATES) do
         if state.id == state_id then
             return state
         end
@@ -293,8 +237,8 @@ end
 ---@param y number World Y coordinate.
 ---@return number
 local function RollTier(y)
-    local weights = TIER_WEIGHTS_BY_DEPTH[#TIER_WEIGHTS_BY_DEPTH].weights
-    for _, band in ipairs(TIER_WEIGHTS_BY_DEPTH) do
+    local weights = LANTERN_TIER_WEIGHTS_BY_DEPTH[#LANTERN_TIER_WEIGHTS_BY_DEPTH].weights
+    for _, band in ipairs(LANTERN_TIER_WEIGHTS_BY_DEPTH) do
         if y < band.max_y then
             weights = band.weights
             break
@@ -345,14 +289,14 @@ end
 local function GetLanternPropertyDescriptions(entity_id)
     local descriptions = {}
 
-    local tier_description = TIER_DESCRIPTIONS[GetLanternTier(entity_id)]
-    if tier_description ~= nil then
-        table.insert(descriptions, tier_description)
+    local tier = LANTERN_TIERS[GetLanternTier(entity_id)]
+    if tier ~= nil then
+        table.insert(descriptions, tier.description)
     end
 
     local modifier_description = GetModifierDescription(GetLanternModifier(entity_id))
     if IsLanternExtinguished(entity_id) then
-        modifier_description = EXTINGUISHED_DESCRIPTION
+        modifier_description = LANTERN_EXTINGUISHED_DESCRIPTION
     end
     if modifier_description ~= nil then
         table.insert(descriptions, modifier_description)

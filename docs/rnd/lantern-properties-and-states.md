@@ -91,6 +91,7 @@ Quality tiers and modifiers are implemented and detailed in a separate note: [La
 
 ### Applying Changes
 
+- Liquid states (materials, multipliers, description keys) are configured in `LANTERN_LIQUID_STATES` in `lantern_properties_config.lua`.
 - The state multiplier is factored into the smoothly interpolated illumination scale (`lantern_illumination_scale` = setting × state), so changing state transitions light and fog hole smoothly, identical to tweaking the `Illuminated area size` setting.
 - Tier and state combine multiplicatively, so the "oil-soaked" state on a "masterwork" lantern is noticeably stronger than on a "dim" one. Modifiers (flickering, fading) apply on top.
 - The belt lantern multiplies its light by the state of the lantern currently held by the player.
