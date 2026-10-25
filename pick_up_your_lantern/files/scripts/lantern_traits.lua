@@ -7,6 +7,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_modifier_config.lua")
 
 local PROGRESSION_SETTING_ID = MOD_ID .. ".lantern_progression"
 local TIER_STORAGE = "lantern_tier"
@@ -17,10 +18,6 @@ local EXTINGUISHED_STORAGE = "lantern_extinguished"
 local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
-
-LANTERN_MODIFIER_NONE = 0
-LANTERN_MODIFIER_FLICKERING = 1
-LANTERN_MODIFIER_SHORT_LIVED = 2
 
 LANTERN_LIQUID_STATE_NONE = 0
 LANTERN_LIQUID_STATE_OIL_SOAKED = 1
@@ -56,13 +53,6 @@ local TIER_WEIGHTS_BY_DEPTH = {
     { max_y = math.huge, weights = { 0, 15, 50, 35, }, },  -- Temple of the Art and deeper
 }
 
----Modifiers rolled independently of the tier. Chances are per mille; at most one modifier is applied.
----@type table<number, {id: number, description: string, chance: number}>
-local MODIFIERS = {
-    { id = LANTERN_MODIFIER_FLICKERING,  description = "$item_description_lantern_flickering",  chance = 70, },
-    { id = LANTERN_MODIFIER_SHORT_LIVED, description = "$item_description_lantern_short_lived", chance = 70, },
-}
-
 ---@class LanternLiquidState
 ---@field id number Liquid state ID.
 ---@field materials table<string, boolean> Names of the liquid materials that cause the state.
@@ -87,21 +77,21 @@ local LIQUID_STATES = {
     },
 }
 
----Burn time range of short-lived lanterns, in frames while lit (60 frames per second).
-local BURN_FRAMES_MIN = 3 * 60 * 60
-local BURN_FRAMES_MAX = 8 * 60 * 60
+---Returns the configuration of a modifier.
+---@param modifier_id number
+---@return LanternModifier|nil
+function GetLanternModifierDefinition(modifier_id)
+    for _, modifier in ipairs(LANTERN_MODIFIERS) do
+        if modifier.id == modifier_id then
+            return modifier
+        end
+    end
 
-local FLICKER_DEPTH = 0.45
-local FLICKERING_RADIUS_BONUS = 1.2
+    return nil
+end
 
--- Short-lived lanterns fade slowly to FADE_LOW_FACTOR, then go dark over the last FADE_END_FRAMES while sputtering.
-local FADE_LOW_FACTOR = 0.2
-local FADE_END_FRAMES = 30 * 60
-local SPUTTER_DEPTH = 0.6
-
--- Short-lived lanterns leak a drop of oil every OIL_DRIP_INTERVAL_FRAMES while burning.
-local OIL_DRIP_INTERVAL_FRAMES = 5 * 60
-local OIL_DRIP_OFFSET_Y = 4
+local FLICKERING = GetLanternModifierDefinition(LANTERN_MODIFIER_FLICKERING) --[[@as LanternModifierFlickering]]
+local SHORT_LIVED = GetLanternModifierDefinition(LANTERN_MODIFIER_SHORT_LIVED) --[[@as LanternModifierShortLived]]
 
 ---Checks whether lantern progression is enabled in mod settings.
 ---@return boolean
@@ -225,21 +215,14 @@ local function GetFlickerFactor(frame, phase, depth)
 end
 
 ---Returns the full burn time of a short-lived lantern, in frames.
----Lanterns from older saves lack it and take their remaining burn time, so they fade from full brightness.
 ---@param entity_id number Lantern entity ID.
 ---@return number
 local function GetLanternBurnFramesTotal(entity_id)
-    local total = GetStorageFloat(entity_id, BURN_FRAMES_TOTAL_STORAGE)
-    if total <= 0 then
-        total = GetLanternBurnFrames(entity_id)
-        SetStorageFloat(entity_id, BURN_FRAMES_TOTAL_STORAGE, total)
-    end
-
-    return total
+    return GetStorageFloat(entity_id, BURN_FRAMES_TOTAL_STORAGE)
 end
 
 ---Burns one frame of fuel of a short-lived lantern and leaks a drop of oil at the given position
----every OIL_DRIP_INTERVAL_FRAMES. Lanterns without the modifier burn forever.
+---at the configured interval. Lanterns without the modifier burn forever.
 ---@param entity_id number Lantern entity ID.
 ---@param x number World X coordinate of the oil drop.
 ---@param y number World Y coordinate of the lantern; the drop appears slightly below it.
@@ -256,30 +239,32 @@ function ConsumeLanternFuel(entity_id, x, y)
     end
     SetLanternBurnFrames(entity_id, burn_frames)
 
-    if math.floor(burn_frames) % OIL_DRIP_INTERVAL_FRAMES == 0 then
-        GameCreateParticle("oil", x, y + OIL_DRIP_OFFSET_Y, 1, 0, 0, false, false)
+    if math.floor(burn_frames) % SHORT_LIVED.oil_drip_interval_frames == 0 then
+        GameCreateParticle("oil", x, y + SHORT_LIVED.oil_drip_offset_y, 1, 0, 0, false, false)
     end
 
     return true
 end
 
 ---Calculates how much light a short-lived lantern has left: it fades linearly from full brightness
----to FADE_LOW_FACTOR, then to darkness over the last FADE_END_FRAMES of its burn time.
+---to `fade_low_factor`, then to darkness over the last `fade_end_frames` of its burn time.
 ---@param entity_id number Lantern entity ID.
 ---@return number factor Light multiplier in the range [0, 1].
 local function GetFuelFactor(entity_id)
+    local fade_low_factor = SHORT_LIVED.fade_low_factor
+    local fade_end_frames = SHORT_LIVED.fade_end_frames
     local burn_frames = math.max(0, GetLanternBurnFrames(entity_id))
-    if burn_frames <= FADE_END_FRAMES then
-        return FADE_LOW_FACTOR * burn_frames / FADE_END_FRAMES
+    if burn_frames <= fade_end_frames then
+        return fade_low_factor * burn_frames / fade_end_frames
     end
 
-    local fade_frames = GetLanternBurnFramesTotal(entity_id) - FADE_END_FRAMES
+    local fade_frames = GetLanternBurnFramesTotal(entity_id) - fade_end_frames
     if fade_frames <= 0 then
         return 1.0
     end
 
-    local fuel = math.min(1, (burn_frames - FADE_END_FRAMES) / fade_frames)
-    return FADE_LOW_FACTOR + (1 - FADE_LOW_FACTOR) * fuel
+    local fuel = math.min(1, (burn_frames - fade_end_frames) / fade_frames)
+    return fade_low_factor + (1 - fade_low_factor) * fuel
 end
 
 ---Calculates the light multiplier of the lantern modifier for the current frame:
@@ -292,11 +277,11 @@ function GetLanternModifierFactor(entity_id)
     local modifier_id = GetLanternModifier(entity_id)
 
     if modifier_id == LANTERN_MODIFIER_FLICKERING then
-        return FLICKERING_RADIUS_BONUS * GetFlickerFactor(frame, phase, FLICKER_DEPTH)
+        return FLICKERING.radius_bonus * GetFlickerFactor(frame, phase, FLICKERING.flicker_depth)
     elseif modifier_id == LANTERN_MODIFIER_SHORT_LIVED then
         local factor = GetFuelFactor(entity_id)
-        if GetLanternBurnFrames(entity_id) < FADE_END_FRAMES then
-            factor = factor * GetFlickerFactor(frame, phase, SPUTTER_DEPTH)
+        if GetLanternBurnFrames(entity_id) < SHORT_LIVED.fade_end_frames then
+            factor = factor * GetFlickerFactor(frame, phase, SHORT_LIVED.sputter_depth)
         end
         return factor
     end
@@ -336,7 +321,7 @@ end
 ---@return number
 local function RollModifier()
     local roll = Random(1, 1000)
-    for _, modifier in ipairs(MODIFIERS) do
+    for _, modifier in ipairs(LANTERN_MODIFIERS) do
         roll = roll - modifier.chance
         if roll <= 0 then
             return modifier.id
@@ -350,13 +335,8 @@ end
 ---@param modifier_id number
 ---@return string|nil description Translation key, or nil for LANTERN_MODIFIER_NONE.
 local function GetModifierDescription(modifier_id)
-    for _, modifier in ipairs(MODIFIERS) do
-        if modifier.id == modifier_id then
-            return modifier.description
-        end
-    end
-
-    return nil
+    local modifier = GetLanternModifierDefinition(modifier_id)
+    return modifier ~= nil and modifier.description or nil
 end
 
 ---Lists the description sentences of the current lantern properties: quality tier, modifier, then liquid state.
@@ -451,7 +431,7 @@ local function RollLanternTraits(entity_id)
     SetStorageFloat(entity_id, TIER_STORAGE, tier)
     SetStorageFloat(entity_id, MODIFIER_STORAGE, modifier_id)
     if modifier_id == LANTERN_MODIFIER_SHORT_LIVED then
-        local burn_frames = Random(BURN_FRAMES_MIN, BURN_FRAMES_MAX)
+        local burn_frames = Random(SHORT_LIVED.burn_frames_min, SHORT_LIVED.burn_frames_max)
         SetLanternBurnFrames(entity_id, burn_frames)
         SetStorageFloat(entity_id, BURN_FRAMES_TOTAL_STORAGE, burn_frames)
     end

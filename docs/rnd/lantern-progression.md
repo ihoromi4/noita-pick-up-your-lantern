@@ -10,9 +10,18 @@ General context for differences between lanterns and environmental dynamic state
 
 The first iteration is implemented and tested in-game (commit `a25be6b`).
 
+### Terminology
+
+- **Trait** — umbrella term for everything a lantern rolls once on its first appearance: the quality tier and the modifier (`RollLanternTraits`, `EnsureLanternTraits`). Traits do not change afterwards.
+- **Tier** — a trait every lantern gets while progression is on; only a light multiplier, without its own behaviour.
+- **Modifier** — a rare trait with its own per-frame behaviour (Flickering, Short-lived); configured in `LANTERN_MODIFIERS`, executed by `lantern_modifier.lua`.
+- Not traits: the liquid state (taken on later in hand, see [Environmental Dynamic States](lantern-properties-and-states.md#environmental-dynamic-states)) and the extinguished state (the end of a Short-lived lantern, not a separate modifier).
+- `lantern_traits.lua` is broader than its name: it also holds liquid states, the description and extinguishing.
+
 ### Files
 
-- `files/scripts/lantern_traits.lua` — tier and modifier definitions, roll, oil consumption, description, extinguishing.
+- `files/scripts/lantern_modifier_config.lua` — configuration of all modifiers: IDs, description keys, roll chances and behaviour parameters.
+- `files/scripts/lantern_traits.lua` — tier definitions, tier and modifier roll, oil consumption, description, extinguishing.
 - `files/scripts/lantern_modifier.lua` — modifier behaviors (flickering, burn timer).
 - `files/scripts/lantern_illumination.lua` — applying the tier multiplier to light and fog of war hole.
 - `files/props_gfx/lantern_in_hand_out.xml`, `lantern_small_in_hand_out.xml` — sprites for an extinguished lantern in hand.
@@ -49,12 +58,14 @@ Final light radius: `base type radius × tier multiplier × illumination_scale`,
 
 ### Modifiers
 
-At most one per lantern, 7% chance each (in per mille in the `MODIFIERS` table).
+At most one per lantern, 7% chance each.
 
-- **Flickering.** Light radius is 20% larger (`FLICKERING_RADIUS_BONUS`), but fluctuates (sum of sine waves with occasional deep drops) down to −45%.
-- **Short-lived.** Burns for 3–8 minutes; time only ticks down while the lantern emits light in the world, in hand, or on the belt. Total burn time is stored in `lantern_burn_frames_total` (lanterns from old saves inherit the remaining time on the first check).
-  - Every 5 seconds of burning, the lantern drips 1 droplet of oil (`GameCreateParticle("oil", ...)`, without fire); on the belt — at the player's position.
-  - Light radius decreases linearly from 100% to 20% (`FADE_LOW_FACTOR`) until the last 30 seconds (`FADE_END_FRAMES`), and during those 30 seconds — from 20% to zero with flickering, after which the lantern extinguishes permanently:
+All modifiers are configured in the `LANTERN_MODIFIERS` table in `lantern_modifier_config.lua`: ID, description key, roll chance (per mille) and behaviour parameters (field names in parentheses below). The table is an array: modifiers are rolled in its order, so the order is part of the configuration. `GetLanternModifierDefinition(modifier_id)` in `lantern_traits.lua` returns the configuration of a modifier.
+
+- **Flickering.** Light radius is 20% larger (`radius_bonus`), but fluctuates (sum of sine waves with occasional deep drops) down to −45% (`flicker_depth`).
+- **Short-lived.** Burns for 3–8 minutes (`burn_frames_min`, `burn_frames_max`); time only ticks down while the lantern emits light in the world, in hand, or on the belt. Total burn time is stored in `lantern_burn_frames_total`.
+  - Every 5 seconds of burning (`oil_drip_interval_frames`), the lantern drips 1 droplet of oil (`GameCreateParticle("oil", ...)`, without fire); on the belt — at the player's position.
+  - Light radius decreases linearly from 100% to 20% (`fade_low_factor`) until the last 30 seconds (`fade_end_frames`), and during those 30 seconds — from 20% to zero with flickering (`sputter_depth`), after which the lantern extinguishes permanently:
   - `LightComponent` and the fog hole are removed;
   - in-world flame switches to the empty vanilla `out` animation;
   - in-hand sprite is replaced with `*_in_hand_out.xml` (body without flame).
@@ -78,7 +89,10 @@ The lantern name remains unchanged and uses the vanilla translation key from XML
 - `GetLanternPropertyDescriptions` collects sentence keys based on the lantern's current state; new states append their keys there.
 - `UpdateLanternDescription` is called during each scan (`EnsureLanternTraits`) and upon extinguishing; it only writes to the field when the text changes. Thus, the description tracks the lantern's state and the game language.
 - The original description key from XML is saved in `lantern_base_description`, since the field itself is overwritten.
-- Lanterns from older saves retain their names like "Lantern 3F" from previous versions.
+
+### Save Compatibility
+
+Compatibility with saves from older mod versions is not maintained: a new game is assumed after updating the mod. Storage keys, modifier IDs and their order may change between versions without migration.
 
 ### Settings
 
@@ -118,4 +132,5 @@ The lantern name remains unchanged and uses the vanilla translation key from XML
 
 - Should the tier only affect light, or also other properties (durability, explosion)?
 - Should multiple modifiers be allowed on a single lantern (the description system already supports multiple sentences)?
+- The planned Cracked glass modifier is acquired from damage, not on spawn. A modifier then stops meaning "rolled on spawn", and the trait/modifier terminology (and possibly the name of `lantern_traits.lua`) needs to be revisited.
 - Is a modifier frequency setting needed, or an option to disable modifiers independently without disabling tiers?

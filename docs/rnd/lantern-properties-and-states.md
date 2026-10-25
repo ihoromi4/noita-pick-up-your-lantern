@@ -25,7 +25,7 @@ Type parameters are declared using standard component fields in `pick_up_your_la
 - `SpriteComponent` with `fog_of_war_hole="1"` — `special_scale_x` / `special_scale_y`. The component is declared directly in the lantern XML; `patch_lighting.lua` does not add it, only removes it if `Illuminate the darkness` is disabled.
 - `DamageModelComponent` — `hp`.
 
-The mod modifies `radius` and `special_scale_x/y` directly on the entity (setting × tier × modifier), and these altered values persist into saves. Therefore, XML values serve only as the baseline: `EnsureLanternBaseIllumination` in `lantern_illumination.lua` reads them once upon the lantern's initial spawn and stores them in `VariableStorageComponent` (`lantern_base_light_radius`, `lantern_base_fog_hole_scale`). Lanterns from older saves that were already scaled receive the previous shared default baseline of 240 / 1.0. The belt lantern copies the light color of the lantern held by the player.
+The mod modifies `radius` and `special_scale_x/y` directly on the entity (setting × tier × modifier), and these altered values persist into saves. Therefore, XML values serve only as the baseline: `EnsureLanternBaseIllumination` in `lantern_illumination.lua` reads them once upon the lantern's initial spawn and stores them in `VariableStorageComponent` (`lantern_base_light_radius`, `lantern_base_fog_hole_scale`). The belt lantern copies the light color of the lantern held by the player.
 
 ### Alternative: Custom XML Tag
 

@@ -5,6 +5,7 @@ No two lanterns are quite alike. Each lantern has its own light, quality and som
 ## Contents
 
 - [Lantern Types](#lantern-types)
+- [Traits and States](#traits-and-states)
 - [Quality](#quality)
 - [Rare Modifiers](#rare-modifiers)
 - [Oil and Water](#oil-and-water)
@@ -16,6 +17,15 @@ No two lanterns are quite alike. Each lantern has its own light, quality and som
 | --- | --- | --- |
 | Lantern | Wider, warm white | Sturdier |
 | Small Lantern | Smaller, warm yellow | Fragile |
+
+## Traits and States
+
+A lantern is born with its **traits** and keeps them for good:
+
+- **Quality**: every lantern has one. It only sets how far the light reaches.
+- **Modifier**: a rare quirk that changes how the lantern behaves, for example a flickering flame. Most lanterns have none.
+
+**States** come later and can change: a lantern gets oil-soaked or wet when you dive with it, and a short-lived lantern eventually burns out.
 
 ## Quality
 

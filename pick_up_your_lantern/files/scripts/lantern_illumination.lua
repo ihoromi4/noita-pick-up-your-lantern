@@ -15,9 +15,6 @@ local LANTERN_TAG = "lantern"
 local APPLIED_SCALE_STORAGE = "lantern_illumination_scale"
 local BASE_LIGHT_RADIUS_STORAGE = "lantern_base_light_radius"
 local BASE_FOG_HOLE_SCALE_STORAGE = "lantern_base_fog_hole_scale"
--- Base values shared by all lanterns before they were declared per type, used for lanterns from older saves.
-local LEGACY_LIGHT_RADIUS = 240
-local LEGACY_FOG_HOLE_SCALE = 1.0
 local UPDATE_INTERVAL_FRAMES = 30
 local TRANSITION_SPEED = 0.03
 local SNAP_EPSILON = 0.01
@@ -53,7 +50,6 @@ function GetFogHoleSprite(entity_id)
 end
 
 ---Captures the base light radius and fog of war hole scale declared in the lantern XML file.
----Lanterns already scaled by an older version of the mod get the legacy base values instead.
 ---@param entity_id number Lantern entity ID.
 ---@return nil
 function EnsureLanternBaseIllumination(entity_id)
@@ -61,17 +57,15 @@ function EnsureLanternBaseIllumination(entity_id)
         return
     end
 
-    local base_radius = LEGACY_LIGHT_RADIUS
-    local base_fog_hole_scale = LEGACY_FOG_HOLE_SCALE
-    if GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE) <= 0 then
-        local light_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "LightComponent")
-        if light_comp ~= nil then
-            base_radius = ComponentGetValue2(light_comp, "radius")
-        end
-        local fog_hole_sprite = GetFogHoleSprite(entity_id)
-        if fog_hole_sprite ~= nil then
-            base_fog_hole_scale = ComponentGetValue2(fog_hole_sprite, "special_scale_x")
-        end
+    local base_radius = 0
+    local base_fog_hole_scale = 0
+    local light_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "LightComponent")
+    if light_comp ~= nil then
+        base_radius = ComponentGetValue2(light_comp, "radius")
+    end
+    local fog_hole_sprite = GetFogHoleSprite(entity_id)
+    if fog_hole_sprite ~= nil then
+        base_fog_hole_scale = ComponentGetValue2(fog_hole_sprite, "special_scale_x")
     end
 
     SetStorageFloat(entity_id, BASE_LIGHT_RADIUS_STORAGE, base_radius)

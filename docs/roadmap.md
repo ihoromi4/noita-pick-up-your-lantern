@@ -87,6 +87,13 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
   - Implement gameplay incentives for leaving light fixtures hanging in the world (e.g., safe illumination zones, stations to reignite unlit lanterns, enemy debuff zones, or fog of war landmarks).
   - Counteract the tendency to treat lanterns purely as disposable weapons.
   - Hang a held lantern on the ceiling above the player with the Left Mouse Button (LMB); without a ceiling within reach the lantern stays in hand. The Right Mouse Button (RMB) keeps the vanilla throw.
+- **Lantern Modifiers**:
+  - Cracked glass modifier: a lantern that takes damage without breaking (e.g., a fall or a projectile hit) has a 33% chance to crack. A cracked lantern has a 50% chance every 30 frames to emit a particle of gaseous fire (`fire`), both in the world and in hand, so it can set the player on fire. Does not appear when lantern progression is disabled. Described by a sentence in the item description.
+  - Keep the configuration of all lantern modifiers (IDs, description keys, roll chances and behaviour parameters) in a single file.
+  - Allow a lantern to carry several modifiers at once; the modifier configuration defines how modifiers interact with each other (e.g., which ones are incompatible, replace or combine with each other).
+- **Settings Presets**:
+  - Add a `Preset` option as the first entry in Mod Settings that sets all other options at once: Light Touch (default, minimal changes: vanilla vision, lantern progression off), Atmospheric (Dark 50% vision), Survival (Minimal 10% vision, 25% belt light) and Pitch Black (0% vision, 25% belt light). Lantern progression is on in every preset except Light Touch.
+  - Changing any option by hand switches the preset to `Custom`; new-game options of a preset take effect in the next run.
 - **Fire Enemies Lighting Rework**:
   - Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness.
   - Cover vanilla fire enemies: Fire Mage (Stendari), Fire Spirit (Liekkiö), Hell Spitter (Helvetin sylkijä), Hell Gazer (Helvetinkatse), Hellfire Mage (Eldari), perhaps some others.
