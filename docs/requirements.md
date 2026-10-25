@@ -114,8 +114,10 @@ List of light fixtures in the game; only specific ones are pickable items, while
   - Light fixtures do not illuminate areas afflicted by magical darkness.
 - Environmental fog of war:
   - Fixtures clear fog of war in an area around them, allowing the player to spot threats from afar.
-- Strategic incentives for leaving fixtures in place (Under Investigation):
-  - Investigate mechanics that reward leaving fixtures in the environment (e.g., safe zones where certain enemies refuse to approach, zones applying minor enemy debuffs, or stable stations to reignite extinguished handheld lanterns).
+  - A separate "Enemy Study" category in Mod Settings, not affected by presets: a toggle for the mechanic (off by default), the bonus of a fully studied enemy (10%, 25%, 50%, 100%) and the base study time (3, 5, 10, 30 seconds; 10 by default).
+  - While an enemy is within the study radius, in direct line of sight of the player (raycast) and within the light radius of a lantern in the world or in hand (not on the belt), the player's damage against this enemy grows from 0% to the configured bonus. An enemy whose study has begun has a small semi-transparent dot above its head: yellow while it is being studied, red while its study is paused (out of light or sight), green once it is fully studied.
+  - The player studies enemy types. Each enemy type has a knowledge counter: the sum of the study progress (0 to 1) of all its enemies, so five fully studied enemies give 5. Related enemies share part of their knowledge: other variants of the same enemy (e.g. a weak and a normal zombie) give half of theirs, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth. The study takes the base study time at knowledge 0 and shrinks linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge.
+  - The accumulated bonus is kept after the enemy leaves the light or the line of sight.
 - Natural Fear Mode (Under Investigation):
   - Mod settings toggle for "Natural Fear": specific animal/beast enemy categories (`herd_id`) avoid lantern light and keep their distance from the player. Exact enemy categories and AI behavior require separate R&D.
 - Open-flame variants:

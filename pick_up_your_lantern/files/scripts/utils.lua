@@ -5,18 +5,28 @@ local PLAYER_TAG = "player_unit"
 -- Player storage with a lantern thrown with the left mouse button, to be returned to the hand.
 RETURN_LANTERN_STORAGE = "pul_return_lantern_id"
 
+---Finds an existing VariableStorageComponent by name without creating one.
+---@param entity_id number The target entity ID.
+---@param name string The unique name of the variable storage.
+---@return number|nil component_id The found component ID, or nil if the entity has none.
+function FindVariableStorage(entity_id, name)
+    for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "VariableStorageComponent") or {}) do
+        if ComponentGetValue2(comp, "name") == name then
+            return comp
+        end
+    end
+
+    return nil
+end
+
 ---Retrieves an existing VariableStorageComponent by name, or creates a new one.
 ---@param entity_id number The target entity ID.
 ---@param name string The unique name of the variable storage.
 ---@return number component_id The found or newly created component ID.
 function GetOrCreateVariableStorage(entity_id, name)
-    local comps = EntityGetComponentIncludingDisabled(entity_id, "VariableStorageComponent")
-    if comps ~= nil then
-        for _, comp in ipairs(comps) do
-            if ComponentGetValue2(comp, "name") == name then
-                return comp
-            end
-        end
+    local comp = FindVariableStorage(entity_id, name)
+    if comp ~= nil then
+        return comp
     end
 
     return EntityAddComponent2(entity_id, "VariableStorageComponent", {

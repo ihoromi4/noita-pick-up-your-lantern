@@ -171,6 +171,18 @@ local function GetOptionSettings()
     return options
 end
 
+---Returns the option settings controlled by presets, skipping options marked with `preset_excluded`.
+---@return table[]
+local function GetPresetSettings()
+    local options = {}
+    for _, setting in ipairs(GetOptionSettings()) do
+        if not setting.preset_excluded then
+            table.insert(options, setting)
+        end
+    end
+    return options
+end
+
 ---Returns the preset with the given ID, or nil.
 ---@param preset_id string
 ---@return table|nil
@@ -199,7 +211,7 @@ end
 ---@param mod_id string
 ---@param preset table
 local function ApplyPreset(mod_id, preset)
-    for _, setting in ipairs(GetOptionSettings()) do
+    for _, setting in ipairs(GetPresetSettings()) do
         ModSettingSetNextValue(mod_setting_get_id(mod_id, setting), GetPresetValue(preset, setting), false)
     end
 end
@@ -217,7 +229,7 @@ end
 ---Sets the preset setting to the preset matching the current option values, or to Custom.
 ---@param mod_id string
 local function SyncPreset(mod_id)
-    local settings = GetOptionSettings()
+    local settings = GetPresetSettings()
     local matched_id = PRESET_CUSTOM
     for _, preset in ipairs(PRESETS) do
         local is_match = true
@@ -320,7 +332,7 @@ mod_settings = {
         ui_description = "$pick_up_your_lantern_preset_desc",
         name_fallback = "Preset",
         desc_fallback =
-        "Sets all other options at once. Changing an option by hand switches the preset to Custom.\nNew-game options take effect in the next run.",
+        "Sets all options except Enemy Study at once. Changing an option by hand switches the preset to Custom.\nNew-game options take effect in the next run.",
         value_default = PRESET_DEFAULT,
         scope = MOD_SETTING_SCOPE_RUNTIME,
         ui_fn = ModSettingPreset,
@@ -458,6 +470,65 @@ mod_settings = {
                 scope = MOD_SETTING_SCOPE_NEW_GAME,
                 ui_fn = ModSettingBool,
                 change_fn = OnOptionChanged,
+            },
+        },
+    },
+    {
+        category_id = "enemy_study_category",
+        ui_name_key = "$pick_up_your_lantern_category_enemy_study",
+        ui_description_key = "$pick_up_your_lantern_category_enemy_study_desc",
+        name_fallback = "Enemy Study",
+        desc_fallback = "Configure studying enemies in lantern light. Presets do not change these options.",
+        foldable = true,
+        _folded = false,
+        settings = {
+            {
+                id = "enemy_study",
+                ui_name = "$pick_up_your_lantern_enemy_study_name",
+                ui_description = "$pick_up_your_lantern_enemy_study_desc",
+                name_fallback = "Enemy study",
+                desc_fallback =
+                "Watching an enemy in lantern light studies it and raises your damage against it.\nA dot above the enemy shows its study: yellow while studied, red while paused, green once studied.\nThe more you study enemies of a type, the faster you study the next ones.",
+                value_default = false,
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingBool,
+                preset_excluded = true,
+            },
+            {
+                id = "enemy_study_damage_bonus",
+                ui_name = "$pick_up_your_lantern_enemy_study_damage_bonus_name",
+                ui_description = "$pick_up_your_lantern_enemy_study_damage_bonus_desc",
+                name_fallback = "Studied enemy damage bonus",
+                desc_fallback =
+                "Extra damage you deal to a fully studied enemy.",
+                value_default = "0.25",
+                values = {
+                    { "0.1",  "$pick_up_your_lantern_study_bonus_low",    "+10%", },
+                    { "0.25", "$pick_up_your_lantern_study_bonus_medium", "+25%", },
+                    { "0.5",  "$pick_up_your_lantern_study_bonus_high",   "+50%", },
+                    { "1.0",  "$pick_up_your_lantern_study_bonus_double", "+100%", },
+                },
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingEnum,
+                preset_excluded = true,
+            },
+            {
+                id = "enemy_study_duration",
+                ui_name = "$pick_up_your_lantern_enemy_study_duration_name",
+                ui_description = "$pick_up_your_lantern_enemy_study_duration_desc",
+                name_fallback = "Base study time",
+                desc_fallback =
+                "Time to study an enemy of a type you know nothing about.\nKnowing a type and its relatives shortens it down to 0.5 seconds. Bosses always take 120 seconds.",
+                value_default = "10",
+                values = {
+                    { "3",  "$pick_up_your_lantern_study_duration_3",  "3 s", },
+                    { "5",  "$pick_up_your_lantern_study_duration_5",  "5 s", },
+                    { "10", "$pick_up_your_lantern_study_duration_10", "10 s", },
+                    { "30", "$pick_up_your_lantern_study_duration_30", "30 s", },
+                },
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingEnum,
+                preset_excluded = true,
             },
         },
     },

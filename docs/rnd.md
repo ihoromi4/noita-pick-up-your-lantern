@@ -16,7 +16,7 @@ This document contains an index of research, Noita engine technical details, and
 - "Limited Visibility" game mode, making handheld lanterns significantly more useful.
 - "Natural Fear" mode, where certain enemy types (wild beasts category) fear lantern light and keep their distance from the player.
 - Player can pick up open-flame oil lamps and braziers that ignite combustible materials and surrounding enemies, extinguish when submerged in liquid, and reignite near fire.
-- The player should benefit from lanterns left hanging in the world, and conversely receive a penalty for picking up a lantern (so lanterns are not perceived merely as disposable incendiary projectiles).
+- Enemy study: an enemy watched in lantern light raises the player's damage against it; the more the player has studied enemies of a type and its relatives (variants of the same enemy, its herd), the faster the next ones of that type are studied.
 - Displaying the first lantern from the inventory on the player's belt and passive base illumination when the lantern is not equipped as the active item in hands (reference: "Extra Backpack" mod, Steam ID: 3807317449).
 - Varied lantern properties (light radius, illuminated area size, quality tiers based on depth) as internal progression.
 - Dynamic lantern states influenced by the environment: for example, after the player dips in oil, the lantern shines brighter until the player dives into water.
@@ -38,4 +38,5 @@ This document contains an index of research, Noita engine technical details, and
 - [Player Polymorph and Lighting System](rnd/polymorph-and-lighting.md) - engine polymorph mechanics, `polytools` library, bug with darkness loss after transformation, and fix options.
 - [Lantern Progression: Quality Tiers and Modifiers](rnd/lantern-progression.md) - depth-based quality tiers, rare modifiers (flickering, frail), current implementation, and future ideas.
 - [Lantern Properties and Dynamic States](rnd/lantern-properties-and-states.md) - lantern quality tiers, depth progression, and lighting changes depending on liquids (oil, water, etc.).
+- [Enemy Study](rnd/enemy-study.md) - damage bonus against enemies watched in the light: line of sight and lit area checks, per-enemy bonus storage, damage hooks, and study markers above enemies.
 - [YAML Localization](rnd/yaml-localization.md) - postponed idea of storing translations in YAML (`.yaml.txt`) and converting them to CSV at startup via `tinyyaml`; limitations, pros and cons.
