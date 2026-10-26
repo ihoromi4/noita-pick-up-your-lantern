@@ -13,6 +13,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_liquid_state.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_hang.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/enemy_study.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/patch_light_sources.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/fire_enemy_glow.lua")
 
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
@@ -66,6 +67,7 @@ function OnWorldPreUpdate()
     UpdateLanternHang()
     UpdateLanternIllumination()
     UpdateEnemyStudy()
+    UpdateFireEnemyGlow()
 end
 
 ---Called once every frame after the game world is updated.

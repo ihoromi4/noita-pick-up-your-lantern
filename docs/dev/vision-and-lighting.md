@@ -13,6 +13,7 @@ How the mod limits the player's vision, lets light sources cut through the darkn
 - [Polymorph](#polymorph)
 - [All-Seeing Eye](#all-seeing-eye)
 - [Glowing Materials and Burning Entities](#glowing-materials-and-burning-entities)
+- [Fire Enemy Glow](#fire-enemy-glow)
 
 ## Why Vanilla Components Are Not Enough
 
@@ -199,3 +200,15 @@ The effect entity follows its host, so a burning enemy or player lights the cave
 - The blur radius in `post_glow1.frag` (horizontal) and `post_glow2.frag` (vertical) grows from 5.0 to 10.0 pixels (`BLUR_RADIUS`), widening the halo around fire, lava and sparks.
 - In `post_glow1.frag`, the normalization changes from `0.1` to `0.05` (21 samples instead of 11), so the glow does not get brighter.
 - In `post_glow2.frag`, the decay factor changes from `1.0 / 12.2` to `1.0 / 23.0`, keeping the vanilla glow decay rate without white build-up.
+
+## Fire Enemy Glow
+
+`files/scripts/fire_enemy_glow.lua` gives fire-related enemies a bright light and a fog of war hole, so they stand out in darkness. It is always on.
+
+- `UpdateFireEnemyGlow()` runs from `OnWorldPreUpdate` every 30 frames and checks root entities with the `enemy`, `boss` or `boss_dragon` tag within 512 px of the camera.
+- Each enemy is checked once and gets the `pul_fire_glow_checked` tag. The tag is saved with the entity, so the light is not added again after loading.
+- Vanilla fire enemies (`data/entities/animals/**/<name>.xml`) take their radius and colour from `VANILLA_GLOWS`. Other enemies are scored by fire signs (fire herd, fire keyword in the name, fire attack, fire blood, fire particles), and a score of 2 or more makes them glow orange with a radius of `GLOW_BASE_RADIUS + GLOW_RADIUS_PER_SCORE * score` (100 + 50 × score, from 200 to 400 px).
+- The light is a new `LightComponent` with the `pul_fire_glow` tag, centred on the hitbox, with `fade_out_time="1.0"` and `update_properties="1"` (without it, a light added at runtime stays invisible). The vanilla light of the enemy is left alone.
+- When `Illuminate the darkness` is on, a fog of war hole `SpriteComponent` (`fog_of_war_hole_64.xml`, alpha 0.55, `pul_fire_glow` tag) is added at the same offset. Its scale is `radius * 1.2 / 280` (the lantern proportion) times `GetIlluminationScale()`. Without it, the light lifts only the mod darkness, and the enemy stays hidden in the vanilla fog of war of unexplored areas.
+
+Research, the vanilla list and the heuristic: [Fire Enemies](../rnd/fire-enemies.md).

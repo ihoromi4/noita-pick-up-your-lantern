@@ -41,4 +41,5 @@ This document contains an index of research, Noita engine technical details, and
 - [Lantern Progression: Quality Tiers and Modifiers](rnd/lantern-progression.md) - depth-based quality tiers, rare modifiers (flickering, frail), current implementation, and future ideas.
 - [Lantern Properties and Dynamic States](rnd/lantern-properties-and-states.md) - lantern quality tiers, depth progression, and lighting changes depending on liquids (oil, water, etc.).
 - [Enemy Study](rnd/enemy-study.md) - damage bonus against enemies watched in the light: line of sight and lit area checks, per-enemy bonus storage, damage hooks, and study markers above enemies.
+- [Fire Enemies](rnd/fire-enemies.md) - brighter light of fire-related enemies: vanilla list, runtime light, detection heuristic for enemies of other mods, and options for attracting fire enemies to lanterns.
 - [YAML Localization](rnd/yaml-localization.md) - postponed idea of storing translations in YAML (`.yaml.txt`) and converting them to CSV at startup via `tinyyaml`; limitations, pros and cons.

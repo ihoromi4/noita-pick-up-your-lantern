@@ -98,7 +98,7 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
   - Changing any option by hand switches the preset to `Custom`; new-game options of a preset take effect in the next run.
 - **Fire Enemies Lighting Rework**:
   - Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness.
-  - Cover vanilla fire enemies: Fire Mage (Stendari), Fire Spirit (Liekkiö), Hell Spitter (Helvetin sylkijä), Hell Gazer (Helvetinkatse), Hellfire Mage (Eldari), perhaps some others.
+  - Cover vanilla fire enemies: Fire Mage (Stendari), Hellfire Mage (Eldari), Fire Spirit (Liekkiö), Hell Gazer (Helvetinkatse), fire bugs, the flamethrower robot, the Molotov Hiisi and the Dragon.
   - Implement a procedural patch that automatically detects similar fire-related enemies added by other mods and applies the same lighting enhancements.
   - Lanterns attract fire-related enemies.
 - **Natural Fear Mode**:

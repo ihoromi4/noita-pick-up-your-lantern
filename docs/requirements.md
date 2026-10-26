@@ -122,8 +122,10 @@ List of light fixtures in the game; only specific ones are pickable items, while
   - While an enemy is within the study radius, in direct line of sight of the player (raycast) and within the light radius of a lantern in the world or in hand (not on the belt) or of a projectile with the Light spell modifier (`LIGHT`), the player's damage against this enemy grows from 0% to the configured bonus. An enemy whose study has begun has a small semi-transparent dot above its head: yellow while it is being studied, red while its study is paused (out of light or sight), green once it is fully studied.
   - The player studies enemy types. Each enemy type has a knowledge counter: the sum of the study progress (0 to 1) of all its enemies, so five fully studied enemies give 5. Related enemies share part of their knowledge: other variants of the same enemy (e.g. a weak and a normal zombie) give half of theirs, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth. The study takes the base study time at knowledge 0 and shrinks linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge.
   - The accumulated bonus is kept after the enemy leaves the light or the line of sight.
-- Fire enemies attraction (Under Investigation):
-  - Lanterns attract fire-related enemies.
+- Fire enemies:
+  - Fire-related enemies glow noticeably brighter than other enemies and dispel fog of war around themselves, so they stand out in darkness. Always on.
+  - Vanilla fire enemies have tuned light; fire-related enemies of other mods are detected automatically.
+  - Lanterns attract fire-related enemies (Under Investigation).
 - Natural Fear Mode (Under Investigation):
   - Mod settings toggle for "Natural Fear": enemy categories (`herd_id`) react to lantern light. Zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas. Exact enemy categories and AI behavior require separate R&D.
 - Open-flame variants:

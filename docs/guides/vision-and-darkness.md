@@ -34,6 +34,7 @@ Light cuts through the darkness no matter how far it is from you:
 - hanging lanterns, chain torches, torch stands, mining lamps, temple lanterns, tube lamps and burning barrels;
 - fire, burning oil, lava, molten metal, acid, radioactive liquid, plasma and sparks, which glow brighter than in vanilla;
 - burning creatures, including you, which light up the cave around them;
+- fire creatures, such as Stendari, Liekkiö and Helvetinkatse, which glow much brighter than other enemies and dispel the fog of war around them, so you can spot them from afar;
 - explosions.
 
 The `Illuminate the darkness` setting controls whether lanterns and other light sources clear the fog of war around them. The `Illuminated area size` setting makes their light reach further.

@@ -45,9 +45,9 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Fire Enemies Lighting Rework
 
-- [ ] Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness.
-- [ ] Cover vanilla fire enemies: Fire Mage (Stendari), Fire Spirit (Liekkiö), Hell Spitter (Helvetin sylkijä), Hell Gazer (Helvetinkatse), Hellfire Mage (Eldari), perhaps some others.
-- [ ] Implement a procedural patch that automatically detects similar fire-related enemies added by other mods and applies the same lighting enhancements.
+- [x] Make fire-related enemies glow noticeably brighter than other enemies so they stand out in darkness. Always on, no Mod Settings option. Fire enemies around the camera get an extra `LightComponent` at runtime, checked once per enemy, and dispel fog of war around themselves (unless `Illuminate the darkness` is off). Details: [fire-enemies.md](../rnd/fire-enemies.md).
+- [x] Cover vanilla fire enemies with tuned light radius and colour: Fire Mage (Stendari, `firemage_weak`), Hellfire Mage (Eldari, `firemage`, blue), Fire Spirit (Liekkiö, `fireskull`), Hell Gazer (Helvetinkatse, `gazer`), fire bugs (`firebug`, `bigfirebug`), the flamethrower robot (`flamer`), the Molotov Hiisi (`miner_fire`) and the Dragon (`boss_dragon`). Hell Spitter (Helvetin sylkijä, `spitmonster`) is left out: nothing in its data is fire-related.
+- [x] Implement a procedural patch that automatically detects similar fire-related enemies added by other mods and applies the same lighting enhancements. Done at runtime by a score of fire signs (fire herd, name, attack, blood, particles). An offline run over vanilla files marks no non-fire enemy. The light radius grows with the score: 100 + 50 × score.
 - [ ] Lanterns attract fire-related enemies.
 
 ## Natural Fear Mode
