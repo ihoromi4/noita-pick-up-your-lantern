@@ -84,3 +84,19 @@ Lanterns spawn with a quality from dim to masterwork, and rarely with modifiers.
 
 - Default: off (Light Touch preset). On in all other presets.
 - Applies: new game.
+
+### Lanterns Attract Fire Enemies
+
+Fire creatures, such as Stendari and Liekkiö, that see a lit lantern in the world gather around it, like moths to a flame. Spellbound by the light, they notice you only up close and wake up when hurt. Lanterns in your hands, inventory or on your belt do not attract them.
+
+- Default: on.
+- Applies: immediately.
+- Not affected by presets.
+
+### Natural Fear
+
+Creatures react to lantern light by their nature. Hiisi and insects that see a lit lantern in the world gather around it, the same way fire creatures do. Spellbound by the light, they notice you only up close and wake up when hurt.
+
+- Default: off.
+- Applies: immediately.
+- Not affected by presets.

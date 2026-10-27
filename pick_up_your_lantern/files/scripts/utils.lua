@@ -9,6 +9,9 @@ RETURN_LANTERN_STORAGE = "pul_return_lantern_id"
 -- Lantern XML files declare it directly, so a change here must be repeated there.
 LIGHT_SOURCE_TAG = "pul_light_source"
 
+-- Tag of fire-related enemies, set by the fire enemy glow when it lights them.
+FIRE_ENEMY_TAG = "pul_fire_enemy"
+
 ---Finds an existing VariableStorageComponent by name without creating one.
 ---@param entity_id number The target entity ID.
 ---@param name string The unique name of the variable storage.

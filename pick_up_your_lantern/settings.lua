@@ -471,6 +471,32 @@ mod_settings = {
                 ui_fn = ModSettingBool,
                 change_fn = OnOptionChanged,
             },
+            {
+                id = "fire_enemy_attraction",
+                ui_name = "$pick_up_your_lantern_fire_enemy_attraction_name",
+                ui_description = "$pick_up_your_lantern_fire_enemy_attraction_desc",
+                name_fallback = "Lanterns attract fire enemies",
+                desc_fallback =
+                "Fire creatures that see a lit lantern in the world gather around it, like moths to a flame.\nSpellbound by the light, they notice you only up close and wake up when hurt.\nLanterns in your hands, inventory or on your belt do not attract them.\nNot affected by presets.",
+                value_default = true,
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingBool,
+                change_fn = OnOptionChanged,
+                preset_excluded = true,
+            },
+            {
+                id = "natural_fear",
+                ui_name = "$pick_up_your_lantern_natural_fear_name",
+                ui_description = "$pick_up_your_lantern_natural_fear_desc",
+                name_fallback = "Natural Fear",
+                desc_fallback =
+                "Creatures react to lantern light by their nature.\nHiisi and insects that see a lit lantern in the world gather around it.\nSpellbound by the light, they notice you only up close and wake up when hurt.\nNot affected by presets.",
+                value_default = false,
+                scope = MOD_SETTING_SCOPE_RUNTIME,
+                ui_fn = ModSettingBool,
+                change_fn = OnOptionChanged,
+                preset_excluded = true,
+            },
         },
     },
     {

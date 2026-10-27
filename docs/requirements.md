@@ -125,9 +125,9 @@ List of light fixtures in the game; only specific ones are pickable items, while
 - Fire enemies:
   - Fire-related enemies glow noticeably brighter than other enemies and dispel fog of war around themselves, so they stand out in darkness. Always on.
   - Vanilla fire enemies have tuned light; fire-related enemies of other mods are detected automatically.
-  - Lanterns attract fire-related enemies (Under Investigation).
+  - Lit lanterns in the world attract fire-related enemies: they gather around the lantern and do not attack it. The light holds them in a trance: they notice the player only up close and fight as usual once they find prey (the player came close or hurt them). Enemies that already hunt are not lured. Lanterns in hand, in the inventory or on the belt do not attract. A Mod Settings toggle, on by default and not affected by presets.
 - Natural Fear Mode (Under Investigation):
-  - Mod settings toggle for "Natural Fear": enemy categories (`herd_id`) react to lantern light. Zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas. Exact enemy categories and AI behavior require separate R&D.
+  - Mod settings toggle for "Natural Fear": enemy categories (`herd_id`) react to lantern light. Zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas. Hiisi and insects (herds `orcs` and `fly`) are attracted to lit lanterns in the world, as fire enemies are; the toggle is off by default and not affected by presets. Exact enemy categories and AI behavior require separate R&D.
 - Open-flame variants:
   - Separate class of open-flame lamps/torches that can actively ignite flammable surfaces and enemies on contact, extinguish quickly in liquid, and reignite near fire.
 - Limited Visibility Mode:

@@ -10,6 +10,7 @@ Hanging oil lanterns are no longer just decoration: you can take them down, carr
 - [Lantern on Your Belt](#lantern-on-your-belt)
 - [Throwing](#throwing)
 - [Knocking Lanterns Down](#knocking-lanterns-down)
+- [Luring Fire Creatures](#luring-fire-creatures)
 
 ## Which Lanterns Can Be Picked Up
 
@@ -61,3 +62,16 @@ The left mouse button does not throw a held lantern. It hangs the lantern on the
 
 - **Kick** a hanging lantern to tear it off the ceiling.
 - **Destroy the ceiling** above a lantern, and it falls down.
+
+## Luring Fire Creatures
+
+Fire creatures, such as Stendari and Liekkiö, are drawn to a lit lantern hanging, lying or thrown in the world. Once they see it, they gather around it and stay close.
+
+- They do not attack the lantern.
+- The light holds them in a trance: they notice you only when you come close, and wake up when you hurt them. Sneak past them, or strike first and fight them one by one.
+- A creature that is already fighting you is not lured.
+- A lantern in your hands, inventory or on your belt does not lure them.
+- Throw or hang a lantern to lead fire creatures away, or to gather them in one place.
+- Once a creature is lured, it stays near the lantern even if it loses sight of it for a moment.
+- The `Lanterns attract fire enemies` setting turns this off. See [Settings](settings.md#lanterns-attract-fire-enemies).
+- With the `Natural Fear` setting, Hiisi and insects are lured the same way. See [Settings](settings.md#natural-fear).

@@ -10,6 +10,10 @@ Research on the "Fire Enemies Lighting Rework" planned for version 0.3 (see [ver
 - [Fire Detection Heuristic](#fire-detection-heuristic)
 - [Light Parameters](#light-parameters)
 - [Attraction to Lanterns](#attraction-to-lanterns)
+  - [Design](#design)
+  - [In-Game Findings](#in-game-findings)
+  - [Current Status and Next Steps](#current-status-and-next-steps)
+  - [Open Questions](#open-questions)
 - [Edge Cases](#edge-cases)
 - [Relevant Game Files](#relevant-game-files)
 - [Implementation](#implementation)
@@ -21,7 +25,7 @@ Research on the "Fire Enemies Lighting Rework" planned for version 0.3 (see [ver
 - The glow is always on, with no Mod Settings option: like the light of burning entities, it is a lighting fix rather than a mode.
 - Vanilla fire enemies have tuned light: Stendari, Eldari, Liekkiö, Helvetinkatse, the fire bugs, the flamethrower robot, the Molotov Hiisi and the Dragon.
 - Fire-related enemies of other mods are detected automatically and get the same kind of light.
-- Lanterns attract fire-related enemies (see [Attraction to Lanterns](#attraction-to-lanterns), not implemented yet).
+- Lit lanterns in the world (hanging, thrown or lying) attract fire-related enemies: they gather around the lantern like moths to a flame and do not attack it. The light holds them in a trance: they notice the player only up close and fight as usual once they find prey, so the lantern gives a tactical advantage (sneak past, strike first, fight one by one). Lanterns in hand, in the inventory or on the belt do not attract. A Mod Settings option, on by default and not affected by presets, turns the attraction off (see [Attraction to Lanterns](#attraction-to-lanterns)).
 
 ## Vanilla Fire Enemies
 
@@ -108,13 +112,92 @@ Ideas not used:
 
 ## Attraction to Lanterns
 
-Not implemented. The engine has no Lua call that sends an `AnimalAIComponent` to a point, so the options need in-game tests:
+The engine has no Lua call that sends an `AnimalAIComponent` to a point, and no vanilla script changes AI targets. The tools found in the component documentation, vanilla files and other mods:
 
-- **Home position.** `AnimalAIComponent` has private fields used by the idle and return-home jobs. **[Needs verification]** whether writing a home or target position (e.g. `mHomePosition`) makes an idle enemy walk or fly to a lantern, and whether the engine overwrites it.
-- **Lantern as prey.** Give a lantern in the world a `GenomeDataComponent` with a herd that the fire herds hunt, so the AI targets it. Fire enemies would then attack the lantern, and could break it. **[Needs verification]** whether the AI targets entities without a `DamageModelComponent`, and how herd relations can be changed (`data/genome_relations.csv` is loaded by the engine).
-- **Steering.** Every few frames, nudge the velocity of idle fire enemies (`CharacterDataComponent.mVelocity`, or `VelocityComponent` for flyers) towards the nearest lantern within a radius. Fully under mod control, but it may fight the AI and look unnatural.
+| Tool | How it works | Verdict |
+| --- | --- | --- |
+| `AnimalAIComponent.mHomePosition` + `max_distance_to_move_from_home` | The AI stays within the distance from its home. Vanilla leashes `firebug.xml` and `bigfirebug.xml` to their spawn point (256 px). Spellbound Bundle (workshop 1976795806, `set_home_on_player.lua`) moves the home of its drone to the player every 40 frames with a 60 px leash, and the drone follows the player | **Chosen**: native movement and pathfinding, nothing to fight |
+| `AnimalAIComponent.mGreatestPrey` | Writable from Lua (Goki's Things, `hero_mode_ai.lua`, sets it to the player). The AI hunts the entity | Rejected: the enemy would attack the lantern and break it |
+| Velocity steering (`CharacterDataComponent.mVelocity`, `VelocityComponent`) | The mod pushes the enemy towards the lantern every few frames | Rejected: fights the AI and looks unnatural |
+| `WormAttractorComponent` | Attracts or repels worms | Rejected: worms only |
 
-Open questions: the attraction radius, whether lanterns in hand and on the belt attract too, and what a fire enemy does once it reaches a lantern.
+`max_distance_to_move_from_home` is 0 (no leash) for most enemies, so moving the home alone does nothing: the leash has to be set too.
+
+### Design
+
+`files/scripts/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../versions/version-0.3.md#natural-fear-mode) mode, which attracts Hiisi and insects.
+
+- **Lured enemies**: root entities with the `enemy` tag within the attraction radius of a lure lantern, plus the enemies attracted earlier (to release them). An enemy is lured when:
+  - `Lanterns attract fire enemies` is on and it has the `pul_fire_enemy` tag, which the glow scan adds to every enemy it lights;
+  - or `Natural Fear` is on and its herd is `orcs` (Hiisi, with their tanks, turrets and `friend.xml`) or `fly` (insects).
+
+  Bosses, charmed enemies, a polymorphed player and hunting enemies (see Trance) are skipped.
+- **Lure lanterns**: entities with the `lantern` tag that are their own root entity (not held, not in the inventory) and have an enabled `LightComponent` with the `pul_light_source` tag (lit). Vanilla hanging lanterns count too. The attraction radius is 1.5 times the current light radius, which already includes the quality tier, liquid state and modifiers (about 420 px for a large lantern).
+- **Line of sight to start, radius to stay.** A free enemy takes the nearest lantern it sees (`RaytraceSurfaces`). The ray stops 10 px before the lantern (`SIGHT_MARGIN`): the lantern body is solid cells in the world grid, and a hanging lantern sits right under the ceiling, so a ray to its centre always hit something and no enemy was ever attracted. An attracted enemy keeps the lantern it took (its entity ID is kept in the storage, see Release) and needs only the radius to stay: otherwise it flipped between the lantern and its own home whenever a ledge hid the lantern while it moved. It does not switch to a nearer lantern, which it may not even see (see [In-Game Findings](#in-game-findings)).
+- **Walking enemies only on the lantern level.** A walking enemy is lured only while the floor below the lantern is within `WALKING_LEVEL_TOLERANCE` (24 px) of its feet (`EntityGetTransform`). A walker whose home is on another level stands still (see [In-Game Findings](#in-game-findings)).
+- **Markov process.** On every update, a free enemy that sees a lantern takes it as its home with `LURE_ENTER_CHANCE` (10%, about 3 seconds on average), and a lured enemy leaves it to wander with `LURE_LEAVE_CHANCE` (3%, about 11 seconds). Enemies come and go instead of sticking to a lantern for good. The idea came from the user. The enter chance of a free enemy is rolled before the lantern search, so 90% of free enemies skip the line of sight raytraces on an update.
+- **Cost.** Per update, the AI components of each candidate are read once and passed on, and the lure group (fire tag or herd) is checked before the other exclusions, as most enemies near lanterns belong to no lured group. The floor below a lantern is found once per update.
+- **Home and leash.**
+  - Flying enemies (`AnimalAIComponent.can_fly` is 1): home at the lantern, leash `LEASH_DISTANCE` (40 px).
+  - Walking enemies: home on the floor below the lantern (a ray down from 10 px below the lantern, up to 200 px, 4 px above the hit; the lantern itself if there is no floor), found once per lantern per update. The leash is never shorter than the current distance from home plus `WALKING_LEASH_MARGIN` (16 px) and only shrinks as the enemy comes closer, down to 40 px (see [In-Game Findings](#in-game-findings)).
+  - The home is set on every update, as a thrown lantern keeps moving.
+- **Path finding.** An attracted enemy gets `pathfinding_max_depth_no_target` 200 (`LURED_PATHFINDING_DEPTH`, default 50, no vanilla Hiisi override it): with 50 nodes, walkers found no path to a distant home (see [In-Game Findings](#in-game-findings)).
+- **Trance.** Before it, attraction gave no tactical advantage: lured enemies only stood elsewhere and still attacked the player (third test). An attracted enemy gets `creature_detection_range_x` and `_y` 48 (`TRANCE_DETECTION_RANGE`; vanilla Hiisi have 180–300 px), so it notices the player only up close. An enemy whose `mGreatestPrey` is a living entity is not lured: an enemy that is already fighting takes no lantern, and an attracted one that finds prey (the player came within 48 px, or hit it, as the AI counter-attacks with `attack_if_damaged_probability`) is released on the next update and gets its detection range back. The player can sneak past lured enemies, strike first and fight them one by one. The idea of the user, chosen from: trance, luring away (lower leave chance), clustering for area damage.
+- **Release.** The original AI values are saved in a `VariableStorageComponent` named `pul_lantern_attraction` on the first attraction: the leash in `value_float`, `"home_x,home_y,range_x,range_y,depth"` in `value_string` and the lantern entity ID in `value_int`, and the enemy gets the `pul_lantern_attracted` tag. When the enemy leaves by chance, hunts, no lantern attracts it (picked up, extinguished, out of range), it is charmed, or its option is off, the original values are restored and the storage is removed.
+
+### In-Game Findings
+
+From `logger.txt` with the diagnostic output (see [Current Status and Next Steps](#current-status-and-next-steps)).
+
+Fourth test, 2026-10-27 (with the trance and the longer path finding): the user found the attraction works better now. Limanuljaska (`slimeshooter.xml`, `slimeshooter_weak.xml`, `slimeshooter_nontoxic.xml`, herd `slimes`) did not react to lanterns at all, as designed: its herd is not lured. The user decided that slime creatures and other monsters will fear the light in the Natural Fear mode, later.
+
+Third test, 2026-10-27 (`Natural Fear` on, with the lantern level check and sticky lanterns, no cheats). The user's verdict: luring gives no noticeable tactical advantage.
+
+- **Walkers still froze on their own level.** `shotgunner_weak` 454 stood at 150,381 in state 21 for minutes with its home at 329,381 (the same height, 179 px away, leash 195 px); `miner_weak` 793 (68 px from home), 795, 392 and 379 too. So the level was not the only cause. Hypothesis: `pathfinding_max_depth_no_target` (50 nodes by default, used while the AI has no prey) is too short for a distant home. The walkers that moved had their home close: `miner_weak` 631 and `shotgunner_weak` 629 reached it (from 151 and 369 px to 1–7 px), `firemage_weak` 809 from 179 to 10 px.
+- **Sticky lanterns work**: most walkers kept one lantern ID while attracted.
+- **No tactical value**: lured enemies still attacked the player as soon as they saw them, so a lantern changed only where they stood. Hence the trance (see [Design](#design)).
+- `fireskull` 807 (flying) followed lanterns, as before.
+
+Second test, 2026-10-27 (`Natural Fear` on, with the shrinking leash; at times the player was ignored by enemies, so enemies moved less). In the game, flying enemies clearly went to lanterns, while walking ones looked as if they ignored them. The log shows why:
+
+- **Walkers do go to a lantern on their own level.** `miner_weak` 483 (home 1 px above its centre) walked from 250 to 314–386 px around a home at 338 and stayed there with a 40 px leash. `alchemist` 479 went from 556 to a home at 709, then to the next lanterns at 979 and 1137. `shotgunner_weak` 412 and `miner` 1904 also reached the home and wandered around it in state 1. The shrinking leash works: 105 → 79 → 40 px as the enemy comes closer.
+- **Walkers freeze when the home is on another level**, even well inside the leash: `shotgunner_weak` 771 stood at the same pixel for 62 samples (about 2 minutes) in state 21 with the home 120 px above it (distance 126 px, leash 142 px). The same with `miner` 2136 (home 59 px below), 1896 and 1900 (160 px below), 2999 and 3005 (90–115 px below), `goblin_bomb` 3011 (45 px below), and `miner` 1904 on a ledge 28 px under its home. So state 21 does not mean "outside the leash": it is the job of going home, and a walker stands still in it when its path finding finds no way there. This is why walkers looked as if they ignored lanterns: of 13 lured walkers, about a third moved.
+- **An attracted enemy switched to a lantern it did not see.** `shotgunner_weak` 771 took a lantern on its own level (home 939,831), and on the next update the nearest lantern in range (home 1079,640, on the level above) took over, as an attracted enemy skipped the sight check. `miner` 3005 did the same (1680,2460 → 1580,2514). Fixed: an attracted enemy keeps its own lantern.
+- **The Markov process works**, but with a 3% chance to leave and 10% to come back, a walker often returns towards its spawn before it reaches the lantern, which also looks like no reaction.
+- `scavenger_mine` 2011 (flying) followed lanterns from 1830 to 1649 px high.
+- Up to 36 lure lanterns were found at once.
+
+First test, 2026-10-26:
+
+- **Flying enemies work.** `firebug`, `bigfirebug` and `fireskull` fly to the lantern and stay within 15–30 px of it (Liekkiö: from 107 px to 11 px on average). They get their original home and leash back once the lantern is picked up. A few stay where they are when no path leads to the lantern.
+- **Walking enemies froze.** A walking enemy (Stendari `firemage_weak`, Hiisi `miner_weak`, `shotgunner_weak`, `miner_fire`) whose home is moved outside its leash switches to AI state 21 and stands still for good, wherever the home is: at a hanging lantern 40 px above the floor, or on the floor 60 px aside. Before the move, the same enemy walked around in state 1. Flying enemies in state 21 fly home. A frozen enemy no longer wanders or hunts, so a plain home move is a bug for walkers. The shrinking leash is the attempted fix.
+- **Line of sight to the lantern centre was always blocked** before `SIGHT_MARGIN` (see [Design](#design)).
+- **The home follows a thrown lantern** while it flies, as long as the enemy stays within the radius.
+- `PathFindingComponent` has no public target field: the path and goal are private and driven by the AI, so there is no other native way to send a walking enemy to a point.
+- AI states seen: 1 (walking around), 5, 18 (idle, before the camera comes close), 21 (going home; walkers stand still in it when they find no path home, see the second test).
+
+### Current Status and Next Steps
+
+Work state at the end of 2026-10-27:
+
+- **Committed** (`ced8873`): fire enemy glow and fog of war hole.
+- **Ready to commit**: the whole attraction (`lantern_attraction.lua`, `FIRE_ENEMY_TAG`, the `pul_fire_enemy` tag in `fire_enemy_glow.lua`, the `fire_enemy_attraction` and `natural_fear` options, translations, docs). The temporary diagnostics (`DEBUG`, `PrintDebug()` with `[pul_attract]` lines in `logger.txt`) are removed; to debug again, print the enemy position, `ai_state`, `mHomePosition`, `max_distance_to_move_from_home`, `mGreatestPrey` and `creature_detection_range_x` every 120 frames.
+- Commit message: `feat: make lanterns attract fire enemies, Hiisi and insects`.
+
+Next steps:
+
+1. Tune `LURE_ENTER_CHANCE`, `LURE_LEAVE_CHANCE`, `LEASH_DISTANCE`, `ATTRACTION_RADIUS_FACTOR` and `TRANCE_DETECTION_RANGE` by feel.
+2. Slime creatures and other monsters avoid lantern light in the [Natural Fear](../versions/version-0.3.md#natural-fear-mode) mode instead of being attracted (see [In-Game Findings](#in-game-findings)).
+
+### Open Questions
+
+- Walkers move better with the longer path finding (`pathfinding_max_depth_no_target` 200) by the fourth test. **[Needs verification]** whether it costs too much with many attracted enemies.
+- **[Needs verification]** Whether `mGreatestPrey` returns to 0 after a fight. If it keeps a lost or distant prey for long, a once alerted enemy is not lured again for that time; a dead prey is already ignored (`EntityGetIsAlive`).
+- **[Needs verification]** Whether 48 px is a good trance range: small enough to sneak past, yet not so small that an enemy ignores the player right next to it. Ranged enemies detect along X farther than along Y in vanilla, so the two axes may need different values.
+- A hanging lantern above a pit or high in a large cave lures no walkers at all: the floor below it is too far from their level.
+- **[Needs verification]** Whether the leash moves an enemy that still idles: `JobDefault` idles until the camera has once been within `max_distance_to_cam_to_start_hunting` (300 px).
+- **[Needs verification]** Whether `mHomePosition`, a private field, survives saving and loading. If not, the next update sets it again, and the original values are kept in the storage.
+- Vanilla hanging lanterns are lure lanterns too, so lured enemies spawned near them gather there from the start. If this is unwanted, only lanterns the player has touched could lure.
 
 ## Edge Cases
 
@@ -123,6 +206,7 @@ Open questions: the attraction radius, whether lanterns in hand and on the belt 
 - **Charmed enemies**: keep their light.
 - **Enemy parts**: child entities with an enemy tag are skipped, only root entities are checked.
 - **Mod enemies that change their components at runtime**: the check runs once, on the first scan that sees the enemy.
+- **Enemies attracted before a save**: the attraction is evaluated again after loading, and the original home and leash stay in the storage until the enemy is released.
 
 ## Relevant Game Files
 
@@ -135,7 +219,11 @@ Open questions: the attraction radius, whether lanterns in hand and on the belt 
 
 | File | Role |
 | --- | --- |
-| `files/scripts/fire_enemy_glow.lua` | Vanilla light table, fire detection heuristic, light and fog of war hole components. `UpdateFireEnemyGlow()` is called from `OnWorldPreUpdate` |
+| `files/scripts/fire_enemy_glow.lua` | Vanilla light table, fire detection heuristic, light and fog of war hole components, `pul_fire_enemy` tag. `UpdateFireEnemyGlow()` is called from `OnWorldPreUpdate` |
+| `files/scripts/lantern_attraction.lua` | Lure lanterns, lured enemies (fire enemies and the Natural Fear herds), AI home, leash, path finding depth and trance (detection range) of attracted enemies. `UpdateLanternAttraction()` is called from `OnWorldPreUpdate` |
+| `files/scripts/utils.lua` | `FIRE_ENEMY_TAG` |
+| `settings.lua`, `files/translations.csv` | `fire_enemy_attraction` and `natural_fear` options in the `Gameplay` category, marked `preset_excluded = true` |
 
 - Confirmed in-game: fire enemies glow and dispel the fog of war around them.
+- Confirmed in-game: flying enemies are attracted to lanterns; walking enemies and the trance work better after the third test fixes (fourth test, user's verdict).
 - Still worth checking during play: light brightness and colours, the hitbox offset on large enemies and the Dragon, no light on non-fire enemies, no second light after loading a save.

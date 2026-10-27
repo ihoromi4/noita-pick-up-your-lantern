@@ -211,4 +211,6 @@ The effect entity follows its host, so a burning enemy or player lights the cave
 - The light is a new `LightComponent` with the `pul_fire_glow` tag, centred on the hitbox, with `fade_out_time="1.0"` and `update_properties="1"` (without it, a light added at runtime stays invisible). The vanilla light of the enemy is left alone.
 - When `Illuminate the darkness` is on, a fog of war hole `SpriteComponent` (`fog_of_war_hole_64.xml`, alpha 0.55, `pul_fire_glow` tag) is added at the same offset. Its scale is `radius * 1.2 / 280` (the lantern proportion) times `GetIlluminationScale()`. Without it, the light lifts only the mod darkness, and the enemy stays hidden in the vanilla fog of war of unexplored areas.
 
-Research, the vanilla list and the heuristic: [Fire Enemies](../rnd/fire-enemies.md).
+Every enemy that gets the light is also tagged with `pul_fire_enemy` (`FIRE_ENEMY_TAG` in `utils.lua`). `files/scripts/lantern_attraction.lua` uses the tag to draw fire enemies to lit lanterns in the world by moving the home of their AI.
+
+Research, the vanilla list, the heuristic and the attraction: [Fire Enemies](../rnd/fire-enemies.md).

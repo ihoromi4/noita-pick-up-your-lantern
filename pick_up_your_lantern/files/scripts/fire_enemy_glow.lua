@@ -7,6 +7,7 @@
 local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 
 ---@class FireGlow
@@ -289,7 +290,8 @@ local function AddGlow(enemy_id, glow)
     ComponentSetValue2(sprite_comp, "transform_offset", offset_x, offset_y)
 end
 
----Checks enemies around the camera that have not been checked yet and lights the fire-related ones.
+---Checks enemies around the camera that have not been checked yet, lights the fire-related ones
+---and marks them with FIRE_ENEMY_TAG for the lantern attraction.
 ---Runs every SCAN_INTERVAL_FRAMES frames from OnWorldPreUpdate.
 ---@return nil
 function UpdateFireEnemyGlow()
@@ -304,6 +306,7 @@ function UpdateFireEnemyGlow()
                 EntityAddTag(enemy_id, CHECKED_TAG)
                 local glow = GetFireGlow(enemy_id)
                 if glow ~= nil then
+                    EntityAddTag(enemy_id, FIRE_ENEMY_TAG)
                     AddGlow(enemy_id, glow)
                 end
             end
