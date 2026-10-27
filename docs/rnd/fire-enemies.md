@@ -143,7 +143,7 @@ The engine has no Lua call that sends an `AnimalAIComponent` to a point, and no 
   - The home is set on every update, as a thrown lantern keeps moving.
 - **Path finding.** An attracted enemy gets `pathfinding_max_depth_no_target` 200 (`LURED_PATHFINDING_DEPTH`, default 50, no vanilla Hiisi override it): with 50 nodes, walkers found no path to a distant home (see [In-Game Findings](#in-game-findings)).
 - **Trance.** Before it, attraction gave no tactical advantage: lured enemies only stood elsewhere and still attacked the player (third test). An attracted enemy gets `creature_detection_range_x` and `_y` 48 (`TRANCE_DETECTION_RANGE`; vanilla Hiisi have 180–300 px), so it notices the player only up close. An enemy whose `mGreatestPrey` is a living entity is not lured: an enemy that is already fighting takes no lantern, and an attracted one that finds prey (the player came within 48 px, or hit it, as the AI counter-attacks with `attack_if_damaged_probability`) is released on the next update and gets its detection range back. The player can sneak past lured enemies, strike first and fight them one by one. The idea of the user, chosen from: trance, luring away (lower leave chance), clustering for area damage.
-- **Release.** The original AI values are saved in a `VariableStorageComponent` named `pul_lantern_attraction` on the first attraction: the leash in `value_float`, `"home_x,home_y,range_x,range_y,depth"` in `value_string` and the lantern entity ID in `value_int`, and the enemy gets the `pul_lantern_attracted` tag. When the enemy leaves by chance, hunts, no lantern attracts it (picked up, extinguished, out of range), it is charmed, or its option is off, the original values are restored and the storage is removed.
+- **Release.** The original AI values are saved in a `VariableStorageComponent` named `pul_original_ai` (see `enemy_ai_home.lua`) on the first attraction: the leash in `value_float`, `"home_x,home_y,range_x,range_y,depth"` in `value_string` and the lantern entity ID in `value_int`, and the enemy gets the `pul_lantern_attracted` tag. When the enemy leaves by chance, hunts, no lantern attracts it (picked up, extinguished, out of range), it is charmed, or its option is off, the original values are restored and the storage is removed.
 
 ### In-Game Findings
 
@@ -174,7 +174,7 @@ First test, 2026-10-26:
 - **Line of sight to the lantern centre was always blocked** before `SIGHT_MARGIN` (see [Design](#design)).
 - **The home follows a thrown lantern** while it flies, as long as the enemy stays within the radius.
 - `PathFindingComponent` has no public target field: the path and goal are private and driven by the AI, so there is no other native way to send a walking enemy to a point.
-- AI states seen: 1 (walking around), 5, 18 (idle, before the camera comes close), 21 (going home; walkers stand still in it when they find no path home, see the second test).
+- AI states seen (names from the [AI state table](natural-fear.md#ai-states)): 1 `RandomMove` (walking around), 5 `PreparingJump`, 11 `TakingFireDamage`, 15 `AttackingRanged`, 18 `JobDefault` (idle before the camera comes close), 21 `GoNearHome` (walkers stand still in it when they find no path home, see the second test).
 
 ### Current Status and Next Steps
 
@@ -221,6 +221,7 @@ Next steps:
 | --- | --- |
 | `files/scripts/fire_enemy_glow.lua` | Vanilla light table, fire detection heuristic, light and fog of war hole components, `pul_fire_enemy` tag. `UpdateFireEnemyGlow()` is called from `OnWorldPreUpdate` |
 | `files/scripts/lantern_attraction.lua` | Lure lanterns, lured enemies (fire enemies and the Natural Fear herds), AI home, leash, path finding depth and trance (detection range) of attracted enemies. `UpdateLanternAttraction()` is called from `OnWorldPreUpdate` |
+| `files/scripts/enemy_ai_home.lua` | AI home helpers shared with the [Natural Fear](natural-fear.md) light avoidance: original AI values (`pul_original_ai` storage), home with leash and path finding depth, lured groups |
 | `files/scripts/utils.lua` | `FIRE_ENEMY_TAG` |
 | `settings.lua`, `files/translations.csv` | `fire_enemy_attraction` and `natural_fear` options in the `Gameplay` category, marked `preset_excluded = true` |
 

@@ -56,7 +56,11 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Natural Fear Mode
 
-- [ ] Mod settings toggle that changes how enemy categories (`herd_id`) react to lantern light: zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas.
+- [x] Mod settings toggle that changes how enemy categories (`herd_id`) react to lantern light: zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas.
 - [x] `Natural Fear` option in the `Gameplay` category, off by default and not affected by presets.
 - [x] Hiisi (with their tanks and turrets) and insects are attracted to lanterns, as fire enemies are. Details: [fire-enemies.md](../rnd/fire-enemies.md#attraction-to-lanterns).
-- [ ] Zombies, slime creatures (e.g. Limanuljaska) and other monsters avoid lantern light.
+- [x] Creatures that lanterns do not attract (zombies, slime creatures such as Limanuljaska, other monsters) panic in lantern light, as if it burned them. Details: [natural-fear.md](../rnd/natural-fear.md).
+- [x] Lanterns in the world and in hand scare them, vanilla hanging lanterns too; the light of the player, the belt lantern and lanterns in the inventory do not.
+- [x] Fear beats hunting: they stay in the dark while fighting the player.
+- [x] Now and then a scared creature flies into a rage (Markov process) and attacks the lantern, or the player who holds it.
+- [x] They go back to their usual behaviour once the light is gone.

@@ -19,7 +19,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 local SCAN_INTERVAL_FRAMES = 30
 -- Covers the screen with a margin, so enemies get their light before they come into view.
 local SCAN_RADIUS = 512
-local CHECKED_TAG = "pul_fire_glow_checked"
+local CHECKED_TAG = FIRE_GLOW_CHECKED_TAG
 local GLOW_TAG = "pul_fire_glow"
 -- The light fades out after the enemy dies, as the light of a burning entity does.
 local GLOW_FADE_OUT_SECONDS = 1.0

@@ -1,0 +1,20 @@
+<Entity name="pul_lantern_rage_effect" tags="pul_lantern_rage_effect" >
+
+    <!--
+        Rage of an enemy that attacks the lantern it feared, spawned by files/scripts/lantern_fear.lua as a child of
+        the enemy and killed when the rage passes. The look of the Berserk status effect (vanilla
+        data/entities/misc/effect_berserk.xml) without its GameEffectComponent, so the enemy does not attack everyone.
+    -->
+    <Base file="data/entities/particles/berserk.xml" >
+        <SpriteParticleEmitterComponent
+            emission_interval_min_frames="10"
+            emission_interval_max_frames="20"
+            randomize_position_inside_hitbox="1"
+        ></SpriteParticleEmitterComponent>
+    </Base>
+
+    <InheritTransformComponent
+        _enabled="1"
+    ></InheritTransformComponent>
+
+</Entity>

@@ -95,7 +95,7 @@ Fire creatures, such as Stendari and Liekkiö, that see a lit lantern in the wor
 
 ### Natural Fear
 
-Creatures react to lantern light by their nature. Hiisi and insects that see a lit lantern in the world gather around it, the same way fire creatures do. Spellbound by the light, they notice you only up close and wake up when hurt.
+Creatures react to lantern light by their nature. Hiisi and insects that see a lit lantern in the world gather around it, the same way fire creatures do. Spellbound by the light, they notice you only up close and wake up when hurt. Other creatures, such as zombies and Limanuljaska, fear lantern light, even of the lantern in your hands, and keep to the dark.
 
 - Default: off.
 - Applies: immediately.

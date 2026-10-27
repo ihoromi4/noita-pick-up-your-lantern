@@ -11,6 +11,8 @@ LIGHT_SOURCE_TAG = "pul_light_source"
 
 -- Tag of fire-related enemies, set by the fire enemy glow when it lights them.
 FIRE_ENEMY_TAG = "pul_fire_enemy"
+-- Tag of enemies the fire enemy glow has checked: only then is it known whether they are fire-related.
+FIRE_GLOW_CHECKED_TAG = "pul_fire_glow_checked"
 
 ---Finds an existing VariableStorageComponent by name without creating one.
 ---@param entity_id number The target entity ID.

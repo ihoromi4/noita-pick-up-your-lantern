@@ -490,7 +490,7 @@ mod_settings = {
                 ui_description = "$pick_up_your_lantern_natural_fear_desc",
                 name_fallback = "Natural Fear",
                 desc_fallback =
-                "Creatures react to lantern light by their nature.\nHiisi and insects that see a lit lantern in the world gather around it.\nSpellbound by the light, they notice you only up close and wake up when hurt.\nNot affected by presets.",
+                "Creatures react to lantern light by their nature.\nHiisi and insects that see a lit lantern in the world gather around it.\nSpellbound by the light, they notice you only up close and wake up when hurt.\nOther creatures fear lantern light, even of the lantern in your hands, and keep to the dark.\nNot affected by presets.",
                 value_default = false,
                 scope = MOD_SETTING_SCOPE_RUNTIME,
                 ui_fn = ModSettingBool,

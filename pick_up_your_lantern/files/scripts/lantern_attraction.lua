@@ -12,6 +12,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
+local enemy_ai_home = dofile_once("mods/" .. MOD_ID .. "/files/scripts/enemy_ai_home.lua")
 
 local FIRE_SETTING_ID = MOD_ID .. ".fire_enemy_attraction"
 local NATURAL_FEAR_SETTING_ID = MOD_ID .. ".natural_fear"
@@ -19,14 +20,8 @@ local UPDATE_INTERVAL_FRAMES = 20
 local LANTERN_TAG = "lantern"
 local ENEMY_TAG = "enemy"
 local ATTRACTED_TAG = "pul_lantern_attracted"
--- Original AI values of an attracted enemy: the leash distance in value_float, and the home position, creature
--- detection range and path finding depth as "home_x,home_y,range_x,range_y,depth" in value_string.
--- The lantern the enemy took is kept in value_int.
-local ORIGINAL_HOME_STORAGE = "pul_lantern_attraction"
 -- Lanterns attract enemies from farther than they light.
 local ATTRACTION_RADIUS_FACTOR = 1.5
--- Distance from the lantern within which attracted enemies wander.
-local LEASH_DISTANCE = 40
 -- The line of sight stops this far before the lantern: the lantern body is solid cells in the world grid,
 -- and a hanging lantern sits right under the ceiling, so a ray to its centre always hits something.
 local SIGHT_MARGIN = 10
@@ -38,10 +33,6 @@ local FLOOR_CLEARANCE = 4
 -- Walking enemies stand still when their home is on another level, as they find no path to it. They are lured
 -- only when the floor below the lantern is within this height of their feet.
 local WALKING_LEVEL_TOLERANCE = 24
--- A walking enemy outside its leash stands still instead of walking home, so its leash is never shorter than its
--- current distance from home plus this margin. The leash only shrinks as the enemy wanders closer, down to
--- LEASH_DISTANCE, and the enemy drifts towards the lantern.
-local WALKING_LEASH_MARGIN = 16
 -- Lure as a Markov process, decided on every update: a free enemy that sees a lantern takes it as its home with
 -- LURE_ENTER_CHANCE, and a lured enemy leaves it to wander with LURE_LEAVE_CHANCE. With updates every 20 frames,
 -- an enemy takes a seen lantern in about 3 seconds on average and stays for about 11 seconds.
@@ -49,39 +40,6 @@ local LURE_ENTER_CHANCE = 0.1
 local LURE_LEAVE_CHANCE = 0.03
 -- Creature detection range of an entranced enemy on both axes: it notices the player only this close.
 local TRANCE_DETECTION_RANGE = 48
--- Path finding depth of an attracted enemy without prey. The default of 50 nodes is too short for a home far away:
--- walking enemies stood still in the going home state even with the home on their own level.
-local LURED_PATHFINDING_DEPTH = 200
-
--- Herds attracted in the Natural Fear mode: Hiisi (with their tanks and turrets) and insects.
-local NATURAL_FEAR_LURED_HERDS = {
-    orcs = true,
-    fly = true,
-}
-
--- Bosses keep their own behaviour, and a polymorphed player is controlled by the player.
-local EXCLUDED_TAGS = {
-    "boss",
-    "boss_dragon",
-    "polymorphed_player",
-    "polymorphed_cessation",
-}
-
----Reads a boolean mod setting, falling back to the pending value and then to the default.
----@param setting_id string
----@param default_value boolean
----@return boolean
-local function GetBoolSetting(setting_id, default_value)
-    local value = ModSettingGet(setting_id)
-    if value == nil then
-        value = ModSettingGetNextValue(setting_id)
-    end
-    if value == nil then
-        return default_value
-    end
-
-    return value == true
-end
 
 ---Gathers lit lanterns in the world: hanging, thrown or lying ones. Lanterns in hand or in the inventory are
 ---children of the player, and extinguished lanterns have no enabled light, so none of them attract.
@@ -133,18 +91,6 @@ local function CollectCandidates(lanterns)
     return candidates
 end
 
----Returns the herd of an enemy from its GenomeDataComponent.
----@param enemy_id number Enemy entity ID.
----@return string|nil
-local function GetHerd(enemy_id)
-    local genome_comp = EntityGetFirstComponentIncludingDisabled(enemy_id, "GenomeDataComponent")
-    if genome_comp == nil then
-        return nil
-    end
-
-    return HerdIdToString(ComponentGetValue2(genome_comp, "herd_id"))
-end
-
 ---Checks whether an enemy is lured by lanterns under the enabled options and is not hunting.
 ---@param enemy_id number Enemy entity ID.
 ---@param ai_comp number AnimalAIComponent of the enemy.
@@ -153,18 +99,9 @@ end
 ---@return boolean
 local function IsLured(enemy_id, ai_comp, is_fire_enabled, is_natural_fear_enabled)
     -- Most enemies near lanterns belong to no lured group, so this check goes first.
-    local is_in_lured_group = (is_fire_enabled and EntityHasTag(enemy_id, FIRE_ENEMY_TAG))
-        or (is_natural_fear_enabled and NATURAL_FEAR_LURED_HERDS[GetHerd(enemy_id) or ""] == true)
-    if not is_in_lured_group then
-        return false
-    end
-
-    for _, tag in ipairs(EXCLUDED_TAGS) do
-        if EntityHasTag(enemy_id, tag) then
-            return false
-        end
-    end
-    if GameGetGameEffectCount(enemy_id, "CHARM") > 0 then
+    local is_in_lured_group = (is_fire_enabled and enemy_ai_home.IsFireEnemy(enemy_id))
+        or (is_natural_fear_enabled and enemy_ai_home.IsNaturalFearLuredHerd(enemy_id))
+    if not is_in_lured_group or enemy_ai_home.IsExcluded(enemy_id) then
         return false
     end
 
@@ -187,18 +124,6 @@ local function CanSeeLantern(x, y, lantern_x, lantern_y, dist)
 
     local factor = (dist - SIGHT_MARGIN) / dist
     return not RaytraceSurfaces(x, y, x + (lantern_x - x) * factor, y + (lantern_y - y) * factor)
-end
-
----Returns the centre of the entity hitbox, or its position if it has no hitbox.
----@param entity_id number Entity ID.
----@return number x, number y
-local function GetEntityCenter(entity_id)
-    local x, y = EntityGetFirstHitboxCenter(entity_id)
-    if x == nil then
-        x, y = EntityGetTransform(entity_id)
-    end
-
-    return x, y
 end
 
 ---Returns the point on the floor below a lantern, found once per update and kept in the lantern table.
@@ -250,13 +175,13 @@ local function FindLureLantern(enemy_id, ai_comp, is_attracted, lanterns)
     if not ComponentGetValue2(ai_comp, "can_fly") then
         feet_y = select(2, EntityGetTransform(enemy_id))
     end
-    local x, y = GetEntityCenter(enemy_id)
+    local x, y = enemy_ai_home.GetEntityCenter(enemy_id)
     local function GetDistance(lantern)
         return math.sqrt((lantern[1] - x) ^ 2 + (lantern[2] - y) ^ 2)
     end
 
     if is_attracted then
-        local storage = FindVariableStorage(enemy_id, ORIGINAL_HOME_STORAGE)
+        local storage = enemy_ai_home.FindOriginalStorage(enemy_id)
         local lantern_id = storage and ComponentGetValue2(storage, "value_int")
         for _, lantern in ipairs(lanterns) do
             if lantern[4] == lantern_id then
@@ -282,8 +207,7 @@ local function FindLureLantern(enemy_id, ai_comp, is_attracted, lanterns)
 end
 
 ---Moves the AI home of an enemy to a lantern, leashes it there and puts it in a trance, saving the original AI values
----on the first call. Flying enemies get the lantern itself as their home and a short leash. Walking ones get the floor
----below it and a leash that only shrinks as they come closer (see WALKING_LEASH_MARGIN).
+---on the first call. Flying enemies get the lantern itself as their home, walking ones the floor below it.
 ---@param enemy_id number Enemy entity ID.
 ---@param ai_comps number[] AnimalAIComponents of the enemy, at least one.
 ---@param is_attracted boolean Whether the enemy is attracted already.
@@ -291,71 +215,31 @@ end
 ---@return nil
 local function Attract(enemy_id, ai_comps, is_attracted, lantern)
     local x, y = lantern[1], lantern[2]
-    local leash = LEASH_DISTANCE
     if not ComponentGetValue2(ai_comps[1], "can_fly") then
         x, y = GetFloorBelow(lantern)
-        local enemy_x, enemy_y = GetEntityCenter(enemy_id)
-        local dist = math.sqrt((x - enemy_x) ^ 2 + (y - enemy_y) ^ 2)
-        local current_leash = math.huge
-        if is_attracted then
-            current_leash = ComponentGetValue2(ai_comps[1], "max_distance_to_move_from_home")
-        end
-        leash = math.max(LEASH_DISTANCE, math.min(current_leash, dist + WALKING_LEASH_MARGIN))
     end
 
     if not is_attracted then
-        local home_x, home_y = ComponentGetValue2(ai_comps[1], "mHomePosition")
-        local storage = GetOrCreateVariableStorage(enemy_id, ORIGINAL_HOME_STORAGE)
-        ComponentSetValue2(storage, "value_float", ComponentGetValue2(ai_comps[1], "max_distance_to_move_from_home"))
-        ComponentSetValue2(storage, "value_string", string.format("%f,%f,%f,%f,%d", home_x, home_y,
-            ComponentGetValue2(ai_comps[1], "creature_detection_range_x"),
-            ComponentGetValue2(ai_comps[1], "creature_detection_range_y"),
-            ComponentGetValue2(ai_comps[1], "pathfinding_max_depth_no_target")))
+        local storage = enemy_ai_home.SaveOriginal(enemy_id, ai_comps[1])
         ComponentSetValue2(storage, "value_int", lantern[4])
         EntityAddTag(enemy_id, ATTRACTED_TAG)
     end
 
-    -- Set on every update: a thrown lantern keeps moving, and the engine may reset the home after loading.
+    -- Set on every update: a thrown lantern keeps moving.
+    enemy_ai_home.SetHome(enemy_id, ai_comps, is_attracted, x, y)
     for _, ai_comp in ipairs(ai_comps) do
-        ComponentSetValue2(ai_comp, "mHomePosition", x, y)
-        ComponentSetValue2(ai_comp, "max_distance_to_move_from_home", leash)
         ComponentSetValue2(ai_comp, "creature_detection_range_x", TRANCE_DETECTION_RANGE)
         ComponentSetValue2(ai_comp, "creature_detection_range_y", TRANCE_DETECTION_RANGE)
-        ComponentSetValue2(ai_comp, "pathfinding_max_depth_no_target", LURED_PATHFINDING_DEPTH)
     end
 end
 
----Restores the original AI home, leash, detection range and path finding depth of an attracted enemy.
+---Restores the original AI values of an attracted enemy.
 ---@param enemy_id number Enemy entity ID.
 ---@param ai_comps number[] AnimalAIComponents of the enemy.
 ---@return nil
 local function Release(enemy_id, ai_comps)
     EntityRemoveTag(enemy_id, ATTRACTED_TAG)
-    local storage = FindVariableStorage(enemy_id, ORIGINAL_HOME_STORAGE)
-    if storage == nil then
-        return
-    end
-
-    local leash = ComponentGetValue2(storage, "value_float")
-    local home_x, home_y, range_x, range_y, depth = (ComponentGetValue2(storage, "value_string") or "")
-        :match("^([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)$")
-    for _, ai_comp in ipairs(ai_comps) do
-        ComponentSetValue2(ai_comp, "max_distance_to_move_from_home", leash)
-        if home_x ~= nil then
-            ComponentSetValue2(ai_comp, "mHomePosition", tonumber(home_x), tonumber(home_y))
-            ComponentSetValue2(ai_comp, "creature_detection_range_x", tonumber(range_x))
-            ComponentSetValue2(ai_comp, "creature_detection_range_y", tonumber(range_y))
-            ComponentSetValue2(ai_comp, "pathfinding_max_depth_no_target", tonumber(depth))
-        end
-    end
-    EntityRemoveComponent(enemy_id, storage)
-end
-
----Returns all AnimalAIComponents of an enemy, including disabled ones.
----@param enemy_id number Enemy entity ID.
----@return number[]
-local function GetAIComponents(enemy_id)
-    return EntityGetComponentIncludingDisabled(enemy_id, "AnimalAIComponent") or {}
+    enemy_ai_home.RestoreOriginal(enemy_id, ai_comps)
 end
 
 ---Attracts lured enemies to the nearest lure lanterns and releases the ones no lantern attracts any more.
@@ -367,18 +251,18 @@ function UpdateLanternAttraction()
         return
     end
 
-    local is_fire_enabled = GetBoolSetting(FIRE_SETTING_ID, true)
-    local is_natural_fear_enabled = GetBoolSetting(NATURAL_FEAR_SETTING_ID, false)
+    local is_fire_enabled = enemy_ai_home.GetBoolSetting(FIRE_SETTING_ID, true)
+    local is_natural_fear_enabled = enemy_ai_home.GetBoolSetting(NATURAL_FEAR_SETTING_ID, false)
     if not is_fire_enabled and not is_natural_fear_enabled then
         for _, enemy_id in ipairs(EntityGetWithTag(ATTRACTED_TAG) or {}) do
-            Release(enemy_id, GetAIComponents(enemy_id))
+            Release(enemy_id, enemy_ai_home.GetAIComponents(enemy_id))
         end
         return
     end
 
     local lanterns = CollectLureLanterns()
     for _, enemy_id in ipairs(CollectCandidates(lanterns)) do
-        local ai_comps = GetAIComponents(enemy_id)
+        local ai_comps = enemy_ai_home.GetAIComponents(enemy_id)
         local is_attracted = EntityHasTag(enemy_id, ATTRACTED_TAG)
         local lantern = nil
         -- The enter chance is rolled before the search, which spares the raytraces of most free enemies.
