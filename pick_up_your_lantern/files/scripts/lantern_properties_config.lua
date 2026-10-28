@@ -16,6 +16,7 @@
 ---@field needs_power boolean|nil Whether the lamp shines only while it is wired to the ceiling: it loses power for good
 ---once it is picked up or detached.
 ---@field unpowered_image_file string|nil Physics image of a lamp without power, used for its next physics body.
+---@field unpowered_ui_sprite string|nil Inventory icon of a lamp without power; also tells the type apart.
 
 ---Pickable light fixtures. Each file is a full override in `data/entities/props/` of the mod.
 ---@type LanternType[]
@@ -47,6 +48,7 @@ LANTERN_TYPES = {
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_tube_lamp.png",
         needs_power = true,
         unpowered_image_file = "mods/pick_up_your_lantern/files/props_gfx/tube_lamp_unlit.png",
+        unpowered_ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_tube_lamp_unlit.png",
     },
 }
 

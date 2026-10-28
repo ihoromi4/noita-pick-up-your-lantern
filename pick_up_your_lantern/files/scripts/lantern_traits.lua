@@ -43,7 +43,7 @@ function GetLanternType(lantern_id)
     local item_comp = EntityGetFirstComponentIncludingDisabled(lantern_id, "ItemComponent")
     local ui_sprite = item_comp ~= nil and ComponentGetValue2(item_comp, "ui_sprite") or ""
     for _, lantern_type in ipairs(LANTERN_TYPES) do
-        if ui_sprite == lantern_type.ui_sprite then
+        if ui_sprite == lantern_type.ui_sprite or ui_sprite == lantern_type.unpowered_ui_sprite then
             return lantern_type.files[1], lantern_type
         end
     end
@@ -229,8 +229,8 @@ local function ShowDarkHandSprite(entity_id)
 end
 
 ---Cuts the power of a lamp that needs it, for good: its light and fog of war hole go to 0 once the illumination
----is applied again, its in-hand sprite turns dark, and the physics image is switched to the unpowered one, which
----the engine uses for the next physics body, after the lamp is thrown or dropped. Called by tube_lamp_cable.lua
+---is applied again, its in-hand sprite and inventory icon turn dark, and the physics image is switched to the
+---unpowered one, which the engine uses for the next physics body, after the lamp is thrown or dropped. Called by tube_lamp_cable.lua
 ---when the lamp leaves the ceiling without its cable, or when the cable snaps.
 ---@param entity_id number Lantern entity ID.
 ---@return boolean cut Whether the power was cut during this call.
@@ -242,6 +242,10 @@ function CutLanternPower(entity_id)
 
     SetStorageFloat(entity_id, POWER_LOST_STORAGE, 1)
     ShowDarkHandSprite(entity_id)
+    local item_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "ItemComponent")
+    if item_comp ~= nil and lantern_type.unpowered_ui_sprite ~= nil then
+        ComponentSetValue2(item_comp, "ui_sprite", lantern_type.unpowered_ui_sprite)
+    end
     if lantern_type.unpowered_image_file ~= nil then
         for _, shape_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "PhysicsImageShapeComponent") or {}) do
             ComponentSetValue2(shape_comp, "image_file", lantern_type.unpowered_image_file)
