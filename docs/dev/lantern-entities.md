@@ -98,7 +98,7 @@ The hole is scaled by `Illuminated area size` when the game starts. It is added 
 - The cable snaps with cosmetic electric sparks (`GameCreateCosmeticParticle`, harmless), the lamp loses its power, and the cable keeps hanging from the ceiling with its paid-out segments.
 - A lamp whose ceiling was destroyed gets no cable and loses its power: no ceiling is found within 8 px above the anchor. Which lamp a cable holds is not saved, so after a reload the lamp falls off and loses its power.
 - A torn cable sparks from its end: `data/entities/misc/electricity_weak.xml` every 60 frames, from 2 seconds after it snapped for 3 minutes. Then it keeps hanging without sparks.
-- Each spark induces current around the end: creatures (`enemy`, `player_unit`) within 40 px with no wall in between (`RaytraceSurfaces`) get the vanilla electrocution effect (`effect_electricity.xml`, 40 frames), 0.08 electric damage (`$damage_tube_lamp_cable`) and an arc of cosmetic sparks from the cable.
+- Each spark induces current around the end: creatures (`enemy`, `player_unit`) within 20 px with no wall in between (`RaytraceSurfaces`) get the vanilla electrocution effect (`effect_electricity.xml`, 40 frames), 0.08 electric damage (`$damage_tube_lamp_cable`) and an arc of cosmetic sparks from the cable.
 - Only one carried cable exists at a time.
 
 > [!NOTE]

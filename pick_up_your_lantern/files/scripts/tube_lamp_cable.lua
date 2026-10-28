@@ -59,7 +59,7 @@ local SPARK_PARTICLE_COUNT = 6
 -- A torn cable is live for 3 minutes, then it keeps hanging without sparks.
 local LIVE_FRAMES = 3 * 60 * 60
 -- Each spark shocks creatures around the end of the cable, unless a wall is in between.
-local INDUCTION_RADIUS = 40
+local INDUCTION_RADIUS = 20
 local INDUCTION_DAMAGE = 0.08
 local INDUCTION_TAGS = { "enemy", "player_unit", }
 local INDUCTION_ARC_PARTICLES = 6
