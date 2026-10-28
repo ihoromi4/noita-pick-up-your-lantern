@@ -32,6 +32,10 @@ Tracking document for features, implementation progress, and known issues for **
 - [x] Settings: a separate `Enemy Study` category in Mod Settings, not affected by presets, with an `Enemy study` option (off by default), the bonus of a fully studied enemy (10%, 25%, 50%, 100%) and the base study time (3, 5, 10, 30 seconds; 10 by default).
 - [x] Bug: projectile spells with the Light modifier (`LIGHT`) do not light enemies for study progress. The modifier adds `data/entities/misc/light.xml` (a `LightComponent` with radius 200) to the projectile, but the study only counted light from entities with the `lantern` tag. Fixed: light sources for study are marked with the `pul_light_source` tag, and `light.xml` is patched at init.
 
+## Mod Compatibility
+
+- [x] Bug (Steam Workshop): with Apotheosis loaded first, the vision shader patch fails, because Apotheosis inserts its uniforms between the two context lines of `01_uniforms.patch.txt`. Fixed: the hunk is anchored on the single line `varying vec2 tex_coord_fogofwar;`, checked in game in both load orders.
+
 ## Lantern Modifiers
 
 - [x] Cracked glass modifier: a lantern that takes damage without breaking (e.g., a fall or a projectile hit) has a 33% chance to crack. A cracked lantern has a 50% chance every 20 frames to emit 2 particles of gaseous fire (`fire`), both in the world and in hand, so it can set the player on fire. Does not appear when lantern progression is disabled. Described by a sentence in the item description.
