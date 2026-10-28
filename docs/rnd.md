@@ -43,4 +43,5 @@ This document contains an index of research, Noita engine technical details, and
 - [Enemy Study](rnd/enemy-study.md) - damage bonus against enemies watched in the light: line of sight and lit area checks, per-enemy bonus storage, damage hooks, and study markers above enemies.
 - [Natural Fear](rnd/natural-fear.md) - creatures that lanterns do not attract run from lantern light through the native Escaping AI state; vanilla burning and the AI state table.
 - [Fire Enemies](rnd/fire-enemies.md) - brighter light of fire-related enemies: vanilla list, runtime light, detection heuristic for enemies of other mods, and attraction of fire enemies to lanterns in the world through the AI home position.
+- [Spawning Fixtures for In-Game Tests](rnd/test-spawning.md) - debug spawner for rare light fixtures, spawn rules, finding biomes and ceiling points in pixel scenes, tested points in the mountain hall at the entrance to the Mines.
 - [YAML Localization](rnd/yaml-localization.md) - postponed idea of storing translations in YAML (`.yaml.txt`) and converting them to CSV at startup via `tinyyaml`; limitations, pros and cons.
