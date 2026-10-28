@@ -21,6 +21,7 @@ The mod overrides the vanilla light fixtures below with full copies in `pick_up_
 | `physics_lantern_small.xml` | Small Lantern, older variant | `snowcave`, `sandcave`, `meat`, `tower`, `lake_statue`, `temple_altar_secret` |
 | `physics_lantern.xml` | Lantern (large) | `liquidcave`, `town` |
 | `physics_mining_lamp.xml` | Mining Lamp | `hills`, `winter`, `mountain_tree`, `lake` |
+| `physics_tubelamp.xml` | Tube Lamp | `snowcastle` (Hiisi Base), `vault`, `vault_frozen`, `robobase`, `rainforest`, `dragoncave`, `sandcave` |
 
 Each entity carries the `lantern` tag, an `ItemComponent` that puts it into the Quick Inventory, and an `AbilityComponent` for throwing. Their light and durability are described in [Lantern Properties and Progression](lantern-properties-and-progression.md).
 
@@ -32,7 +33,7 @@ Noita has two physics component families, and the item system works only with th
 - With `PhysicsBody2Component` left on the entity, picking the lantern up takes only the flame sprite; the glass body stays on the ceiling.
 - Adding `base_item_physics.xml` to an entity that has `PhysicsBody2Component` creates two physics bodies for one lantern: one falls, the other keeps hanging.
 
-So `physics/lantern_small.xml`, which uses `PhysicsBody2Component` in vanilla, is rewritten to use `PhysicsBodyComponent` and `PhysicsJointComponent`. The mining lamp already uses the older family in vanilla. All files are full overrides with the `base_item_physics.xml` components expanded inline, not runtime XML edits.
+So `physics/lantern_small.xml`, which uses `PhysicsBody2Component` in vanilla, is rewritten to use `PhysicsBodyComponent` and `PhysicsJointComponent`. The tube lamp, a tube and two wires on `PhysicsBody2Component` in vanilla, becomes one `PhysicsBodyComponent` body. The mining lamp already uses the older family in vanilla. All files are full overrides with the `base_item_physics.xml` components expanded inline, not runtime XML edits.
 
 The body material must not have `platform_type="1"` in `data/materials.xml`, otherwise the player bumps into the lantern and stands on it. `glass_box2d` has `platform_type="0"`, and the `*_nohit` materials inherit none from `aluminium`. The vanilla mining lamp is made of `wood_prop` (`platform_type="1"`), so its override uses the twin `wood_prop_noplayerhit`.
 
@@ -60,7 +61,9 @@ A lantern hangs on a `PhysicsJointComponent` with `nail_to_wall="1"`.
   - prevents kicking it loose, because its top is stuck in solid pixels.
 - `centered="0"`, `offset_x="4.5"`, `offset_y="3.5"` on `PhysicsImageShapeComponent`, and `offset_y="3.5"` on the world flame `SpriteComponent`, place a small lantern right under the ceiling without overlap.
 - `minelamp.png` (mining lamp) is 5×8 pixels: the wooden cap at `y = 0..1`, the glass with a bright wick at `y = 2..7`. `centered="0"`, `offset_x="2.5"`, `offset_y="4"` keep the vanilla origin in the centre, so the lamp hangs as in vanilla: `hills`, `winter` and `mountain_tree` spawn it 6 pixels below the marker, `lake` right at the marker.
-- The mining lamp has no flame sprite: the lit wick is part of its physics image, so a burnt-out lamp changes only its in-hand sprite (`mining_lamp_out.png`).
+- `tube_lamp.png` (tube lamp, in `files/props_gfx/`) is 19×5 pixels: 2-pixel wire stubs at `x = 4` and `x = 14` (`y = 0..1`) drawn on top of the vanilla `tubelamp.png` tube (`y = 2..4`). The stubs replace the two vanilla wire bodies: the lamp hangs 2 pixels below the ceiling and keeps the stubs when it falls. `centered="0"`, `offset_x="9.5"`, `offset_y="0.5"` put the origin at the top of the wires; `snowcastle` spawns it right at the marker (`x + 5` or `x`).
+- The tube lamp has one `LightComponent` (radius 200) instead of the two vanilla ones (radius 150, 6 pixels left and right of the centre), as the illumination, modifier and belt code scales the first light only. The vanilla damage effects (blinking, electric sparks, a breaking wire) are left out: the electric pulses would shock the player holding it.
+- The mining lamp and the tube lamp have no flame sprite: the lit wick is part of its physics image, so a burnt-out lamp changes only its in-hand sprite (`mining_lamp_out.png`, `tube_lamp_out.png`).
 
 ## Other Light Sources
 
@@ -68,7 +71,7 @@ Besides the lanterns, `patch_lighting.lua` adds a fog of war hole to light sourc
 
 - chain torches: `chain_torch`, `chain_torch_blue`, `chain_torch_ghostly` and their duplicates;
 - torch stands: `physics_torch_stand.xml`, `physics_torch_stand_blue.xml`;
-- `physics/temple_lantern.xml`, `physics_barrel_burning.xml`, `physics_tubelamp.xml`.
+- `physics/temple_lantern.xml`, `physics_barrel_burning.xml`.
 
 The hole is scaled by `Illuminated area size` when the game starts. It is added only when `Illuminate the darkness` is on.
 

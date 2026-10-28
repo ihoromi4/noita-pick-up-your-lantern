@@ -22,7 +22,7 @@ List of light fixtures in the game; only specific ones are pickable items, while
 - Torch Stand: In-game file `data/entities/props/physics_torch_stand.xml`. Found in Rainforest, Dragon Cave, and Crypt.
 - Blue Torch Stand: In-game file `data/entities/props/physics_torch_stand_blue.xml`. Found in Pyramid and Dark Rainforest.
 - Burning Barrel: In-game file `data/entities/props/physics_barrel_burning.xml`. Found in Snowy Depths and Meat biome. Heavy environmental object (non-pickable into inventory).
-- Identify Hiisi Base lamps (TODO).
+- Hiisi Base lamps: the Tube Lamp is the only lamp of the Hiisi Base itself (`snowcastle`). The biome also spawns Ghostly Green Chain Torches, Small Lanterns (`snowcastle_cavern`) and a Temple Lantern (`snowcastle_hourglass_chamber`). Candles there give no light, and the forcefield generator lights up only while shielding.
 
 > [!NOTE]
 > Initial technical testing begins with light sources found in the first biome (Mines): Small Lantern (most frequent) and Ghostly Chain Torch.

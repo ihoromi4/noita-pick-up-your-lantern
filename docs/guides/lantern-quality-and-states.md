@@ -18,6 +18,7 @@ No two lanterns are quite alike. Each lantern has its own light, quality and som
 | Lantern | Wider, warm white | Sturdier |
 | Small Lantern | Smaller, warm yellow | Fragile |
 | Mining Lamp | Small, white | Sturdy, but explodes when hit hard |
+| Tube Lamp | Wide, cold white | Sturdy, bursts with electric sparks |
 
 ## Traits and States
 

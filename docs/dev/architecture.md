@@ -67,6 +67,7 @@ Scripts attached to lantern entities through `LuaComponent`:
 | `lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering and Short-lived modifiers. |
 | `lantern_death.lua`, `lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |
 | `mining_lamp_death.lua` | On death | Spills oil and fire; the explosion comes from `ExplodeOnDamageComponent`. |
+| `tube_lamp_death.lua` | On death | Releases electric sparks; the electric explosion comes from `ExplodeOnDamageComponent`. |
 
 ## Item Lifecycle Tags
 

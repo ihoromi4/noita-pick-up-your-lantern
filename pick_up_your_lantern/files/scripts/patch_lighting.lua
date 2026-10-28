@@ -82,13 +82,6 @@ local TARGET_ENTITIES = {
         alpha = "0.55",
         image_file = "data/particles/fog_of_war_hole.xml",
     },
-    {
-        path = "data/entities/props/physics_tubelamp.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
 }
 
 ---Checks whether dynamic lighting is enabled in mod settings.

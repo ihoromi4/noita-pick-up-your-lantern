@@ -1,0 +1,30 @@
+<Sprite
+    filename="mods/pick_up_your_lantern/files/props_gfx/tube_lamp_out.png"
+    offset_x="9.5"
+    offset_y="0.5"
+    default_animation="default" >
+
+    <RectAnimation
+        name="default"
+        pos_x="0"
+        pos_y="0"
+        frame_count="1"
+        frame_width="19"
+        frame_height="5"
+        frame_wait="0.07"
+        frames_per_row="1"
+        loop="1" >
+    </RectAnimation>
+
+    <RectAnimation
+        name="stand"
+        pos_x="0"
+        pos_y="0"
+        frame_count="1"
+        frame_width="19"
+        frame_height="5"
+        frame_wait="0.07"
+        frames_per_row="1"
+        loop="1" >
+    </RectAnimation>
+</Sprite>

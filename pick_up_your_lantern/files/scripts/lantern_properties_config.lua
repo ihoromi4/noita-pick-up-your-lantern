@@ -37,6 +37,12 @@ LANTERN_TYPES = {
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_mining_lamp.png",
         hang_offset_y = 7,
     },
+    -- Tube Lamp
+    {
+        files = { "data/entities/props/physics_tubelamp.xml", },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_tube_lamp.png",
+        hang_offset_y = 4,
+    },
 }
 
 -- Quality tiers
