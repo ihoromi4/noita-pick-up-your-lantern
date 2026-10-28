@@ -4,7 +4,8 @@
 ---   the ceiling whenever the cable gets too short, up to a random limit, and past the limit the cable snaps with
 ---   a burst of sparks and the lamp goes dark;
 --- - knocked off by a shot or a kick, the lamp dangles on a short cable and blinks, like a damaged vanilla tube lamp;
---- - a lamp in the world is held by its cable like by a leash, and snaps it only when flung far beyond its length.
+--- - a lamp in the world is held by its cable like by a leash, and snaps it only when flung far beyond its length;
+---   the cable holds it by one end of the tube, where a vanilla wire is attached, so the lamp swings on it.
 --- The ceiling part of a snapped cable keeps hanging, and after SPARK_DELAY_FRAMES its end shocks creatures around
 --- it for LIVE_FRAMES. A lamp whose ceiling is destroyed falls and goes dark.
 --- A cable is a rope of verlet points simulated in Lua, one sprite entity per segment: a physics chain built at
@@ -62,6 +63,12 @@ local INDUCTION_RADIUS = 40
 local INDUCTION_DAMAGE = 0.08
 local INDUCTION_TAGS = { "enemy", "player_unit", }
 local INDUCTION_ARC_PARTICLES = 6
+-- A lamp in the world hangs by the upper end of one of its wires, relative to the lamp origin (tube_lamp.png).
+local ATTACH_OFFSET_X = 5
+local ATTACH_OFFSET_Y = -0.5
+-- Middle of the tube relative to the lamp origin, and its length: the lamp is taken as a thin rod.
+local TUBE_CENTER_OFFSET_Y = 2.5
+local TUBE_LENGTH = 19
 local GRAVITY = 0.2
 local DAMPING = 0.95
 local CONSTRAINT_ITERATIONS = 8
@@ -78,6 +85,7 @@ local CONSTRAINT_ITERATIONS = 8
 ---@field segment_ids number[] Segment sprite entity IDs, one per pair of neighbour points.
 ---@field lamp_id number|nil Lamp the cable holds and powers, nil once it snapped.
 ---@field max_segments number Number of segments paid out before the cable snaps.
+---@field attach_side number 1 or -1: which end of the tube the cable holds while the lamp is in the world.
 
 ---Cables simulated this session, by cable entity ID.
 ---@type table<number, CableRope>
@@ -103,7 +111,14 @@ end
 ---@return CableRope
 local function CreateRope(cable_id, end_x, end_y, segment_count)
     local anchor_x, anchor_y = EntityGetTransform(cable_id)
-    local rope = { cable_id = cable_id, points = {}, segment_ids = {}, lamp_id = nil, max_segments = segment_count, }
+    local rope = {
+        cable_id = cable_id,
+        points = {},
+        segment_ids = {},
+        lamp_id = nil,
+        max_segments = segment_count,
+        attach_side = 1,
+    }
     for index = 0, segment_count do
         local t = index / segment_count
         local x = anchor_x + (end_x - anchor_x) * t
@@ -146,14 +161,32 @@ local function DropRope(rope)
     end
 end
 
----Finds where a cable holding a lamp ends: at the lamp in hand or in the world, at its holder while it is in the
----inventory, as the transform of an item in the inventory is not kept up to date.
----@param lamp_id number Lamp entity ID.
+---Turns a point given relative to an entity origin by the entity rotation and moves it to the entity position.
+---@param x number Entity X coordinate.
+---@param y number Entity Y coordinate.
+---@param rotation number Entity rotation, in radians.
+---@param offset_x number Offset from the origin before the rotation, X.
+---@param offset_y number Offset from the origin before the rotation, Y.
 ---@return number x
 ---@return number y
-local function GetLampEnd(lamp_id)
+local function ToWorld(x, y, rotation, offset_x, offset_y)
+    local cos, sin = math.cos(rotation), math.sin(rotation)
+    return x + offset_x * cos - offset_y * sin, y + offset_x * sin + offset_y * cos
+end
+
+---Finds where a cable holding a lamp ends: at one end of the tube while the lamp is in the world, at the lamp in
+---hand, and at its holder while it is in the inventory, as the transform of an item in the inventory is not kept up
+---to date.
+---@param lamp_id number Lamp entity ID.
+---@param attach_side number 1 or -1: which end of the tube the cable holds.
+---@return number x
+---@return number y
+local function GetLampEnd(lamp_id, attach_side)
     local root_id = EntityGetRootEntity(lamp_id)
-    if root_id ~= lamp_id and GetHeldItem(root_id) ~= lamp_id then
+    if root_id == lamp_id then
+        local x, y, rotation = EntityGetTransform(lamp_id)
+        return ToWorld(x, y, rotation, ATTACH_OFFSET_X * attach_side, ATTACH_OFFSET_Y)
+    elseif GetHeldItem(root_id) ~= lamp_id then
         return EntityGetTransform(root_id)
     end
 
@@ -191,7 +224,7 @@ local function RollMaxSegments(anchor_x, anchor_y, min_segments, max_segments)
     return Random(min_segments, max_segments)
 end
 
----Attaches a cable from the ceiling anchor to a lamp that left the ceiling. The lamp keeps its power while the
+---Attaches a cable from the ceiling anchor to a lamp that left the ceiling, by a random end of the tube. The lamp keeps its power while the
 ---cable holds. Its joint is removed, so the lamp no longer counts as hanging once it is back in the world.
 ---@param lamp_id number Lamp entity ID.
 ---@param anchor_x number World X coordinate of the anchor.
@@ -199,7 +232,8 @@ end
 ---@param max_segments number Number of segments paid out before the cable snaps.
 ---@return boolean attached Whether the cable is attached; false if the lamp is already too far and it snapped.
 local function AttachCable(lamp_id, anchor_x, anchor_y, max_segments)
-    local lamp_x, lamp_y = GetLampEnd(lamp_id)
+    local attach_side = Random(0, 1) == 0 and -1 or 1
+    local lamp_x, lamp_y = GetLampEnd(lamp_id, attach_side)
     local distance = math.sqrt((lamp_x - anchor_x) ^ 2 + (lamp_y - anchor_y) ^ 2)
     local segment_count = math.max(1, math.ceil(distance / SEGMENT_LENGTH))
     if segment_count > max_segments then
@@ -224,6 +258,7 @@ local function AttachCable(lamp_id, anchor_x, anchor_y, max_segments)
     local rope = CreateRope(cable_id, lamp_x, lamp_y, segment_count)
     rope.lamp_id = lamp_id
     rope.max_segments = max_segments
+    rope.attach_side = attach_side
     lamp_ropes[lamp_id] = rope
     return true
 end
@@ -250,29 +285,46 @@ local function PayOutSegment(rope)
     SetStorageFloat(rope.cable_id, SEGMENT_COUNT_STORAGE, #rope.segment_ids)
 end
 
----Holds a lamp in the world at the length of its cable: moves its physics body back onto the circle around the
----anchor and takes away its speed away from the anchor.
+---Holds a lamp in the world at the length of its cable by the point the cable is attached to: moves its physics
+---body so that the point is back on the circle around the anchor, and takes away the speed of the point away from
+---the anchor as an impulse at the point would, which also turns the lamp, so it swings on the cable.
+---The lamp is taken as a thin rod: the impulse needs only the ratio of mass to moment of inertia, 12 / length^2.
 ---@param lamp_id number Lamp entity ID.
----@param dx number Offset of the lamp from the anchor, X.
----@param dy number Offset of the lamp from the anchor, Y.
----@param distance number Distance of the lamp from the anchor.
----@param length number Full length of the cable.
+---@param attach_x number World X coordinate of the attachment point.
+---@param attach_y number World Y coordinate of the attachment point.
+---@param dir_x number Direction from the anchor to the attachment point, X.
+---@param dir_y number Direction from the anchor to the attachment point, Y.
+---@param shift number How far the attachment point has to move towards the anchor.
 ---@return nil
-local function HoldLampOnCable(lamp_id, dx, dy, distance, length)
-    local dir_x, dir_y = dx / distance, dy / distance
-    local shift = length - distance
+local function HoldLampOnCable(lamp_id, attach_x, attach_y, dir_x, dir_y, shift)
+    local x, y, rotation = EntityGetTransform(lamp_id)
+    local center_x, center_y = ToWorld(x, y, rotation, 0, TUBE_CENTER_OFFSET_Y)
+    local arm_x, arm_y = attach_x - center_x, attach_y - center_y
+    local mass_over_inertia = 12 / (TUBE_LENGTH * TUBE_LENGTH)
+    -- Box2D may count y and the angle the other way around than the game.
+    local _, physics_down = GameVecToPhysicsVec(0, 1)
+    local angle_sign = physics_down < 0 and -1 or 1
+
     for _, body_id in ipairs(PhysicsBodyIDGetFromEntity(lamp_id) or {}) do
         local body_x, body_y, angle, vel_x, vel_y, angular_vel = PhysicsBodyIDGetTransform(body_id)
         if body_x ~= nil then
-            local x, y = PhysicsPosToGamePos(body_x, body_y)
-            body_x, body_y = GamePosToPhysicsPos(x + dir_x * shift, y + dir_y * shift)
+            local game_x, game_y = PhysicsPosToGamePos(body_x, body_y)
+            body_x, body_y = GamePosToPhysicsPos(game_x - dir_x * shift, game_y - dir_y * shift)
+
             local game_vel_x, game_vel_y = PhysicsVecToGameVec(vel_x, vel_y)
-            local outward = game_vel_x * dir_x + game_vel_y * dir_y
+            local spin = angular_vel * angle_sign
+            -- Velocity of the attachment point: of the centre plus the spin around it.
+            local point_vel_x, point_vel_y = game_vel_x - spin * arm_y, game_vel_y + spin * arm_x
+            local outward = point_vel_x * dir_x + point_vel_y * dir_y
             if outward > 0 then
-                game_vel_x, game_vel_y = game_vel_x - dir_x * outward, game_vel_y - dir_y * outward
+                local arm_cross_dir = arm_x * dir_y - arm_y * dir_x
+                local impulse = outward / (1 + arm_cross_dir * arm_cross_dir * mass_over_inertia)
+                game_vel_x, game_vel_y = game_vel_x - dir_x * impulse, game_vel_y - dir_y * impulse
+                spin = spin - impulse * arm_cross_dir * mass_over_inertia
             end
+
             vel_x, vel_y = GameVecToPhysicsVec(game_vel_x, game_vel_y)
-            PhysicsBodyIDSetTransform(body_id, body_x, body_y, angle, vel_x, vel_y, angular_vel)
+            PhysicsBodyIDSetTransform(body_id, body_x, body_y, angle, vel_x, vel_y, spin * angle_sign)
         end
     end
 end
@@ -289,7 +341,7 @@ local function UpdateLampCable(rope)
         return
     end
 
-    local lamp_x, lamp_y = GetLampEnd(lamp_id)
+    local lamp_x, lamp_y = GetLampEnd(lamp_id, rope.attach_side)
     local is_carried = EntityGetRootEntity(lamp_id) ~= lamp_id
     if is_carried and rope.max_segments < CARRIED_MIN_SEGMENTS then
         -- The player tugs a dangling lamp off its short cable, and more of the cable comes off the ceiling.
@@ -314,7 +366,7 @@ local function UpdateLampCable(rope)
         SnapCable(rope)
         return
     elseif distance > length then
-        HoldLampOnCable(lamp_id, dx, dy, distance, length)
+        HoldLampOnCable(lamp_id, lamp_x, lamp_y, dx / distance, dy / distance, distance - length)
         lamp_x, lamp_y = anchor.x + dx / distance * length, anchor.y + dy / distance * length
     end
 
