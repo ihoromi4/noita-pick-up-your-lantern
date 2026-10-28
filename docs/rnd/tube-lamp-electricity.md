@@ -23,7 +23,7 @@ A fluorescent tube lamp cannot shine without power. Unlike oil lanterns, a picka
 ## Implementation Stages
 
 1. Sword-like sprite in hand, no left-button hanging, propane-like burst. Done.
-2. Power state: the lamp shines only while it hangs, scaled to zero light and fog of war hole otherwise.
+2. Power state: the lamp shines only while it hangs, scaled to zero light and fog of war hole otherwise. Done.
 3. Lighting up from electricity, with a small capacity.
 4. Dangling cable of random length after a kick, sparking for 3 minutes.
 5. Cable of segments while carrying, breaking into a dangling cable.

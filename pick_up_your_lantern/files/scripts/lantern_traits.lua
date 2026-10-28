@@ -19,6 +19,7 @@ local BURN_FRAMES_TOTAL_STORAGE = "lantern_burn_frames_total"
 local EXTINGUISHED_STORAGE = "lantern_extinguished"
 local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
+local POWER_LOST_STORAGE = "lantern_power_lost"
 local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
 
 -- Type used when neither the filename nor the icon is known: the Small Lantern, the most common one.
@@ -189,6 +190,45 @@ end
 ---@return boolean
 function IsLanternExtinguished(entity_id)
     return GetStorageFloat(entity_id, EXTINGUISHED_STORAGE) > 0
+end
+
+---Returns the light multiplier of the lamp power: 0 for a lamp that needs power and has lost it, 1 otherwise.
+---@param entity_id number Lantern entity ID.
+---@return number
+function GetLanternPowerFactor(entity_id)
+    local _, lantern_type = GetLanternType(entity_id)
+    if lantern_type.needs_power and GetStorageFloat(entity_id, POWER_LOST_STORAGE) > 0 then
+        return 0
+    end
+
+    return 1
+end
+
+---Cuts the power of a lamp that needs it once the lamp no longer hangs: it is picked up (no longer a root entity)
+---or detached (lantern_anchor.lua removes its joint). The power is lost for good. The physics image is switched to
+---the unpowered one, which the engine uses for the next physics body, after the lamp is thrown or dropped.
+---@param entity_id number Lantern entity ID.
+---@return boolean lost Whether the power was lost during this call.
+function UpdateLanternPower(entity_id)
+    local _, lantern_type = GetLanternType(entity_id)
+    if not lantern_type.needs_power or GetStorageFloat(entity_id, POWER_LOST_STORAGE) > 0 then
+        return false
+    end
+
+    local is_hanging = EntityGetRootEntity(entity_id) == entity_id
+        and EntityGetFirstComponentIncludingDisabled(entity_id, "PhysicsJointComponent") ~= nil
+    if is_hanging then
+        return false
+    end
+
+    SetStorageFloat(entity_id, POWER_LOST_STORAGE, 1)
+    if lantern_type.unpowered_image_file ~= nil then
+        for _, shape_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "PhysicsImageShapeComponent") or {}) do
+            ComponentSetValue2(shape_comp, "image_file", lantern_type.unpowered_image_file)
+        end
+    end
+
+    return true
 end
 
 ---Returns the liquid state of a lantern.

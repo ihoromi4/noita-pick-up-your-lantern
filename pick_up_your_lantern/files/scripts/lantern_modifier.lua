@@ -26,7 +26,7 @@ end
 
 EmitCrackedFire(entity_id, x, y)
 
-local factor = GetLanternModifierFactor(entity_id)
+local factor = GetLanternModifierFactor(entity_id) * GetLanternPowerFactor(entity_id)
 
 ComponentSetValue2(light_comp, "update_properties", true)
 ComponentSetValue2(light_comp, "radius", math.floor(full_radius * factor))

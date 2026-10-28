@@ -155,13 +155,14 @@ local function IsBeltUpToDate(belt_id, player_id, lantern_id, is_lit)
         and (GetStorageFloat(belt_id, LANTERN_LIT_STORAGE) > 0) == is_lit
 end
 
----Scales the belt light and fog of war hole by the lantern tier, liquid state, illumination setting and modifier.
+---Scales the belt light and fog of war hole by the lantern tier, liquid state, illumination setting, modifier
+---and power.
 ---@param belt_id number Belt lantern entity ID.
 ---@param lantern_id number Carried lantern entity ID.
 ---@return nil
 local function UpdateBeltLight(belt_id, lantern_id)
     local scale = GetIlluminationScale() * GetLanternTierMultiplier(lantern_id)
-        * GetLanternLiquidStateMultiplier(lantern_id) * GetBeltLightScale()
+        * GetLanternLiquidStateMultiplier(lantern_id) * GetBeltLightScale() * GetLanternPowerFactor(lantern_id)
 
     local light_comp = EntityGetFirstComponent(belt_id, "LightComponent")
     if light_comp ~= nil then

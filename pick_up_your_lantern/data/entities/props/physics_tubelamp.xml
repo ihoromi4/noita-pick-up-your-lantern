@@ -154,9 +154,12 @@
         set_latest_event_position="1"
     ></AudioComponent>
 
+    <!-- Spins in flight like the vanilla broken wand, a long object too. -->
     <PhysicsThrowableComponent
         max_throw_speed="180"
         throw_force_coeff="1.5"
+        min_torque="4"
+        max_torque="10"
     ></PhysicsThrowableComponent>
 
     <ProjectileComponent

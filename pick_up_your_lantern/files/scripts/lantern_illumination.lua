@@ -1,6 +1,6 @@
 --- Runtime illumination scaling for lanterns.
 --- Keeps LightComponent radius and fog of war hole scale of every loaded lantern in sync with mod settings,
---- the lantern quality tier and liquid state. Base values of each lantern type are declared in its XML file
+--- the lantern quality tier, liquid state and power. Base values of each lantern type are declared in its XML file
 --- and captured into VariableStorageComponents on first sight, as the components themselves are rescaled at runtime.
 
 local MOD_ID = "pick_up_your_lantern"
@@ -99,6 +99,7 @@ function GetLanternAppliedLightRadius(entity_id)
 end
 
 ---Applies the illumination scale, multiplied by the quality tier, to the light and fog of war hole of a lantern.
+---A lamp without power gets no light and no fog of war hole.
 ---Lanterns stored in the inventory are skipped: touching their disabled components makes them render
 ---again, so they are updated once the lantern is held or returned to the world.
 ---@param entity_id number Lantern entity ID.
@@ -110,7 +111,7 @@ function ApplyLanternIllumination(entity_id, scale)
         return false
     end
 
-    local tier_scale = scale * GetLanternTierMultiplier(entity_id)
+    local tier_scale = scale * GetLanternTierMultiplier(entity_id) * GetLanternPowerFactor(entity_id)
     ComponentSetValue2(light_comp, "update_properties", true)
     ComponentSetValue2(light_comp, "radius", GetLanternLightRadius(entity_id, tier_scale))
 
@@ -163,6 +164,10 @@ function UpdateLanternIllumination(force_refresh)
         EnsureLanternBaseIllumination(entity_id)
         if EnsureLanternTraits(entity_id) then
             -- Snap to the new tier instead of easing from the radius applied before the roll.
+            SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
+        end
+        if UpdateLanternPower(entity_id) then
+            -- Applied again right away, or once the lamp leaves the inventory.
             SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
         end
         -- The liquid state is part of the eased scale, so the lantern changes smoothly when it takes one on.
