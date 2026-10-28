@@ -2,7 +2,8 @@
 
     <!--
         Dangling power cable of a tube lamp, spawned by files/scripts/tube_lamp_cable.lua.
-        The segments and joints are added from Lua, then the physics body is initialized once.
+        The segments and joints are added by its own script on the first update, then the physics body is
+        initialized once.
     -->
 
     <PhysicsBody2Component
@@ -12,6 +13,12 @@
         manual_init="1"
         auto_clean="0"
     ></PhysicsBody2Component>
+
+    <!-- Builds the chain from the segment count and length set in storages by tube_lamp_cable.lua. -->
+    <LuaComponent
+        execute_every_n_frame="1"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/tube_lamp_cable_build.lua"
+    ></LuaComponent>
 
     <!-- Sparks from the end of the cable while it is live. -->
     <LuaComponent

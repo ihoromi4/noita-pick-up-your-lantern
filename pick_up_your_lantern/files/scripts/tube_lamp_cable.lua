@@ -17,14 +17,13 @@ local LANTERN_TAG = "lantern"
 local TETHER_TAG = "pul_cable_tether"
 local CABLE_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/tube_lamp_cable.xml"
 local SEGMENT_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/tube_lamp_cable_segment.xml"
-local SEGMENT_IMAGE = "data/props_breakable_gfx/wire_vertical_5_00.png"
-local SEGMENT_MATERIAL = "metal_wire_nohit"
 -- Lamp position while it hangs: the upper end of its wires, right under the ceiling.
 local ANCHOR_X_STORAGE = "lantern_cable_anchor_x"
 local ANCHOR_Y_STORAGE = "lantern_cable_anchor_y"
 -- Stored on the first segment of a carried cable, to leave a dangling cable if the cable outlives this session.
 local TETHER_ANCHOR_X_STORAGE = "cable_anchor_x"
 local TETHER_ANCHOR_Y_STORAGE = "cable_anchor_y"
+local CABLE_SEGMENT_COUNT_STORAGE = "cable_segment_count"
 local CABLE_SEGMENT_LENGTH_STORAGE = "cable_segment_length"
 
 -- Length of a cable segment, in pixels: the height of the vanilla wire sprite.
@@ -44,12 +43,6 @@ local DAMPING = 0.95
 local CONSTRAINT_ITERATIONS = 8
 local BREAK_SPARK_COUNT = 12
 
--- Physics joints of the dangling cable, as in the vanilla temple lantern chain.
-local CEILING_BREAK_FORCE = 15
-local CEILING_BREAK_DISTANCE = 20
-local SEGMENT_BREAK_FORCE = 6
-local SEGMENT_BREAK_DISTANCE = 3
-
 ---@class CableTether
 ---@field lamp_id number Carried lamp entity ID.
 ---@field max_segments number Number of segments paid out before the cable breaks.
@@ -60,6 +53,7 @@ local SEGMENT_BREAK_DISTANCE = 3
 local tether = nil
 
 ---Spawns a dangling cable: a physics chain of segments attached to the ceiling at the anchor.
+---The chain is built by the cable's own script on its first update, see tube_lamp_cable_build.lua.
 ---@param x number World X coordinate of the anchor, right under the ceiling.
 ---@param y number World Y coordinate of the anchor.
 ---@param segment_count number Number of segments.
@@ -70,44 +64,10 @@ local function SpawnDanglingCable(x, y, segment_count)
         return
     end
 
-    local material = CellFactory_GetType(SEGMENT_MATERIAL)
-    for index = 1, segment_count do
-        local top = (index - 1) * SEGMENT_LENGTH
-        EntityAddComponent2(cable_id, "PhysicsImageShapeComponent", {
-            body_id = index,
-            offset_x = 0,
-            offset_y = top,
-            image_file = SEGMENT_IMAGE,
-            material = material,
-        })
-        if index == 1 then
-            EntityAddComponent2(cable_id, "PhysicsJoint2Component", {
-                type = "REVOLUTE_JOINT_ATTACH_TO_NEARBY_SURFACE",
-                offset_x = 0.5,
-                offset_y = top,
-                body1_id = index,
-                break_force = CEILING_BREAK_FORCE,
-                break_distance = CEILING_BREAK_DISTANCE,
-                ray_x = 0,
-                ray_y = -16,
-            })
-        else
-            EntityAddComponent2(cable_id, "PhysicsJoint2Component", {
-                type = "REVOLUTE_JOINT",
-                offset_x = 0.5,
-                offset_y = top,
-                body1_id = index - 1,
-                body2_id = index,
-                break_force = SEGMENT_BREAK_FORCE,
-                break_distance = SEGMENT_BREAK_DISTANCE,
-            })
-        end
-    end
-    PhysicsBody2InitFromComponents(cable_id)
-
+    SetStorageFloat(cable_id, CABLE_SEGMENT_COUNT_STORAGE, segment_count)
+    SetStorageFloat(cable_id, CABLE_SEGMENT_LENGTH_STORAGE, SEGMENT_LENGTH)
     SetStorageFloat(cable_id, TETHER_ANCHOR_X_STORAGE, x)
     SetStorageFloat(cable_id, TETHER_ANCHOR_Y_STORAGE, y)
-    SetStorageFloat(cable_id, CABLE_SEGMENT_LENGTH_STORAGE, SEGMENT_LENGTH)
 end
 
 ---Spawns the sprite entity of a carried cable segment.
