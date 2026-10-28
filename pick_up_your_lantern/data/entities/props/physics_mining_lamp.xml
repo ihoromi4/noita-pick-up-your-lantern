@@ -16,13 +16,14 @@
         on_death_really_leave_body="0"
     ></PhysicsBodyComponent>
 
-    <!-- Origin at the centre of the lamp, as in vanilla: biomes spawn it 6 px below the ceiling. -->
+    <!-- Origin at the centre of the lamp, as in vanilla: biomes spawn it 6 px below the ceiling.
+         Vanilla wood_prop has platform_type="1", so the player bumps into it; this twin lets the player pass. -->
     <PhysicsImageShapeComponent
         centered="0"
         offset_x="2.5"
         offset_y="4"
         image_file="data/props_gfx/minelamp.png"
-        material="wood_prop"
+        material="wood_prop_noplayerhit"
     ></PhysicsImageShapeComponent>
 
     <PhysicsJointComponent

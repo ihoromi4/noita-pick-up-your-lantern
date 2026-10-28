@@ -34,6 +34,8 @@ Noita has two physics component families, and the item system works only with th
 
 So `physics/lantern_small.xml`, which uses `PhysicsBody2Component` in vanilla, is rewritten to use `PhysicsBodyComponent` and `PhysicsJointComponent`. The mining lamp already uses the older family in vanilla. All files are full overrides with the `base_item_physics.xml` components expanded inline, not runtime XML edits.
 
+The body material must not have `platform_type="1"` in `data/materials.xml`, otherwise the player bumps into the lantern and stands on it. `glass_box2d` has `platform_type="0"`, and the `*_nohit` materials inherit none from `aluminium`. The vanilla mining lamp is made of `wood_prop` (`platform_type="1"`), so its override uses the twin `wood_prop_noplayerhit`.
+
 ## Ceiling Anchors
 
 A lantern hangs on a `PhysicsJointComponent` with `nail_to_wall="1"`.
