@@ -44,4 +44,5 @@ This document contains an index of research, Noita engine technical details, and
 - [Natural Fear](rnd/natural-fear.md) - creatures that lanterns do not attract run from lantern light through the native Escaping AI state; vanilla burning and the AI state table.
 - [Fire Enemies](rnd/fire-enemies.md) - brighter light of fire-related enemies: vanilla list, runtime light, detection heuristic for enemies of other mods, and attraction of fire enemies to lanterns in the world through the AI home position.
 - [Spawning Fixtures for In-Game Tests](rnd/test-spawning.md) - debug spawner for rare light fixtures, spawn rules, finding biomes and ceiling points in pixel scenes, tested points in the mountain hall at the entrance to the Mines.
+- [Tube Lamp and Electricity](rnd/tube-lamp-electricity.md) - a tube lamp shines only while wired to the ceiling or hit by electricity: power state, cable of segments while carrying, sparking dangling cable, implementation stages.
 - [YAML Localization](rnd/yaml-localization.md) - postponed idea of storing translations in YAML (`.yaml.txt`) and converting them to CSV at startup via `tinyyaml`; limitations, pros and cons.

@@ -77,12 +77,13 @@ end
 
 ---Replaces the held lantern with a lantern hanging on the ceiling.
 ---@param lantern_id number Held lantern entity ID.
+---@param lantern_file string Entity file to load the hanging lantern from.
+---@param hang_offset_y number Origin of the hanging lantern below the ceiling, in pixels.
 ---@param ceiling_x number World X coordinate of the ceiling surface.
 ---@param ceiling_y number World Y coordinate of the ceiling surface.
 ---@return boolean hung Whether the lantern was hung.
-local function HangLantern(lantern_id, ceiling_x, ceiling_y)
-    local lantern_file, lantern_type = GetLanternFile(lantern_id)
-    local hung_id = EntityLoad(lantern_file, ceiling_x, ceiling_y + lantern_type.hang_offset_y)
+local function HangLantern(lantern_id, lantern_file, hang_offset_y, ceiling_x, ceiling_y)
+    local hung_id = EntityLoad(lantern_file, ceiling_x, ceiling_y + hang_offset_y)
     if hung_id == nil or hung_id == 0 then
         return false
     end
@@ -201,9 +202,15 @@ function UpdateLanternHang()
         return
     end
 
+    -- The left-button throw of a lantern that cannot be hung is still returned to the hand, so the click does nothing.
+    local lantern_file, lantern_type = GetLanternFile(lantern_id)
+    if lantern_type.hang_offset_y == nil then
+        return
+    end
+
     local x, y = EntityGetTransform(player_id)
     local has_ceiling, ceiling_x, ceiling_y = RaytraceSurfaces(x, y, x, y - HANG_MAX_DISTANCE)
-    if has_ceiling and HangLantern(lantern_id, ceiling_x, ceiling_y) then
+    if has_ceiling and HangLantern(lantern_id, lantern_file, lantern_type.hang_offset_y, ceiling_x, ceiling_y) then
         local next_item = FindNextHeldItem(player_id, lantern_id)
         if next_item ~= 0 then
             SelectHeldItem(player_id, next_item, true)

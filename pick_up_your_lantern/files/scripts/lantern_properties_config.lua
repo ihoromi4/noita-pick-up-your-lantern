@@ -10,8 +10,9 @@
 ---@class LanternType
 ---@field files string[] Entity files of the type; the first one is loaded to hang a held lantern.
 ---@field ui_sprite string Inventory icon; tells the type apart once the entity filename is lost.
----@field hang_offset_y number Origin of a hung lantern below the ceiling, in pixels: the joint ends up just under
----the surface, and lantern_anchor.lua still finds the ceiling within its check distance.
+---@field hang_offset_y number|nil Origin of a hung lantern below the ceiling, in pixels: the joint ends up just under
+---the surface, and lantern_anchor.lua still finds the ceiling within its check distance. Types without it are not
+---hung with the left mouse button.
 
 ---Pickable light fixtures. Each file is a full override in `data/entities/props/` of the mod.
 ---@type LanternType[]
@@ -37,11 +38,10 @@ LANTERN_TYPES = {
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_mining_lamp.png",
         hang_offset_y = 7,
     },
-    -- Tube Lamp
+    -- Tube Lamp: needs a power cable, so it is not hung back.
     {
         files = { "data/entities/props/physics_tubelamp.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_tube_lamp.png",
-        hang_offset_y = 4,
     },
 }
 

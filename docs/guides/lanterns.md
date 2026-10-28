@@ -18,7 +18,7 @@ Hanging oil lanterns are no longer just decoration: you can take them down, carr
 - **Small Lantern**: the most common lantern on a chain, found in the Mines, Coal Pits and most other biomes.
 - **Lantern**: a larger glass lantern with a stronger light, found in liquid caves and towns.
 - **Mining Lamp**: a small oil lamp in a wooden frame, found on the surface: in the Hills, near the lake and in the snowy wasteland.
-- **Tube Lamp**: a fluorescent glass tube with a cold white light, found in the Hiisi Base, the Vault and the Power Plant. It does not burn: when it breaks, it bursts with electric sparks instead of burning oil.
+- **Tube Lamp**: a fluorescent glass tube with a cold white light, found in the Hiisi Base, the Vault and the Power Plant. You hold it upright like a sword. It does not burn: when it breaks, it bursts like a small gas cylinder instead of spilling burning oil. The left mouse button does not hang it back on the ceiling.
 
 Chain torches, torch stands and other light sources stay in place, but they also dispel the darkness around them. See [Vision and Darkness](vision-and-darkness.md).
 
