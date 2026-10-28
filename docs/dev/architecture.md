@@ -62,7 +62,7 @@ Scripts attached to lantern entities through `LuaComponent`:
 | --- | --- | --- |
 | `lantern_anchor.lua` | In the world, every 20 frames and on kick | Detaches the lantern from the ceiling when kicked or when the ceiling is destroyed, then removes itself. |
 | `lantern_in_world.lua` | Once each time the lantern returns to the world | Resets the mirrored transform scale after a throw or drop. |
-| `lantern_throw.lua` | On throw (`Message_ThrowItem`) | Marks a lantern thrown with the left mouse button, so `UpdateLanternHang` returns it to the hand on the next frame. |
+| `lantern_throw.lua` | On throw (`Message_ThrowItem`) | Marks a lantern thrown with the left mouse button, so `UpdateLanternHang` returns it to the hand on the next frame. Types that cannot be hung (no `hang_offset_y` in `LANTERN_TYPES`) are not marked and fly away. |
 | `lantern_in_hand.lua` | In hand, every frame | Swings the lantern like a damped pendulum. Also drives the belt lantern. |
 | `lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering and Short-lived modifiers. |
 | `lantern_death.lua`, `lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |

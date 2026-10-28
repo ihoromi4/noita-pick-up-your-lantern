@@ -1,12 +1,13 @@
 --- Throw callback for lanterns: marks a lantern thrown with the left mouse button to be returned to the hand.
 --- Clearing the fire button in OnWorldPreUpdate does not stop the vanilla item throw, so a left-button throw
 --- still happens when there is no ceiling to hang the lantern on. UpdateLanternHang returns the lantern on the
---- next frame, outside of the engine throw.
+--- next frame, outside of the engine throw. Lantern types that cannot be hung are thrown with the left button as usual.
 
 local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 
 -- The throw is released after the throw animation, a few frames after the click.
 local THROW_INPUT_WINDOW = 60
@@ -42,5 +43,11 @@ function throw_item(from_x, from_y, to_x, to_y)
         return
     end
 
-    SetStorageFloat(player_id, RETURN_LANTERN_STORAGE, GetUpdatedEntityID())
+    local lantern_id = GetUpdatedEntityID()
+    local _, lantern_type = GetLanternType(lantern_id)
+    if lantern_type.hang_offset_y == nil then
+        return
+    end
+
+    SetStorageFloat(player_id, RETURN_LANTERN_STORAGE, lantern_id)
 end

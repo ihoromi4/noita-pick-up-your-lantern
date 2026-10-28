@@ -1,7 +1,7 @@
 <Sprite
     filename="mods/pick_up_your_lantern/files/props_gfx/tube_lamp_in_hand.png"
     offset_x="1.5"
-    offset_y="17.5"
+    offset_y="1.5"
     default_animation="default" >
 
     <RectAnimation

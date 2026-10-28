@@ -21,6 +21,36 @@ local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
 
+-- Type used when neither the filename nor the icon is known: the Small Lantern, the most common one.
+local DEFAULT_LANTERN_TYPE_INDEX = 2
+
+---Picks the entity file the lantern was loaded from, and its type.
+---@param lantern_id number Lantern entity ID.
+---@return string filename
+---@return LanternType lantern_type
+function GetLanternType(lantern_id)
+    local filename = EntityGetFilename(lantern_id)
+    for _, lantern_type in ipairs(LANTERN_TYPES) do
+        for _, lantern_file in ipairs(lantern_type.files) do
+            if filename == lantern_file then
+                return lantern_file, lantern_type
+            end
+        end
+    end
+
+    -- The filename is unreliable once the lantern has passed through world streaming; the icon tells the type apart.
+    local item_comp = EntityGetFirstComponentIncludingDisabled(lantern_id, "ItemComponent")
+    local ui_sprite = item_comp ~= nil and ComponentGetValue2(item_comp, "ui_sprite") or ""
+    for _, lantern_type in ipairs(LANTERN_TYPES) do
+        if ui_sprite == lantern_type.ui_sprite then
+            return lantern_type.files[1], lantern_type
+        end
+    end
+
+    local default_type = LANTERN_TYPES[DEFAULT_LANTERN_TYPE_INDEX]
+    return default_type.files[1], default_type
+end
+
 ---Returns the configuration of a modifier.
 ---@param modifier_id number
 ---@return LanternModifier|nil

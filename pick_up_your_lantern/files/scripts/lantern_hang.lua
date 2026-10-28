@@ -16,8 +16,6 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 local LANTERN_TAG = "lantern"
 local WAND_TAG = "wand"
 local QUICK_INVENTORY_NAME = "inventory_quick"
--- Type used when neither the filename nor the icon is known: the Small Lantern, the most common one.
-local DEFAULT_LANTERN_TYPE = LANTERN_TYPES[2]
 local STORAGE_FIELDS = {
     "value_string",
     "value_int",
@@ -29,32 +27,6 @@ local STORAGE_FIELDS = {
 local HANG_MAX_DISTANCE = 16
 
 local last_click_frame = -1
-
----Picks the entity file the lantern was loaded from, and its type.
----@param lantern_id number Lantern entity ID.
----@return string filename
----@return LanternType lantern_type
-local function GetLanternFile(lantern_id)
-    local filename = EntityGetFilename(lantern_id)
-    for _, lantern_type in ipairs(LANTERN_TYPES) do
-        for _, lantern_file in ipairs(lantern_type.files) do
-            if filename == lantern_file then
-                return lantern_file, lantern_type
-            end
-        end
-    end
-
-    -- The filename is unreliable once the lantern has passed through world streaming; the icon tells the type apart.
-    local item_comp = EntityGetFirstComponentIncludingDisabled(lantern_id, "ItemComponent")
-    local ui_sprite = item_comp ~= nil and ComponentGetValue2(item_comp, "ui_sprite") or ""
-    for _, lantern_type in ipairs(LANTERN_TYPES) do
-        if ui_sprite == lantern_type.ui_sprite then
-            return lantern_type.files[1], lantern_type
-        end
-    end
-
-    return DEFAULT_LANTERN_TYPE.files[1], DEFAULT_LANTERN_TYPE
-end
 
 ---Copies the lantern state kept in VariableStorageComponents and the remaining health.
 ---@param source_id number Lantern entity ID to copy from.
@@ -202,8 +174,8 @@ function UpdateLanternHang()
         return
     end
 
-    -- The left-button throw of a lantern that cannot be hung is still returned to the hand, so the click does nothing.
-    local lantern_file, lantern_type = GetLanternFile(lantern_id)
+    -- A lantern that cannot be hung is thrown with the left button as usual, see lantern_throw.lua.
+    local lantern_file, lantern_type = GetLanternType(lantern_id)
     if lantern_type.hang_offset_y == nil then
         return
     end
