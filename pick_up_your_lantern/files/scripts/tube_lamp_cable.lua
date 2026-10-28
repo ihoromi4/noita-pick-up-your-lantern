@@ -1,10 +1,12 @@
 --- Power cables of tube lamps for Pick Up Your Lantern mod.
 --- A tube lamp hangs on its power cable. When the player takes it down, a cable of separate segments runs from
 --- the ceiling to the lamp: a segment is paid out from the ceiling whenever the cable gets too short, up to a random
---- limit, and past the limit the cable breaks with a burst of sparks. The ceiling part keeps hanging as a physics
---- chain with the paid-out segments and sparks for a while, see tube_lamp_cable_spark.lua.
---- A lamp kicked down leaves a dangling cable of random length; a lamp whose ceiling is destroyed leaves none.
---- The carried cable is simulated in Lua as a rope of verlet points, as a physics chain cannot grow once initialized.
+--- limit, and past the limit the cable snaps with a burst of sparks. The ceiling part keeps hanging, and after
+--- SPARK_DELAY_FRAMES its end sparks for LIVE_FRAMES. A lamp kicked down leaves a hanging cable of random length;
+--- a lamp whose ceiling is destroyed leaves none.
+--- A cable is a rope of verlet points simulated in Lua, one sprite entity per segment: a physics chain built at
+--- runtime gets no bodies when spawned by the mod, and could not grow anyway. A cable entity at the ceiling anchor
+--- keeps the segment count and age in storages, so cables are rebuilt after a save and reload.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -14,21 +16,20 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 
 local LANTERN_TAG = "lantern"
-local TETHER_TAG = "pul_cable_tether"
+local CABLE_TAG = "pul_cable"
+local SEGMENT_TAG = "pul_cable_segment"
 local CABLE_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/tube_lamp_cable.xml"
 local SEGMENT_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/tube_lamp_cable_segment.xml"
+local SPARK_ENTITY_PATH = "data/entities/misc/electricity_weak.xml"
 -- Lamp position while it hangs: the upper end of its wires, right under the ceiling.
 local ANCHOR_X_STORAGE = "lantern_cable_anchor_x"
 local ANCHOR_Y_STORAGE = "lantern_cable_anchor_y"
--- Stored on the first segment of a carried cable, to leave a dangling cable if the cable outlives this session.
-local TETHER_ANCHOR_X_STORAGE = "cable_anchor_x"
-local TETHER_ANCHOR_Y_STORAGE = "cable_anchor_y"
-local CABLE_SEGMENT_COUNT_STORAGE = "cable_segment_count"
-local CABLE_SEGMENT_LENGTH_STORAGE = "cable_segment_length"
+local SEGMENT_COUNT_STORAGE = "cable_segment_count"
+local AGE_STORAGE = "cable_age_frames"
 
 -- Length of a cable segment, in pixels: the height of the vanilla wire sprite.
 local SEGMENT_LENGTH = 5
--- Number of segments a carried cable pays out before it breaks: 20 to 80 px.
+-- Number of segments a carried cable pays out before it snaps: 20 to 80 px.
 local MIN_SEGMENTS = 4
 local MAX_SEGMENTS = 16
 -- Number of segments of the cable left by a lamp kicked down.
@@ -36,41 +37,41 @@ local KICKED_MIN_SEGMENTS = 2
 local KICKED_MAX_SEGMENTS = 16
 -- How far above the anchor the ceiling is searched for, to tell a kick from a destroyed ceiling.
 local CEILING_CHECK_DISTANCE = 8
--- How much a fully paid-out cable stretches before it breaks.
+-- How much a fully paid-out cable stretches before it snaps.
 local BREAK_STRETCH = 1.1
+local BREAK_SPARK_COUNT = 12
+-- The first spark comes 2 seconds after the cable snapped, so the player who broke it is not shocked right away.
+local SPARK_DELAY_FRAMES = 2 * 60
+local SPARK_INTERVAL_FRAMES = 60
+local SPARK_PARTICLE_COUNT = 6
+-- A torn cable is live for 3 minutes, then it keeps hanging without sparks.
+local LIVE_FRAMES = 3 * 60 * 60
 local GRAVITY = 0.2
 local DAMPING = 0.95
 local CONSTRAINT_ITERATIONS = 8
-local BREAK_SPARK_COUNT = 12
 
----@class CableTether
----@field lamp_id number Carried lamp entity ID.
----@field max_segments number Number of segments paid out before the cable breaks.
----@field points {x: number, y: number, prev_x: number, prev_y: number}[] Rope points from the ceiling to the lamp.
+---@class CablePoint
+---@field x number
+---@field y number
+---@field prev_x number
+---@field prev_y number
+
+---@class CableRope
+---@field cable_id number Cable entity ID at the ceiling anchor.
+---@field points CablePoint[] Rope points from the ceiling to the end of the cable.
 ---@field segment_ids number[] Segment sprite entity IDs, one per pair of neighbour points.
+---@field lamp_id number|nil Lamp the cable is attached to while the player carries it.
+---@field max_segments number Number of segments paid out before a carried cable snaps.
 
----@type CableTether|nil
-local tether = nil
+---Cables simulated this session, by cable entity ID.
+---@type table<number, CableRope>
+local ropes = {}
 
----Spawns a dangling cable: a physics chain of segments attached to the ceiling at the anchor.
----The chain is built by the cable's own script on its first update, see tube_lamp_cable_build.lua.
----@param x number World X coordinate of the anchor, right under the ceiling.
----@param y number World Y coordinate of the anchor.
----@param segment_count number Number of segments.
----@return nil
-local function SpawnDanglingCable(x, y, segment_count)
-    local cable_id = EntityLoad(CABLE_ENTITY_PATH, x, y)
-    if cable_id == nil or cable_id == 0 then
-        return
-    end
+---Cable attached to a lamp the player carries; only one at a time.
+---@type CableRope|nil
+local carried = nil
 
-    SetStorageFloat(cable_id, CABLE_SEGMENT_COUNT_STORAGE, segment_count)
-    SetStorageFloat(cable_id, CABLE_SEGMENT_LENGTH_STORAGE, SEGMENT_LENGTH)
-    SetStorageFloat(cable_id, TETHER_ANCHOR_X_STORAGE, x)
-    SetStorageFloat(cable_id, TETHER_ANCHOR_Y_STORAGE, y)
-end
-
----Spawns the sprite entity of a carried cable segment.
+---Spawns the sprite entity of a cable segment.
 ---@param x number World X coordinate of the upper end of the segment.
 ---@param y number World Y coordinate of the upper end of the segment.
 ---@return number segment_id
@@ -78,12 +79,63 @@ local function SpawnSegment(x, y)
     return EntityLoad(SEGMENT_ENTITY_PATH, x, y)
 end
 
----Finds where the carried cable ends: at the lamp in hand or in the world, at its holder while it is in the
+---Creates the rope of a cable: points on a straight line from the anchor to the end, one segment between each two.
+---@param cable_id number Cable entity ID.
+---@param end_x number World X coordinate of the end of the cable.
+---@param end_y number World Y coordinate of the end of the cable.
+---@param segment_count number Number of segments.
+---@return CableRope
+local function CreateRope(cable_id, end_x, end_y, segment_count)
+    local anchor_x, anchor_y = EntityGetTransform(cable_id)
+    local rope = { cable_id = cable_id, points = {}, segment_ids = {}, lamp_id = nil, max_segments = segment_count, }
+    for index = 0, segment_count do
+        local t = index / segment_count
+        local x = anchor_x + (end_x - anchor_x) * t
+        local y = anchor_y + (end_y - anchor_y) * t
+        table.insert(rope.points, { x = x, y = y, prev_x = x, prev_y = y, })
+        if index < segment_count then
+            table.insert(rope.segment_ids, SpawnSegment(x, y))
+        end
+    end
+    ropes[cable_id] = rope
+
+    return rope
+end
+
+---Spawns a cable hanging from the ceiling at the anchor; its segments start straight down and settle.
+---@param anchor_x number World X coordinate of the anchor, right under the ceiling.
+---@param anchor_y number World Y coordinate of the anchor.
+---@param segment_count number Number of segments.
+---@return CableRope|nil rope
+local function SpawnHangingCable(anchor_x, anchor_y, segment_count)
+    local cable_id = EntityLoad(CABLE_ENTITY_PATH, anchor_x, anchor_y)
+    if cable_id == nil or cable_id == 0 then
+        return nil
+    end
+
+    SetStorageFloat(cable_id, SEGMENT_COUNT_STORAGE, segment_count)
+    return CreateRope(cable_id, anchor_x, anchor_y + segment_count * SEGMENT_LENGTH, segment_count)
+end
+
+---Removes the sprites of a rope and forgets it; the cable entity is left as it is.
+---@param rope CableRope
+---@return nil
+local function DropRope(rope)
+    for _, segment_id in ipairs(rope.segment_ids) do
+        EntityKill(segment_id)
+    end
+    ropes[rope.cable_id] = nil
+    if carried == rope then
+        carried = nil
+    end
+end
+
+---Finds where a carried cable ends: at the lamp in hand or in the world, at its holder while it is in the
 ---inventory, as the transform of an item in the inventory is not kept up to date.
 ---@param lamp_id number Lamp entity ID.
 ---@return number x
 ---@return number y
-local function GetTetherEnd(lamp_id)
+local function GetCarriedEnd(lamp_id)
     local root_id = EntityGetRootEntity(lamp_id)
     if root_id ~= lamp_id and GetHeldItem(root_id) ~= lamp_id then
         return EntityGetTransform(root_id)
@@ -92,24 +144,18 @@ local function GetTetherEnd(lamp_id)
     return EntityGetTransform(lamp_id)
 end
 
----Removes the carried cable and leaves its ceiling part hanging, with a burst of sparks at the break.
----@param break_x number|nil World X coordinate of the break; no sparks without it.
----@param break_y number|nil World Y coordinate of the break.
+---Snaps the carried cable off the lamp with a burst of harmless sparks; the cable keeps hanging from the ceiling.
 ---@return nil
-local function BreakTether(break_x, break_y)
-    if tether == nil then
+local function SnapCarriedCable()
+    if carried == nil then
         return
     end
 
-    local anchor = tether.points[1]
-    SpawnDanglingCable(anchor.x, anchor.y, #tether.segment_ids)
-    if break_x ~= nil then
-        GameCreateCosmeticParticle("spark_electric", break_x, break_y, BREAK_SPARK_COUNT, 0, 0)
-    end
-    for _, segment_id in ipairs(tether.segment_ids) do
-        EntityKill(segment_id)
-    end
-    tether = nil
+    local last = carried.points[#carried.points]
+    GameCreateCosmeticParticle("spark_electric", last.x, last.y, BREAK_SPARK_COUNT, 0, 0)
+    carried.lamp_id = nil
+    SetStorageFloat(carried.cable_id, AGE_STORAGE, 0)
+    carried = nil
 end
 
 ---Starts a carried cable from the ceiling anchor to a lamp the player took down.
@@ -117,58 +163,63 @@ end
 ---@param anchor_x number World X coordinate of the anchor.
 ---@param anchor_y number World Y coordinate of the anchor.
 ---@return nil
-local function StartTether(lamp_id, anchor_x, anchor_y)
-    BreakTether(nil, nil)
+local function StartCarriedCable(lamp_id, anchor_x, anchor_y)
+    SnapCarriedCable()
 
-    local lamp_x, lamp_y = GetTetherEnd(lamp_id)
+    local lamp_x, lamp_y = GetCarriedEnd(lamp_id)
     local distance = math.sqrt((lamp_x - anchor_x) ^ 2 + (lamp_y - anchor_y) ^ 2)
     SetRandomSeed(anchor_x + GameGetFrameNum(), anchor_y)
     local max_segments = Random(MIN_SEGMENTS, MAX_SEGMENTS)
     local segment_count = math.max(1, math.ceil(distance / SEGMENT_LENGTH))
     if segment_count > max_segments then
         -- The lamp is already too far, e.g. picked up in a hurry from a high ceiling.
-        SpawnDanglingCable(anchor_x, anchor_y, max_segments)
+        SpawnHangingCable(anchor_x, anchor_y, max_segments)
         GameCreateCosmeticParticle("spark_electric", lamp_x, lamp_y, BREAK_SPARK_COUNT, 0, 0)
         return
     end
 
-    tether = { lamp_id = lamp_id, max_segments = max_segments, points = {}, segment_ids = {}, }
-    for index = 0, segment_count do
-        local t = index / segment_count
-        local x = anchor_x + (lamp_x - anchor_x) * t
-        local y = anchor_y + (lamp_y - anchor_y) * t
-        table.insert(tether.points, { x = x, y = y, prev_x = x, prev_y = y, })
-        if index < segment_count then
-            table.insert(tether.segment_ids, SpawnSegment(x, y))
-        end
+    local cable_id = EntityLoad(CABLE_ENTITY_PATH, anchor_x, anchor_y)
+    if cable_id == nil or cable_id == 0 then
+        return
     end
-    SetStorageFloat(tether.segment_ids[1], TETHER_ANCHOR_X_STORAGE, anchor_x)
-    SetStorageFloat(tether.segment_ids[1], TETHER_ANCHOR_Y_STORAGE, anchor_y)
+    SetStorageFloat(cable_id, SEGMENT_COUNT_STORAGE, segment_count)
+
+    carried = CreateRope(cable_id, lamp_x, lamp_y, segment_count)
+    carried.lamp_id = lamp_id
+    carried.max_segments = max_segments
 end
 
----Pays out one more segment from the ceiling: a new point appears between the anchor and the next point.
+---Pays out one more segment of a carried cable from the ceiling: a new point appears next to the anchor.
+---@param rope CableRope
 ---@return nil
-local function PayOutSegment()
-    local anchor = tether.points[1]
-    local next_point = tether.points[2]
+local function PayOutSegment(rope)
+    local anchor = rope.points[1]
+    local next_point = rope.points[2]
     local x = (anchor.x + next_point.x) / 2
     local y = (anchor.y + next_point.y) / 2
-    table.insert(tether.points, 2, { x = x, y = y, prev_x = x, prev_y = y, })
-    table.insert(tether.segment_ids, SpawnSegment(x, y))
+    table.insert(rope.points, 2, { x = x, y = y, prev_x = x, prev_y = y, })
+    table.insert(rope.segment_ids, SpawnSegment(x, y))
+    SetStorageFloat(rope.cable_id, SEGMENT_COUNT_STORAGE, #rope.segment_ids)
 end
 
----Moves the free rope points with verlet integration, then pulls stretched segments back to their length.
----The first point is held by the ceiling and the last one by the lamp. Slack segments are left as they are.
+---Moves the free rope points with verlet integration, stops them at surfaces, then pulls stretched segments back
+---to their length. The first point is held by the ceiling, and the last one by the lamp while it is carried.
+---Slack segments are left as they are.
+---@param rope CableRope
 ---@return nil
-local function SimulateTether()
-    local points = tether.points
-    for index = 2, #points - 1 do
+local function SimulateRope(rope)
+    local points = rope.points
+    local last_free = rope.lamp_id == nil and #points or #points - 1
+    for index = 2, last_free do
         local point = points[index]
         local vel_x = (point.x - point.prev_x) * DAMPING
         local vel_y = (point.y - point.prev_y) * DAMPING
+        local x = point.x + vel_x
+        local y = point.y + vel_y + GRAVITY
         point.prev_x, point.prev_y = point.x, point.y
-        point.x = point.x + vel_x
-        point.y = point.y + vel_y + GRAVITY
+        if not RaytraceSurfaces(point.x, point.y, x, y) then
+            point.x, point.y = x, y
+        end
     end
 
     for _ = 1, CONSTRAINT_ITERATIONS do
@@ -179,7 +230,7 @@ local function SimulateTether()
             if distance > SEGMENT_LENGTH then
                 local correction = (distance - SEGMENT_LENGTH) / distance
                 local a_free = index > 1
-                local b_free = index + 1 < #points
+                local b_free = index + 1 <= last_free
                 local share = (a_free and b_free) and 0.5 or 1
                 if a_free then
                     a.x, a.y = a.x + dx * correction * share, a.y + dy * correction * share
@@ -193,10 +244,11 @@ local function SimulateTether()
 end
 
 ---Places each segment sprite between its two rope points: turned along the segment and stretched to its length.
+---@param rope CableRope
 ---@return nil
-local function RenderTether()
-    local points = tether.points
-    for index, segment_id in ipairs(tether.segment_ids) do
+local function RenderRope(rope)
+    local points = rope.points
+    for index, segment_id in ipairs(rope.segment_ids) do
         local a, b = points[index], points[index + 1]
         local dx, dy = b.x - a.x, b.y - a.y
         local length = math.sqrt(dx * dx + dy * dy)
@@ -205,50 +257,75 @@ local function RenderTether()
     end
 end
 
----Moves the carried cable after the lamp, pays out segments and breaks the cable once it is too long.
+---Moves a carried cable after its lamp, pays out segments and snaps the cable once it is too long.
+---@param rope CableRope
 ---@return nil
-local function UpdateTether()
-    local lamp_id = tether.lamp_id
-    local last = tether.points[#tether.points]
-    if not EntityGetIsAlive(lamp_id) then
-        BreakTether(last.x, last.y)
+local function UpdateCarriedCable(rope)
+    if not EntityGetIsAlive(rope.lamp_id) then
+        SnapCarriedCable()
         return
     end
 
-    local lamp_x, lamp_y = GetTetherEnd(lamp_id)
+    local lamp_x, lamp_y = GetCarriedEnd(rope.lamp_id)
+    local last = rope.points[#rope.points]
     last.x, last.y = lamp_x, lamp_y
 
-    local anchor = tether.points[1]
+    local anchor = rope.points[1]
     local distance = math.sqrt((lamp_x - anchor.x) ^ 2 + (lamp_y - anchor.y) ^ 2)
-    while distance > #tether.segment_ids * SEGMENT_LENGTH and #tether.segment_ids < tether.max_segments do
-        PayOutSegment()
+    while distance > #rope.segment_ids * SEGMENT_LENGTH and #rope.segment_ids < rope.max_segments do
+        PayOutSegment(rope)
     end
-    if distance > tether.max_segments * SEGMENT_LENGTH * BREAK_STRETCH then
-        BreakTether(lamp_x, lamp_y)
-        return
+    if distance > rope.max_segments * SEGMENT_LENGTH * BREAK_STRETCH then
+        SnapCarriedCable()
     end
-
-    SimulateTether()
-    RenderTether()
 end
 
----Removes carried cable segments left from an earlier session, e.g. after a save and reload, leaving their ceiling
----part as a dangling cable.
+---Sparks from the end of a torn cable while it is live.
+---@param rope CableRope
 ---@return nil
-local function CleanUpStaleTethers()
-    local stale_ids = EntityGetWithTag(TETHER_TAG) or {}
-    if #stale_ids == 0 then
+local function SparkTornCable(rope)
+    local age = GetStorageFloat(rope.cable_id, AGE_STORAGE) + 1
+    if age > LIVE_FRAMES then
         return
     end
+    SetStorageFloat(rope.cable_id, AGE_STORAGE, age)
 
-    for _, segment_id in ipairs(stale_ids) do
-        local anchor_comp = FindVariableStorage(segment_id, TETHER_ANCHOR_X_STORAGE)
-        if anchor_comp ~= nil then
-            local anchor_x = ComponentGetValue2(anchor_comp, "value_float")
-            local anchor_y = GetStorageFloat(segment_id, TETHER_ANCHOR_Y_STORAGE)
-            SpawnDanglingCable(anchor_x, anchor_y, #stale_ids)
+    if age >= SPARK_DELAY_FRAMES and age % SPARK_INTERVAL_FRAMES == 0 then
+        local last = rope.points[#rope.points]
+        EntityLoad(SPARK_ENTITY_PATH, last.x, last.y)
+        GameCreateCosmeticParticle("spark_electric", last.x, last.y, SPARK_PARTICLE_COUNT, 0, 0)
+    end
+end
+
+---Matches ropes to the loaded cable entities: cables loaded from a save or streamed in get a rope hanging straight
+---down, and ropes of unloaded cables are dropped. Segment sprites of no known rope, left from an earlier session,
+---are removed.
+---@return nil
+local function SyncRopes()
+    local loaded = {}
+    for _, cable_id in ipairs(EntityGetWithTag(CABLE_TAG) or {}) do
+        loaded[cable_id] = true
+        if ropes[cable_id] == nil then
+            local anchor_x, anchor_y = EntityGetTransform(cable_id)
+            local segment_count = math.max(1, math.floor(GetStorageFloat(cable_id, SEGMENT_COUNT_STORAGE)))
+            CreateRope(cable_id, anchor_x, anchor_y + segment_count * SEGMENT_LENGTH, segment_count)
         end
-        EntityKill(segment_id)
+    end
+
+    local known_segments = {}
+    for cable_id, rope in pairs(ropes) do
+        if loaded[cable_id] then
+            for _, segment_id in ipairs(rope.segment_ids) do
+                known_segments[segment_id] = true
+            end
+        else
+            DropRope(rope)
+        end
+    end
+    for _, segment_id in ipairs(EntityGetWithTag(SEGMENT_TAG) or {}) do
+        if not known_segments[segment_id] then
+            EntityKill(segment_id)
+        end
     end
 end
 
@@ -265,10 +342,10 @@ local function UpdateHangingLamps()
                     local anchor_x = GetStorageFloat(lamp_id, ANCHOR_X_STORAGE)
                     local anchor_y = GetStorageFloat(lamp_id, ANCHOR_Y_STORAGE)
                     if EntityGetRootEntity(lamp_id) ~= lamp_id then
-                        StartTether(lamp_id, anchor_x, anchor_y)
+                        StartCarriedCable(lamp_id, anchor_x, anchor_y)
                     elseif RaytraceSurfaces(anchor_x, anchor_y, anchor_x, anchor_y - CEILING_CHECK_DISTANCE) then
                         SetRandomSeed(anchor_x + GameGetFrameNum(), anchor_y)
-                        SpawnDanglingCable(anchor_x, anchor_y, Random(KICKED_MIN_SEGMENTS, KICKED_MAX_SEGMENTS))
+                        SpawnHangingCable(anchor_x, anchor_y, Random(KICKED_MIN_SEGMENTS, KICKED_MAX_SEGMENTS))
                     end
                 end
             else
@@ -280,16 +357,20 @@ local function UpdateHangingLamps()
     end
 end
 
----Updates tube lamp cables. Runs every frame in OnWorldPostUpdate, after physics, so the carried cable follows the
+---Updates tube lamp cables. Runs every frame in OnWorldPostUpdate, after physics, so a carried cable follows its
 ---lamp in the same frame before rendering.
 ---@return nil
 function UpdateTubeLampCables()
-    if tether == nil then
-        CleanUpStaleTethers()
-    end
-
+    SyncRopes()
     UpdateHangingLamps()
-    if tether ~= nil then
-        UpdateTether()
+
+    for _, rope in pairs(ropes) do
+        if rope == carried then
+            UpdateCarriedCable(rope)
+        else
+            SparkTornCable(rope)
+        end
+        SimulateRope(rope)
+        RenderRope(rope)
     end
 end

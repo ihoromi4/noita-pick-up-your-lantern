@@ -65,7 +65,6 @@ Scripts attached to lantern entities through `LuaComponent`:
 | `lantern_throw.lua` | On throw (`Message_ThrowItem`) | Marks a lantern thrown with the left mouse button, so `UpdateLanternHang` returns it to the hand on the next frame. Types that cannot be hung (no `hang_offset_y` in `LANTERN_TYPES`) are not marked and fly away. |
 | `lantern_in_hand.lua` | In hand, every frame | Swings the lantern like a damped pendulum. Also drives the belt lantern. |
 | `lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering and Short-lived modifiers. |
-| `tube_lamp_cable_spark.lua` | On a dangling tube lamp cable, every 10 frames | Sparks from the end of the cable for 3 minutes, starting 2 seconds after it broke. |
 | `lantern_death.lua`, `lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |
 | `mining_lamp_death.lua` | On death | Spills oil and fire; the explosion comes from `ExplodeOnDamageComponent`. |
 
@@ -88,8 +87,8 @@ Vanilla lanterns have a `TorchComponent` that ignites nearby pixels and goes out
 - `lantern`: every pickable lantern, including other fixtures such as the mining lamp. The illumination scan, liquid states, belt and Item Radar filter look for it.
 - `pul_belt`: the belt lantern entity. It deliberately does not contain `lantern`, so the illumination scan never treats it as a real lantern.
 - `pul_xray`: the All-Seeing Eye spell projectile.
-- `pul_cable`: a dangling tube lamp cable, a physics chain.
-- `pul_cable_tether`: a segment sprite of the cable a carried tube lamp drags from the ceiling.
+- `pul_cable`: a tube lamp cable entity at its ceiling anchor.
+- `pul_cable_segment`: a segment sprite of a tube lamp cable.
 
 ## Diff Patch Library
 

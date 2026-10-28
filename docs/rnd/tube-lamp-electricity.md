@@ -30,15 +30,15 @@ A fluorescent tube lamp cannot shine without power. Unlike oil lanterns, a picka
 
 ## Engine Building Blocks
 
-- **[Confirmed]** Vanilla builds chains of physics segments at runtime: `data/scripts/props/temple_lantern.lua` and `hanging_wire_spawner.lua` add `PhysicsImageShapeComponent` and `PhysicsJoint2Component` (`REVOLUTE_JOINT_ATTACH_TO_NEARBY_SURFACE` for the ceiling) with `EntityAddComponent2`, then call `PhysicsBody2InitFromComponents` once. Wire segment: `data/props_breakable_gfx/wire_vertical_10_00.png`, material `metal_wire_nohit` (the player passes through it).
+- **[Confirmed]** A runtime physics chain spawned by the mod got no bodies, see [Lantern Entities](../dev/lantern-entities.md#tube-lamp-cable); both cables are Lua ropes instead. Vanilla builds chains of physics segments at runtime: `data/scripts/props/temple_lantern.lua` and `hanging_wire_spawner.lua` add `PhysicsImageShapeComponent` and `PhysicsJoint2Component` (`REVOLUTE_JOINT_ATTACH_TO_NEARBY_SURFACE` for the ceiling) with `EntityAddComponent2`, then call `PhysicsBody2InitFromComponents` once. Wire segment: `data/props_breakable_gfx/wire_vertical_10_00.png`, material `metal_wire_nohit` (the player passes through it).
 - **[Confirmed]** `data/entities/misc/electricity_weak.xml` is a short electric discharge (`ElectricityComponent energy="50"`). The vanilla damaged tube lamp spawns it every 60 frames (`physics_tube_lamp_electricity_pulse.lua`).
 - **[Confirmed]** `ElectricityReceiverComponent` (`radius`, `active_time_frames`) calls `electricity_receiver_switched(on)` of `script_electricity_receiver_switched` when electricity reaches the entity; vanilla traps and the drill laser are powered this way.
 - **[Confirmed]** Lantern light consumers (fire enemy attraction, Natural Fear, enemy study, belt) read the current `LightComponent` radius, so a radius of 0 turns a lamp off for all of them. The fog of war hole is scaled separately.
-- **[Needs verification]** A physics chain cannot grow after `PhysicsBody2InitFromComponents`, so the cable that grows while carrying is simulated in Lua (verlet points, one sprite per segment), and only the dangling cable is a physics chain. The Lua rope does not collide with the terrain.
-- **[Needs verification]** The end of a physics chain can be found with `PhysicsBodyIDGetFromEntity` and `PhysicsBodyIDGetTransform`, to spark from it.
+- **[Needs verification]** A physics chain cannot grow after `PhysicsBody2InitFromComponents`.
 - **[Needs verification]** `ElectricityReceiverComponent` works on an item in hand, not only in the world.
 
 ## Open Questions
 
 - What happens to the cable while the player carries a lamp across a save and reload, or far enough to unload the ceiling chunk.
 - A dead cable stays hanging without sparks after 3 minutes; to be confirmed in play.
+- The Lua rope stops at surfaces but is not pushed by explosions or creatures.

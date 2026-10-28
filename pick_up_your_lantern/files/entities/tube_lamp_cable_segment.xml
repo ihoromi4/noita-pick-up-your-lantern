@@ -1,7 +1,7 @@
-<Entity name="pul_tube_lamp_cable_segment" tags="pul_cable_tether" >
+<Entity name="pul_tube_lamp_cable_segment" tags="pul_cable_segment" >
 
     <!--
-        One segment of the cable that runs from the ceiling to a tube lamp taken down by the player.
+        One segment of a tube lamp cable.
         Placed, turned and stretched every frame by files/scripts/tube_lamp_cable.lua: the origin is the upper end.
     -->
 
