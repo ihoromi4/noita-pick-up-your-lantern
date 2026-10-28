@@ -1,9 +1,10 @@
 --- Power cables of tube lamps for Pick Up Your Lantern mod.
 --- A tube lamp hangs on its power cable. When the player takes it down, a cable of separate segments runs from
---- the ceiling to the lamp: a segment is paid out from the ceiling whenever the cable gets too short, up to a random
---- limit, and past the limit the cable snaps with a burst of sparks. The ceiling part keeps hanging, and after
---- SPARK_DELAY_FRAMES its end sparks for LIVE_FRAMES. A lamp kicked down leaves a hanging cable of random length;
---- a lamp whose ceiling is destroyed leaves none.
+--- the ceiling to the lamp and keeps it powered: a segment is paid out from the ceiling whenever the cable gets too
+--- short, up to a random limit, and past the limit the cable snaps with a burst of sparks and the lamp goes dark.
+--- A lamp in the world is held back by its cable like by a leash. The ceiling part keeps hanging, and after
+--- SPARK_DELAY_FRAMES its end shocks creatures around it for LIVE_FRAMES. A lamp kicked down leaves a hanging cable
+--- of random length; a lamp whose ceiling is destroyed leaves none.
 --- A cable is a rope of verlet points simulated in Lua, one sprite entity per segment: a physics chain built at
 --- runtime gets no bodies when spawned by the mod, and could not grow anyway. A cable entity at the ceiling anchor
 --- keeps the segment count and age in storages, so cables are rebuilt after a save and reload.
@@ -21,29 +22,41 @@ local SEGMENT_TAG = "pul_cable_segment"
 local CABLE_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/tube_lamp_cable.xml"
 local SEGMENT_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/tube_lamp_cable_segment.xml"
 local SPARK_ENTITY_PATH = "data/entities/misc/electricity_weak.xml"
+local ELECTROCUTION_EFFECT_PATH = "data/entities/misc/effect_electricity.xml"
 -- Lamp position while it hangs: the upper end of its wires, right under the ceiling.
 local ANCHOR_X_STORAGE = "lantern_cable_anchor_x"
 local ANCHOR_Y_STORAGE = "lantern_cable_anchor_y"
+-- Set while a lamp hangs, so the moment it leaves the ceiling is told apart from a lamp loaded off the ceiling.
+local HANGING_STORAGE = "lantern_cable_hanging"
 local SEGMENT_COUNT_STORAGE = "cable_segment_count"
 local AGE_STORAGE = "cable_age_frames"
 
 -- Length of a cable segment, in pixels: the height of the vanilla wire sprite.
 local SEGMENT_LENGTH = 5
--- Number of segments a carried cable pays out before it snaps: 20 to 80 px.
-local MIN_SEGMENTS = 4
-local MAX_SEGMENTS = 16
+-- Number of segments a carried cable pays out before it snaps: 40 to 160 px.
+local MIN_SEGMENTS = 8
+local MAX_SEGMENTS = 32
 -- Number of segments of the cable left by a lamp kicked down.
-local KICKED_MIN_SEGMENTS = 2
-local KICKED_MAX_SEGMENTS = 16
+local KICKED_MIN_SEGMENTS = 4
+local KICKED_MAX_SEGMENTS = 32
 -- How far above the anchor the ceiling is searched for, to tell a kick from a destroyed ceiling.
 local CEILING_CHECK_DISTANCE = 8
--- How much a fully paid-out cable stretches before it snaps.
+-- How much a fully paid-out cable stretches before it snaps when the player pulls the lamp.
 local BREAK_STRETCH = 1.1
+-- A lamp in the world is pulled back by a stretched cable, and snaps it only when flung this much farther.
+local WORLD_BREAK_STRETCH = 2
+local LEASH_FORCE_PER_PIXEL = 3
+local LEASH_MAX_FORCE = 60
 local BREAK_SPARK_COUNT = 12
 -- The first spark comes 2 seconds after the cable snapped, so the player who broke it is not shocked right away.
 local SPARK_DELAY_FRAMES = 2 * 60
 local SPARK_INTERVAL_FRAMES = 60
 local SPARK_PARTICLE_COUNT = 6
+-- Each spark shocks creatures around the end of the cable, unless a wall is in between.
+local INDUCTION_RADIUS = 40
+local INDUCTION_DAMAGE = 0.08
+local INDUCTION_TAGS = { "enemy", "player_unit", }
+local INDUCTION_ARC_PARTICLES = 6
 -- A torn cable is live for 3 minutes, then it keeps hanging without sparks.
 local LIVE_FRAMES = 3 * 60 * 60
 local GRAVITY = 0.2
@@ -144,7 +157,8 @@ local function GetCarriedEnd(lamp_id)
     return EntityGetTransform(lamp_id)
 end
 
----Snaps the carried cable off the lamp with a burst of harmless sparks; the cable keeps hanging from the ceiling.
+---Snaps the carried cable off the lamp with a burst of harmless sparks: the lamp loses its power, and the cable
+---keeps hanging from the ceiling.
 ---@return nil
 local function SnapCarriedCable()
     if carried == nil then
@@ -153,16 +167,20 @@ local function SnapCarriedCable()
 
     local last = carried.points[#carried.points]
     GameCreateCosmeticParticle("spark_electric", last.x, last.y, BREAK_SPARK_COUNT, 0, 0)
+    if EntityGetIsAlive(carried.lamp_id) and CutLanternPower(carried.lamp_id) then
+        RefreshLanternIllumination(carried.lamp_id)
+    end
     carried.lamp_id = nil
     SetStorageFloat(carried.cable_id, AGE_STORAGE, 0)
     carried = nil
 end
 
----Starts a carried cable from the ceiling anchor to a lamp the player took down.
+---Starts a carried cable from the ceiling anchor to a lamp the player took down. The lamp keeps its power while
+---the cable holds. Its joint is removed, so the lamp no longer counts as hanging once it is back in the world.
 ---@param lamp_id number Lamp entity ID.
 ---@param anchor_x number World X coordinate of the anchor.
 ---@param anchor_y number World Y coordinate of the anchor.
----@return nil
+---@return boolean started Whether the cable is attached; false if it snapped right away.
 local function StartCarriedCable(lamp_id, anchor_x, anchor_y)
     SnapCarriedCable()
 
@@ -175,18 +193,23 @@ local function StartCarriedCable(lamp_id, anchor_x, anchor_y)
         -- The lamp is already too far, e.g. picked up in a hurry from a high ceiling.
         SpawnHangingCable(anchor_x, anchor_y, max_segments)
         GameCreateCosmeticParticle("spark_electric", lamp_x, lamp_y, BREAK_SPARK_COUNT, 0, 0)
-        return
+        return false
     end
 
     local cable_id = EntityLoad(CABLE_ENTITY_PATH, anchor_x, anchor_y)
     if cable_id == nil or cable_id == 0 then
-        return
+        return false
     end
     SetStorageFloat(cable_id, SEGMENT_COUNT_STORAGE, segment_count)
+
+    for _, joint_comp in ipairs(EntityGetComponentIncludingDisabled(lamp_id, "PhysicsJointComponent") or {}) do
+        EntityRemoveComponent(lamp_id, joint_comp)
+    end
 
     carried = CreateRope(cable_id, lamp_x, lamp_y, segment_count)
     carried.lamp_id = lamp_id
     carried.max_segments = max_segments
+    return true
 end
 
 ---Pays out one more segment of a carried cable from the ceiling: a new point appears next to the anchor.
@@ -257,7 +280,21 @@ local function RenderRope(rope)
     end
 end
 
----Moves a carried cable after its lamp, pays out segments and snaps the cable once it is too long.
+---Pulls a lamp in the world back towards the anchor when it is farther than the full cable.
+---@param lamp_id number Lamp entity ID.
+---@param dx number Offset of the lamp from the anchor, X.
+---@param dy number Offset of the lamp from the anchor, Y.
+---@param distance number Distance of the lamp from the anchor.
+---@param excess number How much farther the lamp is than the full cable.
+---@return nil
+local function PullLampBack(lamp_id, dx, dy, distance, excess)
+    local force = math.min(LEASH_MAX_FORCE, excess * LEASH_FORCE_PER_PIXEL)
+    PhysicsApplyForce(lamp_id, -dx / distance * force, -dy / distance * force)
+end
+
+---Moves a carried cable after its lamp, pays out segments and snaps the cable once it is too long. The player
+---snaps it by walking away with the lamp; a lamp in the world is held back like by a leash, and snaps it only when
+---flung far beyond its length.
 ---@param rope CableRope
 ---@return nil
 local function UpdateCarriedCable(rope)
@@ -271,16 +308,47 @@ local function UpdateCarriedCable(rope)
     last.x, last.y = lamp_x, lamp_y
 
     local anchor = rope.points[1]
-    local distance = math.sqrt((lamp_x - anchor.x) ^ 2 + (lamp_y - anchor.y) ^ 2)
+    local dx, dy = lamp_x - anchor.x, lamp_y - anchor.y
+    local distance = math.sqrt(dx * dx + dy * dy)
     while distance > #rope.segment_ids * SEGMENT_LENGTH and #rope.segment_ids < rope.max_segments do
         PayOutSegment(rope)
     end
-    if distance > rope.max_segments * SEGMENT_LENGTH * BREAK_STRETCH then
+
+    local full_length = rope.max_segments * SEGMENT_LENGTH
+    if EntityGetRootEntity(rope.lamp_id) ~= rope.lamp_id then
+        if distance > full_length * BREAK_STRETCH then
+            SnapCarriedCable()
+        end
+    elseif distance > full_length * WORLD_BREAK_STRETCH then
         SnapCarriedCable()
+    elseif distance > full_length then
+        PullLampBack(rope.lamp_id, dx, dy, distance, distance - full_length)
     end
 end
 
----Sparks from the end of a torn cable while it is live.
+---Shocks the creatures around a point of a live cable, unless a wall is in between: electrocution as from touching
+---a live wire, a little electric damage, and an arc of sparks from the cable to each of them.
+---@param x number World X coordinate of the end of the cable.
+---@param y number World Y coordinate of the end of the cable.
+---@return nil
+local function InduceCurrent(x, y)
+    for _, tag in ipairs(INDUCTION_TAGS) do
+        for _, target_id in ipairs(EntityGetInRadiusWithTag(x, y, INDUCTION_RADIUS, tag) or {}) do
+            local target_x, target_y = EntityGetTransform(target_id)
+            if not RaytraceSurfaces(x, y, target_x, target_y) then
+                LoadGameEffectEntityTo(target_id, ELECTROCUTION_EFFECT_PATH)
+                EntityInflictDamage(target_id, INDUCTION_DAMAGE, "DAMAGE_ELECTRICITY", "$damage_tube_lamp_cable",
+                    "NONE", 0, 0)
+                for step = 1, INDUCTION_ARC_PARTICLES do
+                    local t = step / INDUCTION_ARC_PARTICLES
+                    GameCreateCosmeticParticle("spark_electric", x + (target_x - x) * t, y + (target_y - y) * t, 1, 0, 0)
+                end
+            end
+        end
+    end
+end
+
+---Sparks from the end of a torn cable while it is live, shocking creatures around it.
 ---@param rope CableRope
 ---@return nil
 local function SparkTornCable(rope)
@@ -294,6 +362,7 @@ local function SparkTornCable(rope)
         local last = rope.points[#rope.points]
         EntityLoad(SPARK_ENTITY_PATH, last.x, last.y)
         GameCreateCosmeticParticle("spark_electric", last.x, last.y, SPARK_PARTICLE_COUNT, 0, 0)
+        InduceCurrent(last.x, last.y)
     end
 end
 
@@ -329,29 +398,35 @@ local function SyncRopes()
     end
 end
 
----Watches tube lamps that still hang on their cable and handles the moment they lose power.
+---Watches powered tube lamps. A hanging lamp keeps its anchor up to date. When it leaves the ceiling, a lamp taken
+---by the player gets a carried cable and stays powered; a lamp kicked down leaves a hanging cable and goes dark,
+---and so does a lamp whose ceiling was destroyed, or one off the ceiling without a cable, e.g. after a reload.
 ---@return nil
-local function UpdateHangingLamps()
+local function UpdatePoweredLamps()
     for _, lamp_id in ipairs(EntityGetWithTag(LANTERN_TAG) or {}) do
         local _, lantern_type = GetLanternType(lamp_id)
-        if lantern_type.needs_power and GetLanternPowerFactor(lamp_id) > 0 then
-            local has_anchor = FindVariableStorage(lamp_id, ANCHOR_X_STORAGE) ~= nil
-            if UpdateLanternPower(lamp_id) then
-                RefreshLanternIllumination(lamp_id)
-                if has_anchor then
-                    local anchor_x = GetStorageFloat(lamp_id, ANCHOR_X_STORAGE)
-                    local anchor_y = GetStorageFloat(lamp_id, ANCHOR_Y_STORAGE)
-                    if EntityGetRootEntity(lamp_id) ~= lamp_id then
-                        StartCarriedCable(lamp_id, anchor_x, anchor_y)
-                    elseif RaytraceSurfaces(anchor_x, anchor_y, anchor_x, anchor_y - CEILING_CHECK_DISTANCE) then
+        local is_carried = carried ~= nil and carried.lamp_id == lamp_id
+        if lantern_type.needs_power and not is_carried and GetLanternPowerFactor(lamp_id) > 0 then
+            if IsLanternHanging(lamp_id) then
+                local x, y = EntityGetTransform(lamp_id)
+                SetStorageFloat(lamp_id, ANCHOR_X_STORAGE, x)
+                SetStorageFloat(lamp_id, ANCHOR_Y_STORAGE, y)
+                SetStorageFloat(lamp_id, HANGING_STORAGE, 1)
+            else
+                local was_hanging = GetStorageFloat(lamp_id, HANGING_STORAGE) > 0
+                SetStorageFloat(lamp_id, HANGING_STORAGE, 0)
+                local anchor_x = GetStorageFloat(lamp_id, ANCHOR_X_STORAGE)
+                local anchor_y = GetStorageFloat(lamp_id, ANCHOR_Y_STORAGE)
+                local is_picked_up = EntityGetRootEntity(lamp_id) ~= lamp_id
+                if not (was_hanging and is_picked_up and StartCarriedCable(lamp_id, anchor_x, anchor_y)) then
+                    CutLanternPower(lamp_id)
+                    RefreshLanternIllumination(lamp_id)
+                    local has_ceiling = RaytraceSurfaces(anchor_x, anchor_y, anchor_x, anchor_y - CEILING_CHECK_DISTANCE)
+                    if was_hanging and not is_picked_up and has_ceiling then
                         SetRandomSeed(anchor_x + GameGetFrameNum(), anchor_y)
                         SpawnHangingCable(anchor_x, anchor_y, Random(KICKED_MIN_SEGMENTS, KICKED_MAX_SEGMENTS))
                     end
                 end
-            else
-                local x, y = EntityGetTransform(lamp_id)
-                SetStorageFloat(lamp_id, ANCHOR_X_STORAGE, x)
-                SetStorageFloat(lamp_id, ANCHOR_Y_STORAGE, y)
             end
         end
     end
@@ -362,7 +437,7 @@ end
 ---@return nil
 function UpdateTubeLampCables()
     SyncRopes()
-    UpdateHangingLamps()
+    UpdatePoweredLamps()
 
     for _, rope in pairs(ropes) do
         if rope == carried then

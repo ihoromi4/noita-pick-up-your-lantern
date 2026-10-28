@@ -204,25 +204,44 @@ function GetLanternPowerFactor(entity_id)
     return 1
 end
 
----Cuts the power of a lamp that needs it once the lamp no longer hangs: it is picked up (no longer a root entity)
----or detached (lantern_anchor.lua removes its joint). Called every frame by tube_lamp_cable.lua, which also starts
----the cable and refreshes the illumination. The power is lost for good. The physics image is switched to
----the unpowered one, which the engine uses for the next physics body, after the lamp is thrown or dropped.
+---Checks whether a lantern hangs on the ceiling: it is a root entity, not in an inventory, and keeps its joint,
+---which lantern_anchor.lua removes when the lantern is detached.
 ---@param entity_id number Lantern entity ID.
----@return boolean lost Whether the power was lost during this call.
-function UpdateLanternPower(entity_id)
+---@return boolean
+function IsLanternHanging(entity_id)
+    return EntityGetRootEntity(entity_id) == entity_id
+        and EntityGetFirstComponentIncludingDisabled(entity_id, "PhysicsJointComponent") ~= nil
+end
+
+---Switches the in-hand sprite of a lantern to its dark variant (`*_in_hand.xml` to `*_in_hand_out.xml`).
+---@param entity_id number Lantern entity ID.
+---@return nil
+local function ShowDarkHandSprite(entity_id)
+    for _, sprite_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "SpriteComponent") or {}) do
+        local image_file = ComponentGetValue2(sprite_comp, "image_file")
+        if image_file:find("_in_hand%.xml$") then
+            ComponentSetValue2(sprite_comp, "image_file", (image_file:gsub("_in_hand%.xml$", "_in_hand_out.xml")))
+            if ComponentGetIsEnabled(sprite_comp) then
+                EntityRefreshSprite(entity_id, sprite_comp)
+            end
+        end
+    end
+end
+
+---Cuts the power of a lamp that needs it, for good: its light and fog of war hole go to 0 once the illumination
+---is applied again, its in-hand sprite turns dark, and the physics image is switched to the unpowered one, which
+---the engine uses for the next physics body, after the lamp is thrown or dropped. Called by tube_lamp_cable.lua
+---when the lamp leaves the ceiling without its cable, or when the cable snaps.
+---@param entity_id number Lantern entity ID.
+---@return boolean cut Whether the power was cut during this call.
+function CutLanternPower(entity_id)
     local _, lantern_type = GetLanternType(entity_id)
     if not lantern_type.needs_power or GetStorageFloat(entity_id, POWER_LOST_STORAGE) > 0 then
         return false
     end
 
-    local is_hanging = EntityGetRootEntity(entity_id) == entity_id
-        and EntityGetFirstComponentIncludingDisabled(entity_id, "PhysicsJointComponent") ~= nil
-    if is_hanging then
-        return false
-    end
-
     SetStorageFloat(entity_id, POWER_LOST_STORAGE, 1)
+    ShowDarkHandSprite(entity_id)
     if lantern_type.unpowered_image_file ~= nil then
         for _, shape_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "PhysicsImageShapeComponent") or {}) do
             ComponentSetValue2(shape_comp, "image_file", lantern_type.unpowered_image_file)
@@ -607,13 +626,9 @@ function ExtinguishLantern(entity_id)
             if is_enabled then
                 EntityRefreshSprite(entity_id, sprite_comp)
             end
-        elseif image_file:find("_in_hand%.xml$") then
-            ComponentSetValue2(sprite_comp, "image_file", (image_file:gsub("_in_hand%.xml$", "_in_hand_out.xml")))
-            if is_enabled then
-                EntityRefreshSprite(entity_id, sprite_comp)
-            end
         end
     end
+    ShowDarkHandSprite(entity_id)
 
     for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "LuaComponent") or {}) do
         if ComponentGetValue2(comp, "script_source_file") == MODIFIER_SCRIPT then

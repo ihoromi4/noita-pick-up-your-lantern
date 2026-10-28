@@ -199,7 +199,8 @@ function UpdateLanternBelt()
     if player_id ~= 0 then
         player_x, player_y = EntityGetTransform(player_id)
     end
-    local is_lit = lantern_id ~= 0 and not IsLanternExtinguished(lantern_id)
+    -- A tube lamp that lost power counts as unlit, so the belt shows its dark sprite.
+    local is_lit = lantern_id ~= 0 and not IsLanternExtinguished(lantern_id) and GetLanternPowerFactor(lantern_id) > 0
         and ConsumeLanternFuel(lantern_id, player_x, player_y)
 
     -- Belt lanterns restored with the player after loading or polymorph refer to stale lantern IDs.
