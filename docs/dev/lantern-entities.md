@@ -9,6 +9,7 @@ Which vanilla entities the mod turns into pickable items, how they are rebuilt f
 - [Ceiling Anchors](#ceiling-anchors)
 - [Sprite Geometry](#sprite-geometry)
 - [Other Light Sources](#other-light-sources)
+- [Tube Lamp Cable](#tube-lamp-cable)
 - [Duplicate Torch Entities](#duplicate-torch-entities)
 
 ## Pickable Lanterns
@@ -67,8 +68,9 @@ A lantern hangs on a `PhysicsJointComponent` with `nail_to_wall="1"`.
 - The tube lamp breaks with a burst like the vanilla propane tank, scaled down to radius 24 and damage 3, and has no death script.
 - `LANTERN_TYPES` gives the tube lamp no `hang_offset_y`, so the left mouse button throws it as usual instead of hanging it: it needs a power cable. See [Tube Lamp and Electricity](../rnd/tube-lamp-electricity.md).
 - The mining lamp and the tube lamp have no flame sprite: the lit wick is part of its physics image, so a burnt-out mining lamp changes only its in-hand sprite (`mining_lamp_out.png`).
-- **Power.** The tube lamp has `needs_power` in `LANTERN_TYPES`: it shines only while it hangs. `UpdateLanternPower()` (`lantern_traits.lua`, called by the illumination scan every 30 frames) cuts the power for good once the lamp is no longer a root entity (picked up) or has no `PhysicsJointComponent` (detached by `lantern_anchor.lua`), and the `lantern_power_lost` storage is set. `GetLanternPowerFactor()` then turns the light radius and the fog of war hole to 0 in hand, in the world, on the belt and in the modifier script, so attraction, fear and enemy study ignore the lamp as well.
+- **Power.** The tube lamp has `needs_power` in `LANTERN_TYPES`: it shines only while it hangs. `UpdateLanternPower()` (`lantern_traits.lua`, called every frame by `UpdateTubeLampCables()` in `tube_lamp_cable.lua`) cuts the power for good once the lamp is no longer a root entity (picked up) or has no `PhysicsJointComponent` (detached by `lantern_anchor.lua`), and the `lantern_power_lost` storage is set. `GetLanternPowerFactor()` then turns the light radius and the fog of war hole to 0 in hand, in the world, on the belt and in the modifier script, so attraction, fear and enemy study ignore the lamp as well.
 - The physics image cannot change on an existing body, so `UpdateLanternPower()` switches `PhysicsImageShapeComponent.image_file` to `unpowered_image_file` (`tube_lamp_unlit.png`), and the engine uses it for the next body, created when the lamp is thrown or dropped. A lamp kicked down keeps the lit-looking image until it is picked up and thrown again. The in-hand sprite, belt sprite and inventory icon show the unlit tube.
+- **Cable.** See [Tube Lamp Cable](#tube-lamp-cable).
 - The tube lamp spins in flight: `min_torque="4"`, `max_torque="10"` on `PhysicsThrowableComponent`, as on the vanilla broken wand.
 
 ## Other Light Sources
@@ -80,6 +82,18 @@ Besides the lanterns, `patch_lighting.lua` adds a fog of war hole to light sourc
 - `physics/temple_lantern.xml`, `physics_barrel_burning.xml`.
 
 The hole is scaled by `Illuminated area size` when the game starts. It is added only when `Illuminate the darkness` is on.
+
+## Tube Lamp Cable
+
+`files/scripts/tube_lamp_cable.lua` (`UpdateTubeLampCables()`, every frame in `OnWorldPostUpdate`) gives a tube lamp its power cable:
+
+- While a lamp hangs, its position, the upper end of its wires right under the ceiling, is kept in the `lantern_cable_anchor_x/y` storages as the cable anchor.
+- When the lamp loses power because the player picked it up, a **carried cable** runs from the anchor to the lamp, or to the player while the lamp is in the inventory but not in hand. It is a rope of verlet points simulated in Lua, as a physics chain cannot grow once `PhysicsBody2InitFromComponents` has run. Each segment (5 px, the vanilla `wire_vertical_5_00.png`) is a `tube_lamp_cable_segment.xml` sprite entity, turned along its segment and stretched to its length every frame.
+- A segment is paid out from the ceiling whenever the lamp is farther from the anchor than the cable length, up to a random limit of 4 to 16 segments (20 to 80 px). Once the lamp is 10% farther than the full cable, the cable breaks with cosmetic electric sparks (`GameCreateCosmeticParticle`, harmless), and the paid-out segments stay hanging as a **dangling cable**.
+- A lamp kicked down leaves a dangling cable of 2 to 16 segments. A lamp whose ceiling was destroyed leaves none: no ceiling is found within 8 px above the anchor.
+- The dangling cable (`files/entities/tube_lamp_cable.xml`, tag `pul_cable`) is a `PhysicsBody2Component` chain built from Lua like the vanilla temple lantern chain: one `PhysicsImageShapeComponent` of `metal_wire_nohit` (the player passes through it) per segment, a `REVOLUTE_JOINT_ATTACH_TO_NEARBY_SURFACE` joint to the ceiling and `REVOLUTE_JOINT` joints between segments.
+- `tube_lamp_cable_spark.lua` sparks from the end of the dangling cable, the end of the segment body farthest from the anchor (`PhysicsBodyIDGetFromEntity`, `PhysicsBodyIDGetTransform`, `PhysicsPosToGamePos`): `data/entities/misc/electricity_weak.xml` every 60 frames, from 2 seconds after the break for 3 minutes. Then it removes itself and the cable stays dead.
+- Only one carried cable exists at a time. Its state lives in Lua, so after a save and reload the leftover segments (tag `pul_cable_tether`) are removed and their anchor, kept on the first segment, gets a dangling cable instead.
 
 ## Duplicate Torch Entities
 

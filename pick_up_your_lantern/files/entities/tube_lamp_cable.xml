@@ -1,0 +1,22 @@
+<Entity name="pul_tube_lamp_cable" tags="pul_cable" >
+
+    <!--
+        Dangling power cable of a tube lamp, spawned by files/scripts/tube_lamp_cable.lua.
+        The segments and joints are added from Lua, then the physics body is initialized once.
+    -->
+
+    <PhysicsBody2Component
+        allow_sleep="1"
+        angular_damping="0.5"
+        linear_damping="0.1"
+        manual_init="1"
+        auto_clean="0"
+    ></PhysicsBody2Component>
+
+    <!-- Sparks from the end of the cable while it is live. -->
+    <LuaComponent
+        execute_every_n_frame="10"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/tube_lamp_cable_spark.lua"
+    ></LuaComponent>
+
+</Entity>

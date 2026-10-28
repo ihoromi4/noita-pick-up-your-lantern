@@ -205,7 +205,8 @@ function GetLanternPowerFactor(entity_id)
 end
 
 ---Cuts the power of a lamp that needs it once the lamp no longer hangs: it is picked up (no longer a root entity)
----or detached (lantern_anchor.lua removes its joint). The power is lost for good. The physics image is switched to
+---or detached (lantern_anchor.lua removes its joint). Called every frame by tube_lamp_cable.lua, which also starts
+---the cable and refreshes the illumination. The power is lost for good. The physics image is switched to
 ---the unpowered one, which the engine uses for the next physics body, after the lamp is thrown or dropped.
 ---@param entity_id number Lantern entity ID.
 ---@return boolean lost Whether the power was lost during this call.

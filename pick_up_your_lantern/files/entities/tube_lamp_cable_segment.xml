@@ -1,0 +1,16 @@
+<Entity name="pul_tube_lamp_cable_segment" tags="pul_cable_tether" >
+
+    <!--
+        One segment of the cable that runs from the ceiling to a tube lamp taken down by the player.
+        Placed, turned and stretched every frame by files/scripts/tube_lamp_cable.lua: the origin is the upper end.
+    -->
+
+    <!-- Player is drawn at 0.6, higher values are drawn behind it. -->
+    <SpriteComponent
+        image_file="data/props_breakable_gfx/wire_vertical_5_00.png"
+        offset_x="0.5"
+        offset_y="0"
+        z_index="0.7"
+    ></SpriteComponent>
+
+</Entity>

@@ -130,6 +130,15 @@ function ApplyLanternIllumination(entity_id, scale)
     return true
 end
 
+---Makes the illumination update apply the scale to a lantern again on the next frame, e.g. after it lost power.
+---A lantern in the inventory gets it once it is held or returned to the world.
+---@param entity_id number Lantern entity ID.
+---@return nil
+function RefreshLanternIllumination(entity_id)
+    SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
+    is_transitioning = true
+end
+
 ---Moves the current scale towards the target scale with exponential easing.
 ---Lanterns without an applied scale yet (freshly spawned or streamed in) snap to the target.
 ---@param current_scale number Scale currently applied to the lantern, or 0 if none.
@@ -164,10 +173,6 @@ function UpdateLanternIllumination(force_refresh)
         EnsureLanternBaseIllumination(entity_id)
         if EnsureLanternTraits(entity_id) then
             -- Snap to the new tier instead of easing from the radius applied before the roll.
-            SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
-        end
-        if UpdateLanternPower(entity_id) then
-            -- Applied again right away, or once the lamp leaves the inventory.
             SetStorageFloat(entity_id, APPLIED_SCALE_STORAGE, 0)
         end
         -- The liquid state is part of the eased scale, so the lantern changes smoothly when it takes one on.
