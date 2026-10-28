@@ -31,7 +31,7 @@ The `Player vision` setting controls how far you see underground without a lante
 Light cuts through the darkness no matter how far it is from you:
 
 - your held lantern, the lantern on your belt and lanterns you threw;
-- hanging lanterns, chain torches, torch stands, mining lamps, temple lanterns, tube lamps and burning barrels;
+- hanging lanterns, mining lamps, chain torches, torch stands, temple lanterns, tube lamps and burning barrels;
 - fire, burning oil, lava, molten metal, acid, radioactive liquid, plasma and sparks, which glow brighter than in vanilla;
 - burning creatures, including you, which light up the cave around them;
 - fire creatures, such as Stendari, Liekkiö and Helvetinkatse, which glow much brighter than other enemies and dispel the fog of war around them, so you can spot them from afar;

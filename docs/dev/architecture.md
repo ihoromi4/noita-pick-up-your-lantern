@@ -19,7 +19,7 @@ All mod files live in `pick_up_your_lantern/`:
 
 - `init.lua`: entry point. Applies startup patches and registers frame hooks.
 - `settings.lua`: Mod Settings definitions and settings presets (`PRESETS`, each listing only the values that differ from the option defaults). Each option's `change_fn` re-syncs the `preset` setting to the matching preset or `custom`. `ModSettingsUpdate` also stores `false` defaults, which vanilla `mod_settings_update` skips. See [Settings](../guides/settings.md) for the player-facing description.
-- `data/entities/props/`: full overrides of the three vanilla lantern entities. See [Lantern Entities](lantern-entities.md).
+- `data/entities/props/`: full overrides of the vanilla light fixtures that become pickable lanterns, listed in `LANTERN_TYPES` of `files/scripts/lantern_properties_config.lua`. See [Lantern Entities](lantern-entities.md).
 - `files/entities/lantern_belt.xml`: the belt lantern entity. See [Holding and Belt](holding-and-belt.md).
 - `files/scripts/`: Lua modules and entity scripts.
 - `files/scripts/libs/`: third-party and helper libraries (`nxml.lua`, `diff_patch.lua`).
@@ -66,6 +66,7 @@ Scripts attached to lantern entities through `LuaComponent`:
 | `lantern_in_hand.lua` | In hand, every frame | Swings the lantern like a damped pendulum. Also drives the belt lantern. |
 | `lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering and Short-lived modifiers. |
 | `lantern_death.lua`, `lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |
+| `mining_lamp_death.lua` | On death | Spills oil and fire; the explosion comes from `ExplodeOnDamageComponent`. |
 
 ## Item Lifecycle Tags
 
@@ -83,7 +84,7 @@ Vanilla lanterns have a `TorchComponent` that ignites nearby pixels and goes out
 
 ## Entity Tags Used by the Mod
 
-- `lantern`: every pickable lantern. The illumination scan, liquid states, belt and Item Radar filter look for it.
+- `lantern`: every pickable lantern, including other fixtures such as the mining lamp. The illumination scan, liquid states, belt and Item Radar filter look for it.
 - `pul_belt`: the belt lantern entity. It deliberately does not contain `lantern`, so the illumination scan never treats it as a real lantern.
 - `pul_xray`: the All-Seeing Eye spell projectile.
 

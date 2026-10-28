@@ -2,6 +2,8 @@ item_lantern_small,Small Lantern,Маленький фонарь,,,,,,Mała lata
 item_description_lantern_small,A small glass lantern filled with oil,"Маленький стеклянный фонарь, наполненный маслом",,,,,,Mała szklana latarnia wypełniona olejem,装满油的小玻璃提灯,,,,,,,,,,,,,,,
 item_lantern,Lantern,Фонарь,,,,,,Latarnia,提灯,,,,,,,,,,,,,,,
 item_description_lantern,A glass lantern filled with oil,"Стеклянный фонарь, наполненный маслом",,,,,,Szklana latarnia wypełniona olejem,装满油的玻璃提灯,,,,,,,,,,,,,,,
+item_mining_lamp,Mining Lamp,Шахтёрская лампа,,,,,,Lampa górnicza,矿灯,,,,,,,,,,,,,,,
+item_description_mining_lamp,A miner's oil lamp in a wooden frame,Шахтёрская масляная лампа в деревянной оправе,,,,,,Górnicza lampa oliwna w drewnianej oprawie,装在木框里的矿工油灯,,,,,,,,,,,,,,,
 item_description_lantern_tier_1,"The glass is clouded with soot, and the light barely pushes back the dark.","Стекло затянуто копотью, и свет едва отгоняет тьму.",,,,,,"Szkło pokrywa sadza, a światło ledwie odpycha ciemność.",玻璃上蒙着一层烟灰，光芒勉强驱散黑暗。,,,,,,,,,,,,,,,
 item_description_lantern_tier_2,"An ordinary lantern with a steady, honest flame.","Обычный фонарь с ровным пламенем.",,,,,,"Zwykła latarnia o równym, uczciwym płomieniu.",一盏普通的提灯，火焰平稳而踏实。,,,,,,,,,,,,,,,
 item_description_lantern_tier_3,"Clean glass and a well-trimmed wick cast a wide, warm glow.",Чистое стекло и аккуратно подрезанный фитиль дают широкий тёплый свет.,,,,,,"Czyste szkło i starannie przycięty knot rzucają szeroki, ciepły blask.",洁净的玻璃和修剪整齐的灯芯投下宽广而温暖的光。,,,,,,,,,,,,,,,

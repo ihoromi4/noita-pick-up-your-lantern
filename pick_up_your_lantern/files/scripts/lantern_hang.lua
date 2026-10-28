@@ -16,14 +16,8 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
 local LANTERN_TAG = "lantern"
 local WAND_TAG = "wand"
 local QUICK_INVENTORY_NAME = "inventory_quick"
-local LARGE_LANTERN_FILE = "data/entities/props/physics_lantern.xml"
-local SMALL_LANTERN_FILE = "data/entities/props/physics/lantern_small.xml"
-local LANTERN_FILES = {
-    LARGE_LANTERN_FILE,
-    "data/entities/props/physics_lantern_small.xml",
-    SMALL_LANTERN_FILE,
-}
-local LARGE_LANTERN_UI_SPRITE_PATTERN = "ui_lantern%.png$"
+-- Type used when neither the filename nor the icon is known: the Small Lantern, the most common one.
+local DEFAULT_LANTERN_TYPE = LANTERN_TYPES[2]
 local STORAGE_FIELDS = {
     "value_string",
     "value_int",
@@ -33,31 +27,33 @@ local STORAGE_FIELDS = {
 
 -- How far above the player a ceiling is searched for, in pixels.
 local HANG_MAX_DISTANCE = 16
--- Lantern origin below the ceiling: the joint (pos_y="1") ends up just under the surface,
--- and lantern_anchor.lua still finds the ceiling within its check distance.
-local HANG_OFFSET_Y = 4
 
 local last_click_frame = -1
 
----Picks the entity file the lantern was loaded from.
+---Picks the entity file the lantern was loaded from, and its type.
 ---@param lantern_id number Lantern entity ID.
 ---@return string filename
+---@return LanternType lantern_type
 local function GetLanternFile(lantern_id)
     local filename = EntityGetFilename(lantern_id)
-    for _, lantern_file in ipairs(LANTERN_FILES) do
-        if filename == lantern_file then
-            return lantern_file
+    for _, lantern_type in ipairs(LANTERN_TYPES) do
+        for _, lantern_file in ipairs(lantern_type.files) do
+            if filename == lantern_file then
+                return lantern_file, lantern_type
+            end
         end
     end
 
     -- The filename is unreliable once the lantern has passed through world streaming; the icon tells the type apart.
     local item_comp = EntityGetFirstComponentIncludingDisabled(lantern_id, "ItemComponent")
     local ui_sprite = item_comp ~= nil and ComponentGetValue2(item_comp, "ui_sprite") or ""
-    if ui_sprite:find(LARGE_LANTERN_UI_SPRITE_PATTERN) then
-        return LARGE_LANTERN_FILE
+    for _, lantern_type in ipairs(LANTERN_TYPES) do
+        if ui_sprite == lantern_type.ui_sprite then
+            return lantern_type.files[1], lantern_type
+        end
     end
 
-    return SMALL_LANTERN_FILE
+    return DEFAULT_LANTERN_TYPE.files[1], DEFAULT_LANTERN_TYPE
 end
 
 ---Copies the lantern state kept in VariableStorageComponents and the remaining health.
@@ -85,7 +81,8 @@ end
 ---@param ceiling_y number World Y coordinate of the ceiling surface.
 ---@return boolean hung Whether the lantern was hung.
 local function HangLantern(lantern_id, ceiling_x, ceiling_y)
-    local hung_id = EntityLoad(GetLanternFile(lantern_id), ceiling_x, ceiling_y + HANG_OFFSET_Y)
+    local lantern_file, lantern_type = GetLanternFile(lantern_id)
+    local hung_id = EntityLoad(lantern_file, ceiling_x, ceiling_y + lantern_type.hang_offset_y)
     if hung_id == nil or hung_id == 0 then
         return false
     end

@@ -3,19 +3,13 @@
 
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/pick_up_your_lantern/files/scripts/libs/nxml.lua")
+dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_properties_config.lua")
 dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_illumination.lua")
 
 local SETTING_ID = "pick_up_your_lantern.illuminate_the_darkness"
 
----Lantern entity files that declare their own fog of war hole SpriteComponent.
-local LANTERN_ENTITIES = {
-    "data/entities/props/physics/lantern_small.xml",
-    "data/entities/props/physics_lantern.xml",
-    "data/entities/props/physics_lantern_small.xml",
-}
-
 ---Target entity definitions for dynamic lighting injection.
----Lanterns are not listed: their light and fog of war hole are declared in their own XML files.
+---Lanterns (LANTERN_TYPES) are not listed: their light and fog of war hole are declared in their own XML files.
 ---@type table<number, {path: string, tags: string, enabled: string, alpha: string, image_file: string, offset_x?: number, offset_y?: number, scale?: number}>
 local TARGET_ENTITIES = {
     {
@@ -69,13 +63,6 @@ local TARGET_ENTITIES = {
     },
     {
         path = "data/entities/props/physics_torch_stand_blue.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics_mining_lamp.xml",
         tags = "enabled_in_world",
         enabled = "1",
         alpha = "0.55",
@@ -247,8 +234,10 @@ end
 function PatchLighting()
     local is_enabled = IsSettingEnabled()
     if not is_enabled then
-        for _, path in ipairs(LANTERN_ENTITIES) do
-            RemoveLanternFogOfWarHole(path)
+        for _, lantern_type in ipairs(LANTERN_TYPES) do
+            for _, path in ipairs(lantern_type.files) do
+                RemoveLanternFogOfWarHole(path)
+            end
         end
         return
     end

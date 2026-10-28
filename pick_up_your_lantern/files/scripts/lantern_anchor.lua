@@ -1,7 +1,11 @@
 --- Joint controller for hanging lanterns in world: handles ceiling support collapse and player kicking.
 -- Detaches PhysicsJointComponent when ceiling pixels are destroyed or when kicked, then self-destructs.
 
-local CEILING_CHECK_DISTANCE = 6.0
+dofile_once("mods/pick_up_your_lantern/files/scripts/utils.lua")
+
+-- Lantern types whose joint sits higher above the origin declare their own distance in the XML file.
+local CEILING_CHECK_DISTANCE_STORAGE = "lantern_ceiling_check_distance"
+local DEFAULT_CEILING_CHECK_DISTANCE = 6.0
 local KICK_FORCE_X = 40.0
 local KICK_FORCE_Y = -20.0
 
@@ -32,6 +36,18 @@ local function DetachLantern(entity_id, entity_who_kicked)
     end
 end
 
+---Returns how far above the lantern origin the ceiling is searched for.
+---@param entity_id number The lantern entity ID.
+---@return number
+local function GetCeilingCheckDistance(entity_id)
+    local comp = FindVariableStorage(entity_id, CEILING_CHECK_DISTANCE_STORAGE)
+    if comp == nil then
+        return DEFAULT_CEILING_CHECK_DISTANCE
+    end
+
+    return ComponentGetValue2(comp, "value_float")
+end
+
 ---Checks whether ceiling support above the lantern is still intact.
 ---@param entity_id number The lantern entity ID.
 local function CheckCeiling(entity_id)
@@ -45,13 +61,14 @@ local function CheckCeiling(entity_id)
     end
 
     local x, y = EntityGetTransform(entity_id)
+    local distance = GetCeilingCheckDistance(entity_id)
 
     -- Check if ceiling surface exists above the anchor point
-    local has_ceiling = RaytraceSurfaces(x, y, x, y - CEILING_CHECK_DISTANCE)
+    local has_ceiling = RaytraceSurfaces(x, y, x, y - distance)
     if not has_ceiling then
         -- Secondary check with slight horizontal offsets to avoid false detachments on tiny gaps
-        has_ceiling = RaytraceSurfaces(x - 2.0, y, x - 2.0, y - CEILING_CHECK_DISTANCE)
-            or RaytraceSurfaces(x + 2.0, y, x + 2.0, y - CEILING_CHECK_DISTANCE)
+        has_ceiling = RaytraceSurfaces(x - 2.0, y, x - 2.0, y - distance)
+            or RaytraceSurfaces(x + 2.0, y, x + 2.0, y - distance)
     end
 
     if not has_ceiling then

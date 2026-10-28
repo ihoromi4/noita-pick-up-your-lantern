@@ -2,9 +2,42 @@
 --- - Traits are rolled once when a lantern first appears and never change: the quality tier and the modifiers.
 ---   Some modifiers are never rolled and are acquired later instead (Cracked, from damage).
 --- - States are taken on later and can change: liquid states and the extinguished state.
---- Base values of each lantern type (light radius and colour, fog of war hole, hp) are declared in its XML file:
---- - data/entities/props/physics_lantern.xml: Lantern.
---- - data/entities/props/physics_lantern_small.xml, data/entities/props/physics/lantern_small.xml: Small Lantern.
+--- Lantern types are listed in LANTERN_TYPES. Base values of each type (light radius and colour, fog of war hole,
+--- hp, ceiling check distance) are declared in its XML files.
+
+-- Lantern types
+
+---@class LanternType
+---@field files string[] Entity files of the type; the first one is loaded to hang a held lantern.
+---@field ui_sprite string Inventory icon; tells the type apart once the entity filename is lost.
+---@field hang_offset_y number Origin of a hung lantern below the ceiling, in pixels: the joint ends up just under
+---the surface, and lantern_anchor.lua still finds the ceiling within its check distance.
+
+---Pickable light fixtures. Each file is a full override in `data/entities/props/` of the mod.
+---@type LanternType[]
+LANTERN_TYPES = {
+    -- Lantern
+    {
+        files = { "data/entities/props/physics_lantern.xml", },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_lantern.png",
+        hang_offset_y = 4,
+    },
+    -- Small Lantern
+    {
+        files = {
+            "data/entities/props/physics/lantern_small.xml",
+            "data/entities/props/physics_lantern_small.xml",
+        },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_lantern_small.png",
+        hang_offset_y = 4,
+    },
+    -- Mining Lamp
+    {
+        files = { "data/entities/props/physics_mining_lamp.xml", },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_mining_lamp.png",
+        hang_offset_y = 7,
+    },
+}
 
 -- Quality tiers
 
