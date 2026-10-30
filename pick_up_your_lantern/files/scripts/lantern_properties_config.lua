@@ -17,6 +17,8 @@
 ---once it is picked up or detached.
 ---@field unpowered_image_file string|nil Physics image of a lamp without power, used for its next physics body.
 ---@field unpowered_ui_sprite string|nil Inventory icon of a lamp without power; also tells the type apart.
+---@field open_fire boolean|nil Whether the lantern burns with an open fire, which the player carries in hand and on
+---the belt, see chain_torch_fire.lua.
 ---@field chain LanternChainConfig|nil Chain a lantern spawned by a biome hangs on, see lantern_chain.lua.
 
 ---@class LanternChainConfig
@@ -26,6 +28,17 @@
 ---@field has_ceiling_link boolean|nil Whether the link at the ceiling shows the vanilla ceiling mount sprite.
 ---@field center_offset_y number Centre of the lantern below its top, in pixels.
 ---@field mass_over_inertia number Ratio of the mass of the lantern to its moment of inertia, per square pixel.
+
+---Chain of the chain torches, as the vanilla base_chain_torch.xml: 4 links of 6 px, the top one on a ceiling mount.
+---The body is an 11×13 box.
+---@type LanternChainConfig
+local CHAIN_TORCH_CHAIN = {
+    link_count = 4,
+    ceiling_search_distance = 48,
+    has_ceiling_link = true,
+    center_offset_y = 6.5,
+    mass_over_inertia = 12 / (11 * 11 + 13 * 13),
+}
 
 ---Pickable light fixtures. Each file is a full override in `data/entities/props/` of the mod.
 ---@type LanternType[]
@@ -70,6 +83,38 @@ LANTERN_TYPES = {
             center_offset_y = 5,
             mass_over_inertia = 12 / (9 * 9 + 11 * 11),
         },
+    },
+    -- Chain Torches: hang on a short chain of 4 links when spawned, right under the ceiling when hung back. The
+    -- duplicates in props/ spawn about 32 px below the ceiling, so the ceiling is searched for up to 48 px above.
+    {
+        files = {
+            "data/entities/props/physics/chain_torch.xml",
+            "data/entities/props/physics_chain_torch.xml",
+        },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_chain_torch.png",
+        hang_offset_y = 1,
+        open_fire = true,
+        chain = CHAIN_TORCH_CHAIN,
+    },
+    {
+        files = {
+            "data/entities/props/physics/chain_torch_blue.xml",
+            "data/entities/props/physics_chain_torch_blue.xml",
+        },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_chain_torch_blue.png",
+        hang_offset_y = 1,
+        open_fire = true,
+        chain = CHAIN_TORCH_CHAIN,
+    },
+    {
+        files = {
+            "data/entities/props/physics/chain_torch_ghostly.xml",
+            "data/entities/props/physics_chain_torch_ghostly.xml",
+        },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_chain_torch_ghostly.png",
+        hang_offset_y = 1,
+        open_fire = true,
+        chain = CHAIN_TORCH_CHAIN,
     },
 }
 

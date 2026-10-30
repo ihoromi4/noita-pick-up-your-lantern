@@ -20,7 +20,24 @@ local EXTINGUISHED_STORAGE = "lantern_extinguished"
 local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local POWER_LOST_STORAGE = "lantern_power_lost"
-local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
+local DOUSED_STORAGE = "lantern_doused"
+local SPARK_MATERIAL_STORAGE = "chain_torch_spark_material"
+
+-- Open fire of a torch carried by the player, as the vanilla torch emitters (data/entities/base_torch_particle.xml).
+-- Visual particles are cosmetic ones that rise on a negative gravity, as fire does; GameCreateParticle with
+-- just_visual makes particles that fall and still set the player alight.
+local OPEN_FIRE_INTERVAL_MIN_FRAMES = 2
+local OPEN_FIRE_INTERVAL_MAX_FRAMES = 6
+local OPEN_FIRE_LIFETIME_MIN = 0.3
+local OPEN_FIRE_LIFETIME_MAX = 0.5
+local OPEN_FIRE_GRAVITY_Y = -30
+-- Each particle starts at a random point over the coals and flies up at a random speed and angle.
+local OPEN_FIRE_SPREAD_X = 2
+local OPEN_FIRE_SPREAD_Y = 1
+local OPEN_FIRE_VEL_X_MAX = 8
+local OPEN_FIRE_VEL_Y_MIN = -25
+local OPEN_FIRE_VEL_Y_MAX = -8
+local OPEN_FIRE_SPARK_INTERVAL_FRAMES = 2
 
 -- Type used when neither the filename nor the icon is known: the Small Lantern, the most common one.
 local DEFAULT_LANTERN_TYPE_INDEX = 2
@@ -192,10 +209,94 @@ function IsLanternExtinguished(entity_id)
     return GetStorageFloat(entity_id, EXTINGUISHED_STORAGE) > 0
 end
 
----Returns the light multiplier of the lamp power: 0 for a lamp that needs power and has lost it, 1 otherwise.
+---Checks whether an open fire lantern has been doused in a liquid, see chain_torch_fire.lua.
+---@param entity_id number Lantern entity ID.
+---@return boolean
+function IsLanternDoused(entity_id)
+    return GetStorageFloat(entity_id, DOUSED_STORAGE) > 0
+end
+
+---Douses an open fire lantern or lights it again: keeps the state and switches the in-hand sprite between its lit
+---(`*_in_hand.xml`) and dark (`*_in_hand_out.xml`) variants. The light goes to 0 through GetLanternPowerFactor().
+---@param entity_id number Lantern entity ID.
+---@param is_doused boolean
+---@return nil
+function SetLanternDoused(entity_id, is_doused)
+    SetStorageFloat(entity_id, DOUSED_STORAGE, is_doused and 1 or 0)
+    local from, to = "_in_hand%.xml$", "_in_hand_out.xml"
+    if not is_doused then
+        from, to = "_in_hand_out%.xml$", "_in_hand.xml"
+    end
+    for _, sprite_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "SpriteComponent") or {}) do
+        local image_file = ComponentGetValue2(sprite_comp, "image_file")
+        if image_file:find(from) then
+            ComponentSetValue2(sprite_comp, "image_file", (image_file:gsub(from, to)))
+            if ComponentGetIsEnabled(sprite_comp) then
+                EntityRefreshSprite(entity_id, sprite_comp)
+            end
+        end
+    end
+end
+
+---Returns the spark material of an open fire lantern, kept in its XML file.
+---@param entity_id number Lantern entity ID.
+---@return string
+local function GetOpenFireSparkMaterial(entity_id)
+    for _, storage_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "VariableStorageComponent") or {}) do
+        if ComponentGetValue2(storage_comp, "name") == SPARK_MATERIAL_STORAGE then
+            return ComponentGetValue2(storage_comp, "value_string")
+        end
+    end
+
+    return "spark"
+end
+
+---Makes the open fire of a torch carried by the player, in hand or on the belt, where the particle emitters of the
+---torch do not work: sparks of its type and fire, of which only a share is real fire cells that set burning
+---materials around alight, and the rest only visual. Called every frame.
+---@param entity_id number Lantern entity ID.
+---@param x number World X coordinate of the coals.
+---@param y number World Y coordinate of the coals.
+---@param real_fire_chance number Share of the fire particles that are real fire cells, 0 to 1.
+---@return nil
+function EmitOpenFire(entity_id, x, y, real_fire_chance)
+    ---Creates particles of a material one by one, each at its own point and with its own velocity.
+    ---@param material string
+    ---@param count number
+    ---@param is_real boolean Whether the particles are real cells, not cosmetic ones.
+    local function Emit(material, count, is_real)
+        for _ = 1, count do
+            local px = x + (math.random() * 2 - 1) * OPEN_FIRE_SPREAD_X
+            local py = y + (math.random() * 2 - 1) * OPEN_FIRE_SPREAD_Y
+            local vel_x = (math.random() * 2 - 1) * OPEN_FIRE_VEL_X_MAX
+            local vel_y = OPEN_FIRE_VEL_Y_MIN + math.random() * (OPEN_FIRE_VEL_Y_MAX - OPEN_FIRE_VEL_Y_MIN)
+            if is_real then
+                GameCreateParticle(material, px, py, 1, vel_x, vel_y, false, false, false)
+            else
+                GameCreateCosmeticParticle(material, px, py, 1, vel_x, vel_y, 0, OPEN_FIRE_LIFETIME_MIN,
+                    OPEN_FIRE_LIFETIME_MAX, true, false, false, false, 0, OPEN_FIRE_GRAVITY_Y)
+            end
+        end
+    end
+
+    local frame = GameGetFrameNum()
+    if frame % OPEN_FIRE_SPARK_INTERVAL_FRAMES == 0 then
+        Emit(GetOpenFireSparkMaterial(entity_id), math.random(1, 3), false)
+    end
+    if frame % math.random(OPEN_FIRE_INTERVAL_MIN_FRAMES, OPEN_FIRE_INTERVAL_MAX_FRAMES) == 0 then
+        Emit("fire", math.random(1, 2), math.random() < real_fire_chance)
+    end
+end
+
+---Returns the light multiplier of the lamp power: 0 for a lamp that needs power and has lost it, or for a doused
+---open fire lantern, 1 otherwise.
 ---@param entity_id number Lantern entity ID.
 ---@return number
 function GetLanternPowerFactor(entity_id)
+    if IsLanternDoused(entity_id) then
+        return 0
+    end
+
     local _, lantern_type = GetLanternType(entity_id)
     if lantern_type.needs_power and GetStorageFloat(entity_id, POWER_LOST_STORAGE) > 0 then
         return 0

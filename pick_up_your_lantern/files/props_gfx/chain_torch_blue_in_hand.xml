@@ -1,0 +1,30 @@
+<Sprite
+    filename="data/props_gfx/torch_hang_base_blue.png"
+    offset_x="5.5"
+    offset_y="0.5"
+    default_animation="default" >
+
+    <RectAnimation
+        name="default"
+        pos_x="0"
+        pos_y="0"
+        frame_count="1"
+        frame_width="11"
+        frame_height="14"
+        frame_wait="0.07"
+        frames_per_row="1"
+        loop="1" >
+    </RectAnimation>
+
+    <RectAnimation
+        name="stand"
+        pos_x="0"
+        pos_y="0"
+        frame_count="1"
+        frame_width="11"
+        frame_height="14"
+        frame_wait="0.07"
+        frames_per_row="1"
+        loop="1" >
+    </RectAnimation>
+</Sprite>

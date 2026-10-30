@@ -13,48 +13,6 @@ local SETTING_ID = "pick_up_your_lantern.illuminate_the_darkness"
 ---@type table<number, {path: string, tags: string, enabled: string, alpha: string, image_file: string, offset_x?: number, offset_y?: number, scale?: number}>
 local TARGET_ENTITIES = {
     {
-        path = "data/entities/props/physics/chain_torch.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics_chain_torch.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics/chain_torch_blue.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics_chain_torch_blue.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics/chain_torch_ghostly.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
-        path = "data/entities/props/physics_chain_torch_ghostly.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
         path = "data/entities/props/physics_torch_stand.xml",
         tags = "enabled_in_world",
         enabled = "1",

@@ -143,7 +143,34 @@ local function HookLantern(chain, lantern_id, config)
     SetStorageFloat(lantern_id, ANCHOR_Y_STORAGE, anchor.y)
 end
 
----Takes a lantern off its chain; the chain keeps hanging.
+---Removes the joints of a lantern: its joint component and, for a lantern in the world, the Box2D joints at its
+---origin.
+---@param lantern_id number Lantern entity ID.
+---@return nil
+local function RemoveLanternJoints(lantern_id)
+    for _, joint_comp in ipairs(EntityGetComponentIncludingDisabled(lantern_id, "PhysicsJointComponent") or {}) do
+        EntityRemoveComponent(lantern_id, joint_comp)
+    end
+    if EntityGetRootEntity(lantern_id) == lantern_id then
+        local x, y = EntityGetTransform(lantern_id)
+        PhysicsRemoveJoints(x - 3, y - 3, x + 3, y + 3)
+    end
+end
+
+---Removes the anchor script of a lantern that hangs on a chain, which would detach it from a ceiling it does not
+---touch.
+---@param lantern_id number Lantern entity ID.
+---@return nil
+local function RemoveAnchorScript(lantern_id)
+    for _, lua_comp in ipairs(EntityGetComponentIncludingDisabled(lantern_id, "LuaComponent") or {}) do
+        if ComponentGetValue2(lua_comp, "script_source_file") == ANCHOR_SCRIPT then
+            EntityRemoveComponent(lantern_id, lua_comp)
+        end
+    end
+end
+
+---Takes a lantern off its chain; the chain keeps hanging. A lantern at the end of a chain with a fixed number of
+---links loses the joint it hangs on.
 ---@param chain LanternChain
 ---@return nil
 local function UnhookLantern(chain)
@@ -152,12 +179,16 @@ local function UnhookLantern(chain)
         return
     end
 
+    local config = chain.config
     chain.lantern_id = nil
     chain.config = nil
     lantern_chains[lantern_id] = nil
     if EntityGetIsAlive(lantern_id) then
         SetStorageFloat(lantern_id, ON_CHAIN_STORAGE, 0)
         SetStorageFloat(lantern_id, UNHOOK_STORAGE, 0)
+        if config ~= nil and config.link_count ~= nil then
+            RemoveLanternJoints(lantern_id)
+        end
     end
 end
 
@@ -238,43 +269,39 @@ local function BreakChain(chain, link_index)
     SetStorageFloat(chain.anchor_id, chain.kind.segment_count_storage, #chain.segment_ids)
 end
 
----Removes the joints of a lantern that hangs on a chain, and its anchor script, which would detach it from
----a ceiling it does not touch.
+---Spawns a freshly spawned lantern again at another place, marked as seen, and removes the old one quietly,
+---without its death effects. Moving the physics body of a lantern that hangs on its ceiling joint does not stick.
 ---@param lantern_id number Lantern entity ID.
----@return nil
-local function RemoveCeilingJoint(lantern_id)
-    local x, y = EntityGetTransform(lantern_id)
-    for _, joint_comp in ipairs(EntityGetComponentIncludingDisabled(lantern_id, "PhysicsJointComponent") or {}) do
-        EntityRemoveComponent(lantern_id, joint_comp)
+---@param x number World X coordinate of the new lantern.
+---@param y number World Y coordinate of the new lantern.
+---@return number|nil new_id New lantern entity ID, or nil if it could not be spawned.
+local function RespawnLanternAt(lantern_id, x, y)
+    local filename = EntityGetFilename(lantern_id)
+    if filename == "" then
+        filename = GetLanternType(lantern_id)
     end
-    PhysicsRemoveJoints(x - 3, y - 3, x + 3, y + 3)
+    local new_id = EntityLoad(filename, x, y)
+    if new_id == nil or new_id == 0 then
+        return nil
+    end
 
+    SetStorageFloat(new_id, CHECKED_STORAGE, 1)
     for _, lua_comp in ipairs(EntityGetComponentIncludingDisabled(lantern_id, "LuaComponent") or {}) do
-        if ComponentGetValue2(lua_comp, "script_source_file") == ANCHOR_SCRIPT then
+        if ComponentGetValue2(lua_comp, "script_death") ~= "" then
             EntityRemoveComponent(lantern_id, lua_comp)
         end
     end
-end
-
----Moves a lantern straight down or up to another height, its physics body too, at rest.
----@param lantern_id number Lantern entity ID.
----@param y number New world Y coordinate of the lantern origin.
----@return nil
-local function MoveLanternTo(lantern_id, y)
-    local x, old_y, rotation = EntityGetTransform(lantern_id)
-    for _, body_id in ipairs(PhysicsBodyIDGetFromEntity(lantern_id) or {}) do
-        local body_x, body_y, angle = PhysicsBodyIDGetTransform(body_id)
-        if body_x ~= nil then
-            local game_x, game_y = PhysicsPosToGamePos(body_x, body_y)
-            body_x, body_y = GamePosToPhysicsPos(game_x, game_y + y - old_y)
-            PhysicsBodyIDSetTransform(body_id, body_x, body_y, angle, 0, 0, 0)
-        end
+    for _, explode_comp in ipairs(EntityGetComponentIncludingDisabled(lantern_id, "ExplodeOnDamageComponent") or {}) do
+        EntityRemoveComponent(lantern_id, explode_comp)
     end
-    EntitySetTransform(lantern_id, x, y, rotation)
+    EntityKill(lantern_id)
+
+    return new_id
 end
 
 ---Gives a freshly spawned lantern its chain. A chain with a fixed number of links hangs from the ceiling right
----above, and the lantern is moved to its end, as a vanilla chain torch hangs. Otherwise the chain reaches up to the
+---above, and the lantern is spawned again at its end, as a vanilla chain torch hangs: its joint pins the top of the
+---lantern there, in the air, so it swings on it as a physics body. Otherwise the chain reaches up to the
 ---ceiling, as the vanilla temple_lantern.lua builds it, and a lantern right under the ceiling, hung with the left
 ---mouse button, keeps its joint. Without a ceiling the lantern falls.
 ---@param lantern_id number Lantern entity ID.
@@ -307,11 +334,18 @@ local function CreateChain(lantern_id, config)
         return
     end
 
-    RemoveCeilingJoint(lantern_id)
     local end_y = anchor_y + link_count * LINK_LENGTH
     if config.link_count ~= nil then
-        MoveLanternTo(lantern_id, end_y)
+        local new_id = RespawnLanternAt(lantern_id, x, end_y)
+        if new_id == nil then
+            EntityKill(anchor_id)
+            return
+        end
+        lantern_id = new_id
+    else
+        RemoveLanternJoints(lantern_id)
     end
+    RemoveAnchorScript(lantern_id)
     local chain = CreateHangingRope(kind, anchor_id, x, anchor_y, x, end_y, link_count)
     ---@cast chain LanternChain
     chains[kind][anchor_id] = chain
@@ -368,7 +402,9 @@ local function UpdateChainLanterns()
     end
 end
 
----Holds a lantern at the length of its chain by its top, and takes it off when it is kicked or flung far.
+---Holds a lantern at the length of its chain by its top, and takes it off when it is kicked or flung far. A lantern
+---on a chain with a fixed number of links is held by its own joint at the end of the chain instead: holding it from
+---Lua turned its heavy bowl upside down.
 ---@param chain LanternChain
 ---@return boolean is_taut Whether the lantern pulls the chain taut.
 local function UpdateChainedLantern(chain)
@@ -380,6 +416,12 @@ local function UpdateChainedLantern(chain)
     end
 
     local x, y, rotation = EntityGetTransform(lantern_id)
+    local last = chain.points[#chain.points]
+    if config.link_count ~= nil then
+        last.x, last.y = x, y
+        return true
+    end
+
     local anchor = chain.points[1]
     local dx, dy = x - anchor.x, y - anchor.y
     local distance = math.sqrt(dx * dx + dy * dy)
@@ -394,7 +436,6 @@ local function UpdateChainedLantern(chain)
         x, y = anchor.x + dx / distance * length, anchor.y + dy / distance * length
     end
 
-    local last = chain.points[#chain.points]
     last.x, last.y = x, y
     return distance >= length - TAUT_SLACK
 end

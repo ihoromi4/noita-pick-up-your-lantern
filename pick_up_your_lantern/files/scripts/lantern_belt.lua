@@ -20,6 +20,8 @@ local DEFAULT_LIGHT_SCALE = 0.5
 
 -- Belt lantern is smaller than the one in hand so it does not reach below the feet.
 local SPRITE_SCALE = 0.6
+-- Coals of an open fire torch on the belt below its origin: 6 px at the sprite scale.
+local OPEN_FIRE_COALS_OFFSET_Y = 6 * SPRITE_SCALE
 -- Player is drawn at 0.6, lower values are drawn in front of it.
 local SPRITE_Z_INDEX = 0.5
 
@@ -230,5 +232,11 @@ function UpdateLanternBelt()
 
     if is_lit then
         UpdateBeltLight(belt_id, lantern_id)
+        -- The fire of a torch on the belt is only visual, so it does not set the player alight.
+        local _, lantern_type = GetLanternType(lantern_id)
+        if lantern_type.open_fire then
+            local belt_x, belt_y = EntityGetTransform(belt_id)
+            EmitOpenFire(lantern_id, belt_x, belt_y + OPEN_FIRE_COALS_OFFSET_Y, 0)
+        end
     end
 end
