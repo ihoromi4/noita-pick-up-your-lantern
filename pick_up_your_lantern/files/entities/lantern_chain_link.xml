@@ -1,8 +1,8 @@
-<Entity name="pul_temple_lantern_chain_link" tags="pul_chain_link" >
+<Entity name="pul_lantern_chain_link" tags="pul_chain_link" >
 
     <!--
-        One link of a temple lantern chain: the vanilla chain link sprite.
-        Placed and turned every frame by files/scripts/temple_lantern_chain.lua: the origin is the upper end.
+        One link of a lantern chain: the vanilla chain link sprite.
+        Placed and turned every frame by files/scripts/lantern_chain.lua: the origin is the upper end.
     -->
 
     <!-- Player is drawn at 0.6, higher values are drawn behind it. -->

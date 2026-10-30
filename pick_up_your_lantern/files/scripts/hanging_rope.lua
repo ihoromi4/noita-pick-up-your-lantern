@@ -1,4 +1,4 @@
---- Ropes hanging from the ceiling for Pick Up Your Lantern mod: tube lamp cables and temple lantern chains.
+--- Ropes hanging from the ceiling for Pick Up Your Lantern mod: tube lamp cables and lantern chains.
 --- A rope is a chain of verlet points simulated in Lua, one sprite entity per segment: a physics chain built at
 --- runtime gets no bodies when spawned by the mod. An anchor entity at the ceiling keeps the segment count in
 --- a storage, so ropes are rebuilt, hanging straight down, after a save and reload or when a chunk streams in.
@@ -15,6 +15,7 @@ local CONSTRAINT_ITERATIONS = 8
 ---@class RopeKind
 ---@field segment_length number Length of a segment, in pixels: the height of its sprite.
 ---@field segment_entity_path string Sprite entity of a segment, with its origin at the upper end.
+---@field top_segment_entity_path string|nil Sprite entity of the segment at the anchor; the usual one if nil.
 ---@field anchor_tag string Tag of the anchor entities at the ceiling.
 ---@field segment_tag string Tag of the segment sprite entities.
 ---@field segment_count_storage string Storage of the anchor entity with the number of segments.
@@ -54,7 +55,11 @@ function CreateHangingRope(kind, anchor_id, start_x, start_y, end_x, end_y, segm
         local y = start_y + (end_y - start_y) * t
         table.insert(rope.points, { x = x, y = y, prev_x = x, prev_y = y, })
         if index < segment_count then
-            table.insert(rope.segment_ids, EntityLoad(kind.segment_entity_path, x, y))
+            local entity_path = kind.segment_entity_path
+            if index == 0 and kind.top_segment_entity_path ~= nil then
+                entity_path = kind.top_segment_entity_path
+            end
+            table.insert(rope.segment_ids, EntityLoad(entity_path, x, y))
         end
     end
 

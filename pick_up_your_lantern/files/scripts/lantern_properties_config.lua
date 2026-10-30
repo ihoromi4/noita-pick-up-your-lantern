@@ -17,8 +17,15 @@
 ---once it is picked up or detached.
 ---@field unpowered_image_file string|nil Physics image of a lamp without power, used for its next physics body.
 ---@field unpowered_ui_sprite string|nil Inventory icon of a lamp without power; also tells the type apart.
----@field hangs_on_chain boolean|nil Whether a lantern spawned by a biome hangs on a chain from the ceiling far above,
----see temple_lantern_chain.lua.
+---@field chain LanternChainConfig|nil Chain a lantern spawned by a biome hangs on, see lantern_chain.lua.
+
+---@class LanternChainConfig
+---@field link_count number|nil Fixed number of links, with the lantern moved to their end; nil for a chain up to
+---the ceiling, as long as the distance to it.
+---@field ceiling_search_distance number How far above the lantern top the ceiling is searched for, in pixels.
+---@field has_ceiling_link boolean|nil Whether the link at the ceiling shows the vanilla ceiling mount sprite.
+---@field center_offset_y number Centre of the lantern below its top, in pixels.
+---@field mass_over_inertia number Ratio of the mass of the lantern to its moment of inertia, per square pixel.
 
 ---Pickable light fixtures. Each file is a full override in `data/entities/props/` of the mod.
 ---@type LanternType[]
@@ -57,7 +64,12 @@ LANTERN_TYPES = {
         files = { "data/entities/props/physics/temple_lantern.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_temple_lantern.png",
         hang_offset_y = 1,
-        hangs_on_chain = true,
+        -- Up to the ceiling as far as the vanilla temple_lantern.lua searches; the body is a 9×11 box.
+        chain = {
+            ceiling_search_distance = 200,
+            center_offset_y = 5,
+            mass_over_inertia = 12 / (9 * 9 + 11 * 11),
+        },
     },
 }
 

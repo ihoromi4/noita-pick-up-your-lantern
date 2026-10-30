@@ -26,7 +26,7 @@
     ></PhysicsImageShapeComponent>
 
     <!-- Holds a lantern hung with the left mouse button. A lantern spawned by a biome is far below the ceiling:
-         temple_lantern_chain.lua removes this joint and hangs it on a chain. -->
+         lantern_chain.lua removes this joint and hangs it on a chain. -->
     <PhysicsJointComponent
         nail_to_wall="1"
         breakable="1"
@@ -45,7 +45,7 @@
     <LuaComponent
         _tags="enabled_in_world"
         execute_every_n_frame="-1"
-        script_kick="mods/pick_up_your_lantern/files/scripts/temple_lantern_kick.lua"
+        script_kick="mods/pick_up_your_lantern/files/scripts/lantern_chain_kick.lua"
     ></LuaComponent>
 
     <LuaComponent

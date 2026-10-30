@@ -1,7 +1,7 @@
---- Chains of temple lanterns for Pick Up Your Lantern mod.
---- A temple lantern spawned by a biome hangs far below the ceiling. The vanilla lantern builds a physics chain up to
---- the ceiling at runtime, which gets no bodies once the lantern is a mod item, so the chain is a rigid rope of
---- hanging_rope.lua made of the vanilla chain link sprites:
+--- Chains of lanterns for Pick Up Your Lantern mod, for each lantern type with `chain` in LANTERN_TYPES.
+--- A temple lantern spawned by a biome hangs far below the ceiling, a chain torch on a short chain of 4 links. The
+--- vanilla fixtures build physics chains, which get no bodies once the lantern is a mod item, so a chain is a rigid
+--- rope of hanging_rope.lua made of the vanilla chain link sprites:
 --- - the lantern is held at the length of its chain by its top, so it swings on it;
 --- - picked up, kicked or flung far, the lantern comes off the chain, which keeps hanging from the ceiling;
 --- - a projectile that hits a link breaks the chain there: the upper part keeps hanging, the lower one falls off
@@ -20,23 +20,21 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/hanging_rope.lua")
 
 local LANTERN_TAG = "lantern"
 local PROJECTILE_TAG = "projectile"
-local CHAIN_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/temple_lantern_chain.xml"
-local LINK_ENTITY_PATH = "mods/" .. MOD_ID .. "/files/entities/temple_lantern_chain_link.xml"
+local ENTITIES_PATH = "mods/" .. MOD_ID .. "/files/entities/"
 local ANCHOR_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_anchor.lua"
 -- Set once the lantern has been seen in the world, so only a freshly spawned lantern gets a chain.
 local CHECKED_STORAGE = "lantern_chain_checked"
--- Set while the lantern hangs on its chain; shared with temple_lantern_kick.lua.
+-- Set while the lantern hangs on its chain; shared with lantern_chain_kick.lua.
 local ON_CHAIN_STORAGE = "lantern_on_chain"
--- Set by temple_lantern_kick.lua when the lantern is kicked off its chain.
+-- Set by lantern_chain_kick.lua when the lantern is kicked off its chain.
 local UNHOOK_STORAGE = "lantern_chain_unhook"
 local ANCHOR_X_STORAGE = "lantern_chain_anchor_x"
 local ANCHOR_Y_STORAGE = "lantern_chain_anchor_y"
 
 -- Length of a link, in pixels: the height of the vanilla link sprite (torch_hang_chain.png).
 local LINK_LENGTH = 6
--- How far above a spawned lantern the ceiling is searched for, as in the vanilla temple_lantern.lua.
-local CEILING_SEARCH_DISTANCE = 200
--- A lantern with the ceiling this close above its top hangs on its joint, without a chain.
+-- A lantern with the ceiling this close above its top hangs on its joint, without a chain, unless its chain has
+-- a fixed number of links.
 local JOINT_CEILING_DISTANCE = 6
 -- How far above the anchor the ceiling is searched for, to tell when it is destroyed, and how often.
 local ANCHOR_CEILING_CHECK_DISTANCE = 4
@@ -48,9 +46,6 @@ local WORLD_BREAK_STRETCH = 2
 local TAUT_SLACK = 0.5
 -- A lantern on a chain that has not been loaded for this long falls.
 local MISSING_CHAIN_FRAMES = 3 * 60
--- Centre of the lantern below its top, and the ratio of its mass to its moment of inertia: a 9×11 box.
-local CENTER_OFFSET_Y = 5
-local MASS_OVER_INERTIA = 12 / (9 * 9 + 11 * 11)
 -- A projectile path closer than this to a link hits it.
 local HIT_DISTANCE = 2
 -- Search radius for projectiles around the middle of a chain, on top of half its length.
@@ -59,24 +54,51 @@ local BREAK_SPARK_COUNT = 6
 -- A piece that fell off a chain lies on the floor for 10 seconds.
 local LOOSE_PIECE_FRAMES = 10 * 60
 
----@type RopeKind
-local CHAIN_KIND = {
+---A kind of chain: its rope kind and the entity at its ceiling anchor. Kinds share the link tag, so each one keeps
+---the links of the others when it syncs its chains.
+---@class ChainKind : RopeKind
+---@field anchor_entity_path string Chain entity spawned at the ceiling anchor.
+
+---Plain chain of the temple lantern.
+---@type ChainKind
+local PLAIN_CHAIN_KIND = {
     segment_length = LINK_LENGTH,
-    segment_entity_path = LINK_ENTITY_PATH,
+    segment_entity_path = ENTITIES_PATH .. "lantern_chain_link.xml",
     anchor_tag = "pul_chain",
     segment_tag = "pul_chain_link",
     segment_count_storage = "chain_link_count",
     rigid = true,
+    anchor_entity_path = ENTITIES_PATH .. "lantern_chain.xml",
 }
+
+---Chain of a chain torch, with the vanilla ceiling mount sprite on its top link.
+---@type ChainKind
+local MOUNTED_CHAIN_KIND = {
+    segment_length = LINK_LENGTH,
+    segment_entity_path = ENTITIES_PATH .. "lantern_chain_link.xml",
+    top_segment_entity_path = ENTITIES_PATH .. "lantern_chain_mount.xml",
+    anchor_tag = "pul_mounted_chain",
+    segment_tag = "pul_chain_link",
+    segment_count_storage = "chain_link_count",
+    rigid = true,
+    anchor_entity_path = ENTITIES_PATH .. "lantern_mounted_chain.xml",
+}
+
+---@type ChainKind[]
+local CHAIN_KINDS = { PLAIN_CHAIN_KIND, MOUNTED_CHAIN_KIND, }
 
 ---A chain hanging from the ceiling, or a loose piece of one.
 ---@class LanternChain : HangingRope
 ---@field lantern_id number|nil Lantern hanging on the chain.
+---@field config LanternChainConfig|nil Chain config of the lantern type hanging on the chain.
 ---@field age_frames number|nil Frames since a loose piece fell off.
 
----Chains simulated this session, by chain entity ID.
----@type table<number, LanternChain>
+---Chains simulated this session, by chain kind and chain entity ID.
+---@type table<ChainKind, table<number, LanternChain>>
 local chains = {}
+for _, kind in ipairs(CHAIN_KINDS) do
+    chains[kind] = {}
+end
 
 ---Chains that hold a lantern, by lantern entity ID.
 ---@type table<number, LanternChain>
@@ -90,20 +112,29 @@ local loose_pieces = {}
 ---@type table<number, number>
 local missing_frames = {}
 
----Checks whether a lantern type hangs on a chain.
+---Returns the chain config of a lantern type, if it hangs on a chain.
 ---@param lantern_id number Lantern entity ID.
----@return boolean
-local function IsChainLantern(lantern_id)
+---@return LanternChainConfig|nil
+local function GetChainConfig(lantern_id)
     local _, lantern_type = GetLanternType(lantern_id)
-    return lantern_type.hangs_on_chain == true
+    return lantern_type.chain
+end
+
+---Returns the kind of chain a lantern type hangs on.
+---@param config LanternChainConfig
+---@return ChainKind
+local function GetChainKind(config)
+    return config.has_ceiling_link and MOUNTED_CHAIN_KIND or PLAIN_CHAIN_KIND
 end
 
 ---Hangs a lantern on a chain: links them both ways and marks the lantern.
 ---@param chain LanternChain
 ---@param lantern_id number Lantern entity ID.
+---@param config LanternChainConfig Chain config of the lantern type.
 ---@return nil
-local function HookLantern(chain, lantern_id)
+local function HookLantern(chain, lantern_id, config)
     chain.lantern_id = lantern_id
+    chain.config = config
     lantern_chains[lantern_id] = chain
     missing_frames[lantern_id] = nil
     local anchor = chain.points[1]
@@ -122,6 +153,7 @@ local function UnhookLantern(chain)
     end
 
     chain.lantern_id = nil
+    chain.config = nil
     lantern_chains[lantern_id] = nil
     if EntityGetIsAlive(lantern_id) then
         SetStorageFloat(lantern_id, ON_CHAIN_STORAGE, 0)
@@ -141,16 +173,17 @@ local function OnChainDropped(rope)
 end
 
 ---Turns points and links of a chain into a loose piece that falls.
+---@param kind ChainKind
 ---@param points RopePoint[]
 ---@param segment_ids number[]
 ---@return nil
-local function DropLoosePiece(points, segment_ids)
+local function DropLoosePiece(kind, points, segment_ids)
     if #segment_ids == 0 then
         return
     end
 
     table.insert(loose_pieces, {
-        kind = CHAIN_KIND,
+        kind = kind,
         anchor_id = nil,
         points = points,
         segment_ids = segment_ids,
@@ -164,9 +197,9 @@ end
 ---@return nil
 local function DropWholeChain(chain)
     UnhookLantern(chain)
-    chains[chain.anchor_id] = nil
+    chains[chain.kind][chain.anchor_id] = nil
     EntityKill(chain.anchor_id)
-    DropLoosePiece(chain.points, chain.segment_ids)
+    DropLoosePiece(chain.kind, chain.points, chain.segment_ids)
 end
 
 ---Breaks a chain at one link: the link is gone, the part above it keeps hanging, and the part below falls off
@@ -188,10 +221,10 @@ local function BreakChain(chain, link_index)
     for index = link_index + 1, #chain.segment_ids do
         table.insert(lower_segment_ids, chain.segment_ids[index])
     end
-    DropLoosePiece(lower_points, lower_segment_ids)
+    DropLoosePiece(chain.kind, lower_points, lower_segment_ids)
 
     if link_index == 1 then
-        chains[chain.anchor_id] = nil
+        chains[chain.kind][chain.anchor_id] = nil
         EntityKill(chain.anchor_id)
         return
     end
@@ -202,7 +235,7 @@ local function BreakChain(chain, link_index)
     for index = #chain.segment_ids, link_index, -1 do
         table.remove(chain.segment_ids, index)
     end
-    SetStorageFloat(chain.anchor_id, CHAIN_KIND.segment_count_storage, #chain.segment_ids)
+    SetStorageFloat(chain.anchor_id, chain.kind.segment_count_storage, #chain.segment_ids)
 end
 
 ---Removes the joints of a lantern that hangs on a chain, and its anchor script, which would detach it from
@@ -223,52 +256,81 @@ local function RemoveCeilingJoint(lantern_id)
     end
 end
 
----Gives a freshly spawned lantern its chain up to the ceiling, as the vanilla temple_lantern.lua does. A lantern
----right under the ceiling, hung with the left mouse button, keeps its joint; without a ceiling it falls.
+---Moves a lantern straight down or up to another height, its physics body too, at rest.
 ---@param lantern_id number Lantern entity ID.
+---@param y number New world Y coordinate of the lantern origin.
 ---@return nil
-local function CreateChain(lantern_id)
+local function MoveLanternTo(lantern_id, y)
+    local x, old_y, rotation = EntityGetTransform(lantern_id)
+    for _, body_id in ipairs(PhysicsBodyIDGetFromEntity(lantern_id) or {}) do
+        local body_x, body_y, angle = PhysicsBodyIDGetTransform(body_id)
+        if body_x ~= nil then
+            local game_x, game_y = PhysicsPosToGamePos(body_x, body_y)
+            body_x, body_y = GamePosToPhysicsPos(game_x, game_y + y - old_y)
+            PhysicsBodyIDSetTransform(body_id, body_x, body_y, angle, 0, 0, 0)
+        end
+    end
+    EntitySetTransform(lantern_id, x, y, rotation)
+end
+
+---Gives a freshly spawned lantern its chain. A chain with a fixed number of links hangs from the ceiling right
+---above, and the lantern is moved to its end, as a vanilla chain torch hangs. Otherwise the chain reaches up to the
+---ceiling, as the vanilla temple_lantern.lua builds it, and a lantern right under the ceiling, hung with the left
+---mouse button, keeps its joint. Without a ceiling the lantern falls.
+---@param lantern_id number Lantern entity ID.
+---@param config LanternChainConfig Chain config of the lantern type.
+---@return nil
+local function CreateChain(lantern_id, config)
     local x, y = EntityGetTransform(lantern_id)
-    if RaytraceSurfaces(x, y, x, y - JOINT_CEILING_DISTANCE) then
+    local link_count = config.link_count
+    if link_count == nil and RaytraceSurfaces(x, y, x, y - JOINT_CEILING_DISTANCE) then
         return
     end
 
-    local found, _, hit_y = RaytracePlatforms(x, y, x, y - CEILING_SEARCH_DISTANCE)
+    local found, _, hit_y = RaytracePlatforms(x, y, x, y - config.ceiling_search_distance)
     if not found then
         return
     end
 
     local anchor_y = math.floor(hit_y) + 1
-    local distance = y - anchor_y
-    if distance <= LINK_LENGTH then
-        return
+    if link_count == nil then
+        local distance = y - anchor_y
+        if distance <= LINK_LENGTH then
+            return
+        end
+        link_count = math.floor(distance / LINK_LENGTH)
     end
 
-    local link_count = math.floor(distance / LINK_LENGTH)
-    local anchor_id = SpawnHangingRopeAnchor(CHAIN_ENTITY_PATH, CHAIN_KIND, x, anchor_y, link_count)
+    local kind = GetChainKind(config)
+    local anchor_id = SpawnHangingRopeAnchor(kind.anchor_entity_path, kind, x, anchor_y, link_count)
     if anchor_id == nil then
         return
     end
 
     RemoveCeilingJoint(lantern_id)
-    local chain = CreateHangingRope(CHAIN_KIND, anchor_id, x, anchor_y, x, anchor_y + link_count * LINK_LENGTH,
-        link_count)
+    local end_y = anchor_y + link_count * LINK_LENGTH
+    if config.link_count ~= nil then
+        MoveLanternTo(lantern_id, end_y)
+    end
+    local chain = CreateHangingRope(kind, anchor_id, x, anchor_y, x, end_y, link_count)
     ---@cast chain LanternChain
-    chains[anchor_id] = chain
-    HookLantern(chain, lantern_id)
+    chains[kind][anchor_id] = chain
+    HookLantern(chain, lantern_id, config)
 end
 
 ---Puts a lantern loaded from a save back on its chain, once the chain is loaded. A lantern whose chain does not
 ---show up in time falls.
 ---@param lantern_id number Lantern entity ID.
+---@param config LanternChainConfig Chain config of the lantern type.
 ---@return nil
-local function RehookLantern(lantern_id)
+local function RehookLantern(lantern_id, config)
+    local kind = GetChainKind(config)
     local anchor_x = GetStorageFloat(lantern_id, ANCHOR_X_STORAGE)
     local anchor_y = GetStorageFloat(lantern_id, ANCHOR_Y_STORAGE)
-    for _, anchor_id in ipairs(EntityGetInRadiusWithTag(anchor_x, anchor_y, 2, CHAIN_KIND.anchor_tag) or {}) do
-        local chain = chains[anchor_id]
+    for _, anchor_id in ipairs(EntityGetInRadiusWithTag(anchor_x, anchor_y, 2, kind.anchor_tag) or {}) do
+        local chain = chains[kind][anchor_id]
         if chain ~= nil and chain.lantern_id == nil then
-            HookLantern(chain, lantern_id)
+            HookLantern(chain, lantern_id, config)
             return
         end
     end
@@ -281,12 +343,13 @@ local function RehookLantern(lantern_id)
     end
 end
 
----Watches temple lanterns: a freshly spawned one gets its chain, a lantern loaded from a save is put back on its
----chain, and a lantern picked up comes off it.
+---Watches lanterns that hang on chains: a freshly spawned one gets its chain, a lantern loaded from a save is put
+---back on its chain, and a lantern picked up comes off it.
 ---@return nil
 local function UpdateChainLanterns()
     for _, lantern_id in ipairs(EntityGetWithTag(LANTERN_TAG) or {}) do
-        if IsChainLantern(lantern_id) then
+        local config = GetChainConfig(lantern_id)
+        if config ~= nil then
             local chain = lantern_chains[lantern_id]
             if EntityGetRootEntity(lantern_id) ~= lantern_id then
                 if chain ~= nil then
@@ -297,9 +360,9 @@ local function UpdateChainLanterns()
                 SetStorageFloat(lantern_id, CHECKED_STORAGE, 1)
             elseif GetStorageFloat(lantern_id, CHECKED_STORAGE) <= 0 then
                 SetStorageFloat(lantern_id, CHECKED_STORAGE, 1)
-                CreateChain(lantern_id)
+                CreateChain(lantern_id, config)
             elseif chain == nil and GetStorageFloat(lantern_id, ON_CHAIN_STORAGE) > 0 then
-                RehookLantern(lantern_id)
+                RehookLantern(lantern_id, config)
             end
         end
     end
@@ -310,6 +373,7 @@ end
 ---@return boolean is_taut Whether the lantern pulls the chain taut.
 local function UpdateChainedLantern(chain)
     local lantern_id = chain.lantern_id --[[@as number]]
+    local config = chain.config --[[@as LanternChainConfig]]
     if not EntityGetIsAlive(lantern_id) or GetStorageFloat(lantern_id, UNHOOK_STORAGE) > 0 then
         UnhookLantern(chain)
         return false
@@ -324,9 +388,9 @@ local function UpdateChainedLantern(chain)
         UnhookLantern(chain)
         return false
     elseif distance > length then
-        local center_x, center_y = OffsetToWorld(x, y, rotation, 0, CENTER_OFFSET_Y)
+        local center_x, center_y = OffsetToWorld(x, y, rotation, 0, config.center_offset_y)
         HoldBodyOnHangingRope(lantern_id, x, y, center_x, center_y, dx / distance, dy / distance, distance - length,
-            MASS_OVER_INERTIA)
+            config.mass_over_inertia)
         x, y = anchor.x + dx / distance * length, anchor.y + dy / distance * length
     end
 
@@ -418,13 +482,14 @@ local function CheckProjectileHits(chain)
     end
 end
 
----Updates the chains hanging from the ceiling.
+---Updates the chains of one kind hanging from the ceiling.
+---@param kind_chains table<number, LanternChain> Chains of the kind by chain entity ID.
 ---@return nil
-local function UpdateChains()
+local function UpdateChains(kind_chains)
     local check_anchors = GameGetFrameNum() % ANCHOR_CHECK_INTERVAL_FRAMES == 0
     ---@type table<number, boolean>
     local taut = {}
-    for anchor_id, chain in pairs(chains) do
+    for anchor_id, chain in pairs(kind_chains) do
         local anchor = chain.points[1]
         if check_anchors
             and not RaytraceSurfaces(anchor.x, anchor.y, anchor.x, anchor.y - ANCHOR_CEILING_CHECK_DISTANCE) then
@@ -437,7 +502,7 @@ local function UpdateChains()
         end
     end
 
-    for anchor_id, chain in pairs(chains) do
+    for anchor_id, chain in pairs(kind_chains) do
         -- A projectile may have broken a taut chain since, which then hangs free.
         if taut[anchor_id] and chain.lantern_id ~= nil then
             StraightenHangingRope(chain)
@@ -464,12 +529,35 @@ local function UpdateLoosePieces()
     end
 end
 
----Updates temple lantern chains. Runs every frame in OnWorldPostUpdate, after physics, so a chain follows its
----lantern in the same frame before rendering.
+---Matches the chains of each kind to the loaded chain entities. The links of the other kinds and of loose pieces
+---are kept, as all kinds share the link tag.
 ---@return nil
-function UpdateTempleLanternChains()
-    SyncHangingRopes(CHAIN_KIND, chains, OnChainDropped, loose_pieces)
+local function SyncChains()
+    for _, kind in ipairs(CHAIN_KINDS) do
+        ---@type HangingRope[]
+        local other_ropes = {}
+        for _, piece in ipairs(loose_pieces) do
+            table.insert(other_ropes, piece)
+        end
+        for other_kind, kind_chains in pairs(chains) do
+            if other_kind ~= kind then
+                for _, chain in pairs(kind_chains) do
+                    table.insert(other_ropes, chain)
+                end
+            end
+        end
+        SyncHangingRopes(kind, chains[kind], OnChainDropped, other_ropes)
+    end
+end
+
+---Updates lantern chains. Runs every frame in OnWorldPostUpdate, after physics, so a chain follows its lantern in
+---the same frame before rendering.
+---@return nil
+function UpdateLanternChains()
+    SyncChains()
     UpdateChainLanterns()
-    UpdateChains()
+    for _, kind in ipairs(CHAIN_KINDS) do
+        UpdateChains(chains[kind])
+    end
     UpdateLoosePieces()
 end

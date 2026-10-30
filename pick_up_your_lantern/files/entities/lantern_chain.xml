@@ -1,0 +1,8 @@
+<Entity name="pul_lantern_chain" tags="pul_chain" >
+
+    <!--
+        Plain lantern chain at its ceiling anchor, spawned by files/scripts/lantern_chain.lua.
+        Keeps the link count in a storage; the links are sprite entities simulated in Lua.
+    -->
+
+</Entity>

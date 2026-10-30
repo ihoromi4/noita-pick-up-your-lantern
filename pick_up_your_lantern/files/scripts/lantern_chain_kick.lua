@@ -1,10 +1,10 @@
---- Kick handler of a temple lantern on its chain: marks the lantern to be taken off the chain by
---- temple_lantern_chain.lua and pushes it away from the kicker. A lantern hung with the left mouse button has
+--- Kick handler of a lantern on its chain: marks the lantern to be taken off the chain by
+--- lantern_chain.lua and pushes it away from the kicker. A lantern hung with the left mouse button has
 --- no chain and is handled by lantern_anchor.lua.
 
 dofile_once("mods/pick_up_your_lantern/files/scripts/utils.lua")
 
--- Storages shared with temple_lantern_chain.lua.
+-- Storages shared with lantern_chain.lua.
 local ON_CHAIN_STORAGE = "lantern_on_chain"
 local UNHOOK_STORAGE = "lantern_chain_unhook"
 local KICK_FORCE_X = 40.0
