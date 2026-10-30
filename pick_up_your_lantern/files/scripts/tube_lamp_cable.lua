@@ -8,10 +8,10 @@
 ---   the cable holds it by one end of the tube, where a vanilla wire is attached, so the lamp swings on it.
 --- The ceiling part of a snapped cable keeps hanging, and after SPARK_DELAY_FRAMES its end shocks creatures around
 --- it for LIVE_FRAMES. A lamp whose ceiling is destroyed falls and goes dark.
---- A cable is a rope of verlet points simulated in Lua, one sprite entity per segment: a physics chain built at
---- runtime gets no bodies when spawned by the mod, and could not grow anyway. A cable entity at the ceiling anchor
---- keeps the segment count and age in storages, so cables are rebuilt after a save and reload. Which lamp a cable
---- holds is not saved: after a reload the lamp falls off and goes dark.
+--- A cable is a slack rope of hanging_rope.lua: a physics chain built at runtime gets no bodies when spawned by
+--- the mod, and could not grow anyway. A cable entity at the ceiling anchor keeps the segment count and age in
+--- storages, so cables are rebuilt after a save and reload. Which lamp a cable holds is not saved: after a reload
+--- the lamp falls off and goes dark.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -19,6 +19,7 @@ local MOD_ID = "pick_up_your_lantern"
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/hanging_rope.lua")
 
 local LANTERN_TAG = "lantern"
 local CABLE_TAG = "pul_cable"
@@ -69,20 +70,19 @@ local ATTACH_OFFSET_Y = -0.5
 -- Middle of the tube relative to the lamp origin, and its length: the lamp is taken as a thin rod.
 local TUBE_CENTER_OFFSET_Y = 2.5
 local TUBE_LENGTH = 19
-local GRAVITY = 0.2
-local DAMPING = 0.95
-local CONSTRAINT_ITERATIONS = 8
 
----@class CablePoint
----@field x number
----@field y number
----@field prev_x number
----@field prev_y number
+---@type RopeKind
+local CABLE_KIND = {
+    segment_length = SEGMENT_LENGTH,
+    segment_entity_path = SEGMENT_ENTITY_PATH,
+    anchor_tag = CABLE_TAG,
+    segment_tag = SEGMENT_TAG,
+    segment_count_storage = SEGMENT_COUNT_STORAGE,
+    rigid = false,
+}
 
----@class CableRope
----@field cable_id number Cable entity ID at the ceiling anchor.
----@field points CablePoint[] Rope points from the ceiling to the end of the cable.
----@field segment_ids number[] Segment sprite entity IDs, one per pair of neighbour points.
+---A cable; its anchor entity is the cable entity at the ceiling.
+---@class CableRope : HangingRope
 ---@field lamp_id number|nil Lamp the cable holds and powers, nil once it snapped.
 ---@field max_segments number Number of segments paid out before the cable snaps.
 ---@field attach_side number 1 or -1: which end of the tube the cable holds while the lamp is in the world.
@@ -95,15 +95,7 @@ local ropes = {}
 ---@type table<number, CableRope>
 local lamp_ropes = {}
 
----Spawns the sprite entity of a cable segment.
----@param x number World X coordinate of the upper end of the segment.
----@param y number World Y coordinate of the upper end of the segment.
----@return number segment_id
-local function SpawnSegment(x, y)
-    return EntityLoad(SEGMENT_ENTITY_PATH, x, y)
-end
-
----Creates the rope of a cable: points on a straight line from the anchor to the end, one segment between each two.
+---Creates the rope of a cable from the anchor to the end of the cable.
 ---@param cable_id number Cable entity ID.
 ---@param end_x number World X coordinate of the end of the cable.
 ---@param end_y number World Y coordinate of the end of the cable.
@@ -111,23 +103,11 @@ end
 ---@return CableRope
 local function CreateRope(cable_id, end_x, end_y, segment_count)
     local anchor_x, anchor_y = EntityGetTransform(cable_id)
-    local rope = {
-        cable_id = cable_id,
-        points = {},
-        segment_ids = {},
-        lamp_id = nil,
-        max_segments = segment_count,
-        attach_side = 1,
-    }
-    for index = 0, segment_count do
-        local t = index / segment_count
-        local x = anchor_x + (end_x - anchor_x) * t
-        local y = anchor_y + (end_y - anchor_y) * t
-        table.insert(rope.points, { x = x, y = y, prev_x = x, prev_y = y, })
-        if index < segment_count then
-            table.insert(rope.segment_ids, SpawnSegment(x, y))
-        end
-    end
+    local rope = CreateHangingRope(CABLE_KIND, cable_id, anchor_x, anchor_y, end_x, end_y, segment_count)
+    ---@cast rope CableRope
+    rope.lamp_id = nil
+    rope.max_segments = segment_count
+    rope.attach_side = 1
     ropes[cable_id] = rope
 
     return rope
@@ -139,39 +119,17 @@ end
 ---@param segment_count number Number of segments.
 ---@return number|nil cable_id
 local function SpawnCableEntity(anchor_x, anchor_y, segment_count)
-    local cable_id = EntityLoad(CABLE_ENTITY_PATH, anchor_x, anchor_y)
-    if cable_id == nil or cable_id == 0 then
-        return nil
-    end
-
-    SetStorageFloat(cable_id, SEGMENT_COUNT_STORAGE, segment_count)
-    return cable_id
+    return SpawnHangingRopeAnchor(CABLE_ENTITY_PATH, CABLE_KIND, anchor_x, anchor_y, segment_count)
 end
 
----Removes the sprites of a rope and forgets it; the cable entity is left as it is.
----@param rope CableRope
+---Forgets the lamp of a cable whose rope was dropped.
+---@param rope HangingRope
 ---@return nil
-local function DropRope(rope)
-    for _, segment_id in ipairs(rope.segment_ids) do
-        EntityKill(segment_id)
-    end
-    ropes[rope.cable_id] = nil
+local function OnRopeDropped(rope)
+    ---@cast rope CableRope
     if rope.lamp_id ~= nil then
         lamp_ropes[rope.lamp_id] = nil
     end
-end
-
----Turns a point given relative to an entity origin by the entity rotation and moves it to the entity position.
----@param x number Entity X coordinate.
----@param y number Entity Y coordinate.
----@param rotation number Entity rotation, in radians.
----@param offset_x number Offset from the origin before the rotation, X.
----@param offset_y number Offset from the origin before the rotation, Y.
----@return number x
----@return number y
-local function ToWorld(x, y, rotation, offset_x, offset_y)
-    local cos, sin = math.cos(rotation), math.sin(rotation)
-    return x + offset_x * cos - offset_y * sin, y + offset_x * sin + offset_y * cos
 end
 
 ---Finds where a cable holding a lamp ends: at one end of the tube while the lamp is in the world, at the lamp in
@@ -185,7 +143,7 @@ local function GetLampEnd(lamp_id, attach_side)
     local root_id = EntityGetRootEntity(lamp_id)
     if root_id == lamp_id then
         local x, y, rotation = EntityGetTransform(lamp_id)
-        return ToWorld(x, y, rotation, ATTACH_OFFSET_X * attach_side, ATTACH_OFFSET_Y)
+        return OffsetToWorld(x, y, rotation, ATTACH_OFFSET_X * attach_side, ATTACH_OFFSET_Y)
     elseif GetHeldItem(root_id) ~= lamp_id then
         return EntityGetTransform(root_id)
     end
@@ -210,7 +168,7 @@ local function SnapCable(rope)
     end
     lamp_ropes[lamp_id] = nil
     rope.lamp_id = nil
-    SetStorageFloat(rope.cable_id, AGE_STORAGE, 0)
+    SetStorageFloat(rope.anchor_id, AGE_STORAGE, 0)
 end
 
 ---Rolls the number of segments a cable pays out before it snaps.
@@ -272,23 +230,10 @@ local function MakeLampBlink(lamp_id)
     end
 end
 
----Pays out one more segment of a cable from the ceiling: a new point appears next to the anchor.
----@param rope CableRope
----@return nil
-local function PayOutSegment(rope)
-    local anchor = rope.points[1]
-    local next_point = rope.points[2]
-    local x = (anchor.x + next_point.x) / 2
-    local y = (anchor.y + next_point.y) / 2
-    table.insert(rope.points, 2, { x = x, y = y, prev_x = x, prev_y = y, })
-    table.insert(rope.segment_ids, SpawnSegment(x, y))
-    SetStorageFloat(rope.cable_id, SEGMENT_COUNT_STORAGE, #rope.segment_ids)
-end
-
 ---Holds a lamp in the world at the length of its cable by the point the cable is attached to: moves its physics
 ---body so that the point is back on the circle around the anchor, and takes away the speed of the point away from
 ---the anchor as an impulse at the point would, which also turns the lamp, so it swings on the cable.
----The lamp is taken as a thin rod: the impulse needs only the ratio of mass to moment of inertia, 12 / length^2.
+---The lamp is taken as a thin rod: the ratio of mass to moment of inertia is 12 / length^2.
 ---@param lamp_id number Lamp entity ID.
 ---@param attach_x number World X coordinate of the attachment point.
 ---@param attach_y number World Y coordinate of the attachment point.
@@ -298,35 +243,9 @@ end
 ---@return nil
 local function HoldLampOnCable(lamp_id, attach_x, attach_y, dir_x, dir_y, shift)
     local x, y, rotation = EntityGetTransform(lamp_id)
-    local center_x, center_y = ToWorld(x, y, rotation, 0, TUBE_CENTER_OFFSET_Y)
-    local arm_x, arm_y = attach_x - center_x, attach_y - center_y
-    local mass_over_inertia = 12 / (TUBE_LENGTH * TUBE_LENGTH)
-    -- Box2D may count y and the angle the other way around than the game.
-    local _, physics_down = GameVecToPhysicsVec(0, 1)
-    local angle_sign = physics_down < 0 and -1 or 1
-
-    for _, body_id in ipairs(PhysicsBodyIDGetFromEntity(lamp_id) or {}) do
-        local body_x, body_y, angle, vel_x, vel_y, angular_vel = PhysicsBodyIDGetTransform(body_id)
-        if body_x ~= nil then
-            local game_x, game_y = PhysicsPosToGamePos(body_x, body_y)
-            body_x, body_y = GamePosToPhysicsPos(game_x - dir_x * shift, game_y - dir_y * shift)
-
-            local game_vel_x, game_vel_y = PhysicsVecToGameVec(vel_x, vel_y)
-            local spin = angular_vel * angle_sign
-            -- Velocity of the attachment point: of the centre plus the spin around it.
-            local point_vel_x, point_vel_y = game_vel_x - spin * arm_y, game_vel_y + spin * arm_x
-            local outward = point_vel_x * dir_x + point_vel_y * dir_y
-            if outward > 0 then
-                local arm_cross_dir = arm_x * dir_y - arm_y * dir_x
-                local impulse = outward / (1 + arm_cross_dir * arm_cross_dir * mass_over_inertia)
-                game_vel_x, game_vel_y = game_vel_x - dir_x * impulse, game_vel_y - dir_y * impulse
-                spin = spin - impulse * arm_cross_dir * mass_over_inertia
-            end
-
-            vel_x, vel_y = GameVecToPhysicsVec(game_vel_x, game_vel_y)
-            PhysicsBodyIDSetTransform(body_id, body_x, body_y, angle, vel_x, vel_y, spin * angle_sign)
-        end
-    end
+    local center_x, center_y = OffsetToWorld(x, y, rotation, 0, TUBE_CENTER_OFFSET_Y)
+    HoldBodyOnHangingRope(lamp_id, attach_x, attach_y, center_x, center_y, dir_x, dir_y, shift,
+        12 / (TUBE_LENGTH * TUBE_LENGTH))
 end
 
 ---Moves a cable after its lamp, pays out segments and snaps the cable once it is too long. The player snaps it by
@@ -353,7 +272,7 @@ local function UpdateLampCable(rope)
     local dx, dy = lamp_x - anchor.x, lamp_y - anchor.y
     local distance = math.sqrt(dx * dx + dy * dy)
     while distance > #rope.segment_ids * SEGMENT_LENGTH and #rope.segment_ids < rope.max_segments do
-        PayOutSegment(rope)
+        PayOutHangingRopeSegment(rope)
     end
 
     local length = rope.max_segments * SEGMENT_LENGTH
@@ -372,61 +291,6 @@ local function UpdateLampCable(rope)
 
     local last = rope.points[#rope.points]
     last.x, last.y = lamp_x, lamp_y
-end
-
----Moves the free rope points with verlet integration, stops them at surfaces, then pulls stretched segments back
----to their length. The first point is held by the ceiling, and the last one by the lamp while the cable holds one.
----Slack segments are left as they are.
----@param rope CableRope
----@return nil
-local function SimulateRope(rope)
-    local points = rope.points
-    local last_free = rope.lamp_id == nil and #points or #points - 1
-    for index = 2, last_free do
-        local point = points[index]
-        local vel_x = (point.x - point.prev_x) * DAMPING
-        local vel_y = (point.y - point.prev_y) * DAMPING
-        local x = point.x + vel_x
-        local y = point.y + vel_y + GRAVITY
-        point.prev_x, point.prev_y = point.x, point.y
-        if not RaytraceSurfaces(point.x, point.y, x, y) then
-            point.x, point.y = x, y
-        end
-    end
-
-    for _ = 1, CONSTRAINT_ITERATIONS do
-        for index = 1, #points - 1 do
-            local a, b = points[index], points[index + 1]
-            local dx, dy = b.x - a.x, b.y - a.y
-            local distance = math.sqrt(dx * dx + dy * dy)
-            if distance > SEGMENT_LENGTH then
-                local correction = (distance - SEGMENT_LENGTH) / distance
-                local a_free = index > 1
-                local b_free = index + 1 <= last_free
-                local share = (a_free and b_free) and 0.5 or 1
-                if a_free then
-                    a.x, a.y = a.x + dx * correction * share, a.y + dy * correction * share
-                end
-                if b_free then
-                    b.x, b.y = b.x - dx * correction * share, b.y - dy * correction * share
-                end
-            end
-        end
-    end
-end
-
----Places each segment sprite between its two rope points: turned along the segment and stretched to its length.
----@param rope CableRope
----@return nil
-local function RenderRope(rope)
-    local points = rope.points
-    for index, segment_id in ipairs(rope.segment_ids) do
-        local a, b = points[index], points[index + 1]
-        local dx, dy = b.x - a.x, b.y - a.y
-        local length = math.sqrt(dx * dx + dy * dy)
-        -- The sprite points down; the rotation turns (0, 1) into the segment direction.
-        EntitySetTransform(segment_id, a.x, a.y, math.atan2(-dx, dy), 1, length / SEGMENT_LENGTH)
-    end
 end
 
 ---Shocks the creatures around a point of a live cable, unless a wall is in between: electrocution as from touching
@@ -455,49 +319,17 @@ end
 ---@param rope CableRope
 ---@return nil
 local function SparkTornCable(rope)
-    local age = GetStorageFloat(rope.cable_id, AGE_STORAGE) + 1
+    local age = GetStorageFloat(rope.anchor_id, AGE_STORAGE) + 1
     if age > LIVE_FRAMES then
         return
     end
-    SetStorageFloat(rope.cable_id, AGE_STORAGE, age)
+    SetStorageFloat(rope.anchor_id, AGE_STORAGE, age)
 
     if age >= SPARK_DELAY_FRAMES and age % SPARK_INTERVAL_FRAMES == 0 then
         local last = rope.points[#rope.points]
         EntityLoad(SPARK_ENTITY_PATH, last.x, last.y)
         GameCreateCosmeticParticle("spark_electric", last.x, last.y, SPARK_PARTICLE_COUNT, 0, 0)
         InduceCurrent(last.x, last.y)
-    end
-end
-
----Matches ropes to the loaded cable entities: cables loaded from a save or streamed in get a rope hanging straight
----down, and ropes of unloaded cables are dropped. Segment sprites of no known rope, left from an earlier session,
----are removed.
----@return nil
-local function SyncRopes()
-    local loaded = {}
-    for _, cable_id in ipairs(EntityGetWithTag(CABLE_TAG) or {}) do
-        loaded[cable_id] = true
-        if ropes[cable_id] == nil then
-            local anchor_x, anchor_y = EntityGetTransform(cable_id)
-            local segment_count = math.max(1, math.floor(GetStorageFloat(cable_id, SEGMENT_COUNT_STORAGE)))
-            CreateRope(cable_id, anchor_x, anchor_y + segment_count * SEGMENT_LENGTH, segment_count)
-        end
-    end
-
-    local known_segments = {}
-    for cable_id, rope in pairs(ropes) do
-        if loaded[cable_id] then
-            for _, segment_id in ipairs(rope.segment_ids) do
-                known_segments[segment_id] = true
-            end
-        else
-            DropRope(rope)
-        end
-    end
-    for _, segment_id in ipairs(EntityGetWithTag(SEGMENT_TAG) or {}) do
-        if not known_segments[segment_id] then
-            EntityKill(segment_id)
-        end
     end
 end
 
@@ -554,7 +386,7 @@ end
 ---the same frame before rendering.
 ---@return nil
 function UpdateTubeLampCables()
-    SyncRopes()
+    SyncHangingRopes(CABLE_KIND, ropes, OnRopeDropped)
     UpdatePoweredLamps()
 
     for _, rope in pairs(ropes) do
@@ -563,7 +395,7 @@ function UpdateTubeLampCables()
         else
             SparkTornCable(rope)
         end
-        SimulateRope(rope)
-        RenderRope(rope)
+        SimulateHangingRope(rope, rope.lamp_id ~= nil)
+        RenderHangingRope(rope)
     end
 end
