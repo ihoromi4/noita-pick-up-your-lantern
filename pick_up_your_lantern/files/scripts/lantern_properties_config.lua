@@ -17,6 +17,8 @@
 ---once it is picked up or detached.
 ---@field unpowered_image_file string|nil Physics image of a lamp without power, used for its next physics body.
 ---@field unpowered_ui_sprite string|nil Inventory icon of a lamp without power; also tells the type apart.
+---@field hangs_on_chain boolean|nil Whether a lantern spawned by a biome hangs on a chain from the ceiling far above,
+---see temple_lantern_chain.lua.
 
 ---Pickable light fixtures. Each file is a full override in `data/entities/props/` of the mod.
 ---@type LanternType[]
@@ -49,6 +51,13 @@ LANTERN_TYPES = {
         needs_power = true,
         unpowered_image_file = "mods/pick_up_your_lantern/files/props_gfx/tube_lamp_unlit.png",
         unpowered_ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_tube_lamp_unlit.png",
+    },
+    -- Temple Lantern: hangs on a chain when spawned, right under the ceiling when hung back.
+    {
+        files = { "data/entities/props/physics/temple_lantern.xml", },
+        ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_temple_lantern.png",
+        hang_offset_y = 1,
+        hangs_on_chain = true,
     },
 }
 

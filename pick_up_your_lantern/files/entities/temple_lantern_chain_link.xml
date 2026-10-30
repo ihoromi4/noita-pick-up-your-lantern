@@ -1,0 +1,16 @@
+<Entity name="pul_temple_lantern_chain_link" tags="pul_chain_link" >
+
+    <!--
+        One link of a temple lantern chain: the vanilla chain link sprite.
+        Placed and turned every frame by files/scripts/temple_lantern_chain.lua: the origin is the upper end.
+    -->
+
+    <!-- Player is drawn at 0.6, higher values are drawn behind it. -->
+    <SpriteComponent
+        image_file="data/props_gfx/torch_hang_chain.png"
+        offset_x="1.5"
+        offset_y="0"
+        z_index="0.7"
+    ></SpriteComponent>
+
+</Entity>

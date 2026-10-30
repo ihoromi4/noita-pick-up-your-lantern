@@ -607,7 +607,7 @@ function AddLanternModifier(entity_id, modifier_id)
     return true
 end
 
----Permanently puts out a lantern: removes its light and fog of war hole and hides the flame.
+---Permanently puts out a lantern: removes its light, fog of war hole and glow particles, and hides the flame.
 ---@param entity_id number Lantern entity ID.
 ---@return nil
 function ExtinguishLantern(entity_id)
@@ -633,6 +633,12 @@ function ExtinguishLantern(entity_id)
         end
     end
     ShowDarkHandSprite(entity_id)
+
+    for _, component_type in ipairs({ "ParticleEmitterComponent", "SpriteParticleEmitterComponent", }) do
+        for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, component_type) or {}) do
+            EntityRemoveComponent(entity_id, comp)
+        end
+    end
 
     for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "LuaComponent") or {}) do
         if ComponentGetValue2(comp, "script_source_file") == MODIFIER_SCRIPT then

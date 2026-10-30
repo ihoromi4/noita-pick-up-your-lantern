@@ -17,6 +17,7 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/fire_enemy_glow.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_attraction.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_fear.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/tube_lamp_cable.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/temple_lantern_chain.lua")
 
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
@@ -80,4 +81,5 @@ function OnWorldPostUpdate()
     UpdateLanternBelt()
     UpdateLanternLiquidState()
     UpdateTubeLampCables()
+    UpdateTempleLanternChains()
 end

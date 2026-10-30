@@ -69,13 +69,6 @@ local TARGET_ENTITIES = {
         image_file = "data/particles/fog_of_war_hole_64.xml",
     },
     {
-        path = "data/entities/props/physics/temple_lantern.xml",
-        tags = "enabled_in_world",
-        enabled = "1",
-        alpha = "0.55",
-        image_file = "data/particles/fog_of_war_hole_64.xml",
-    },
-    {
         path = "data/entities/props/physics_barrel_burning.xml",
         tags = "enabled_in_world",
         enabled = "1",
