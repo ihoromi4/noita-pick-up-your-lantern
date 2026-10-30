@@ -85,3 +85,10 @@ Spawn markers (first air pixel under the ceiling) found this way, in world coord
 | 938, 56 | 28 px | `hall_b.png` |
 
 **[Confirmed]** Mining lamps spawned at these markers (five at `y + 6`, one right at the marker) appear in the hall and work.
+
+Temple lanterns hang on a chain far below the ceiling, so they are spawned below markers of the cave in `hall.png` with a deep sloped ceiling:
+
+| Spawn point x, y | Ceiling above | Chain |
+| --- | --- | --- |
+| 928, -45 | -95 | 8 links |
+| 780, -165 | -205 | 6 links |
