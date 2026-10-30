@@ -104,6 +104,13 @@ Version 0.3 expands the scope to other environmental light fixtures, danger mech
 - **Natural Fear Mode**:
   - Mod settings toggle that changes how enemy categories (`herd_id`) react to lantern light: zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas.
 
+## Version 0.4
+
+Version 0.4 adds modifiers specific to the new light fixtures.
+
+- **Temple Lantern Modifiers**:
+  - Magic liquid modifier: with a small chance, a temple lantern is filled with a magic liquid instead of plasma. It gives no light, and when it breaks it spills one of the magic liquids: Concentrated Mana (`magic_liquid_mana_regeneration`), Flummoxium (`material_confusion`) or Unstable Teleportatium (`magic_liquid_unstable_teleportation`).
+
 ## Version 1.0 - Polished State Simulation
 
 Version 1.0 delivers complete physical and chemical state transitions, edge case handling, and release stability.
