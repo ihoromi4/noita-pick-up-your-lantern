@@ -1,0 +1,7 @@
+<Entity tags="mortal,hittable,teleportable_NOT,prop,prop_physics,item_physics,item_pickup,lantern,pul_light_source" >
+
+    <!-- Older duplicate of data/entities/props/physics/chain_torch_blue.xml, spawned by other biomes: the same pickable torch.
+         Biomes spawn it lower, about 32 px below the ceiling; lantern_chain.lua hangs it on the same short chain. -->
+    <Base file="data/entities/props/physics/chain_torch_blue.xml" />
+
+</Entity>

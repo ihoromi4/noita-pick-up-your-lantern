@@ -21,7 +21,6 @@ local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local POWER_LOST_STORAGE = "lantern_power_lost"
 local DOUSED_STORAGE = "lantern_doused"
-local SPARK_MATERIAL_STORAGE = "chain_torch_spark_material"
 
 -- Open fire of a torch carried by the player, as the vanilla torch emitters (data/entities/base_torch_particle.xml).
 -- Visual particles are cosmetic ones that rise on a negative gravity, as fire does; GameCreateParticle with
@@ -238,28 +237,15 @@ function SetLanternDoused(entity_id, is_doused)
     end
 end
 
----Returns the spark material of an open fire lantern, kept in its XML file.
----@param entity_id number Lantern entity ID.
----@return string
-local function GetOpenFireSparkMaterial(entity_id)
-    for _, storage_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "VariableStorageComponent") or {}) do
-        if ComponentGetValue2(storage_comp, "name") == SPARK_MATERIAL_STORAGE then
-            return ComponentGetValue2(storage_comp, "value_string")
-        end
-    end
-
-    return "spark"
-end
-
 ---Makes the open fire of a torch carried by the player, in hand or on the belt, where the particle emitters of the
 ---torch do not work: sparks of its type and fire, of which only a share is real fire cells that set burning
 ---materials around alight, and the rest only visual. Called every frame.
----@param entity_id number Lantern entity ID.
+---@param open_fire LanternOpenFire Open fire config of the lantern type.
 ---@param x number World X coordinate of the coals.
 ---@param y number World Y coordinate of the coals.
 ---@param real_fire_chance number Share of the fire particles that are real fire cells, 0 to 1.
 ---@return nil
-function EmitOpenFire(entity_id, x, y, real_fire_chance)
+function EmitOpenFire(open_fire, x, y, real_fire_chance)
     ---Creates particles of a material one by one, each at its own point and with its own velocity.
     ---@param material string
     ---@param count number
@@ -281,7 +267,7 @@ function EmitOpenFire(entity_id, x, y, real_fire_chance)
 
     local frame = GameGetFrameNum()
     if frame % OPEN_FIRE_SPARK_INTERVAL_FRAMES == 0 then
-        Emit(GetOpenFireSparkMaterial(entity_id), math.random(1, 3), false)
+        Emit(open_fire.spark_material, math.random(1, 3), false)
     end
     if frame % math.random(OPEN_FIRE_INTERVAL_MIN_FRAMES, OPEN_FIRE_INTERVAL_MAX_FRAMES) == 0 then
         Emit("fire", math.random(1, 2), math.random() < real_fire_chance)
@@ -293,11 +279,10 @@ end
 ---@param entity_id number Lantern entity ID.
 ---@return number
 function GetLanternPowerFactor(entity_id)
-    if IsLanternDoused(entity_id) then
+    local _, lantern_type = GetLanternType(entity_id)
+    if lantern_type.open_fire ~= nil and IsLanternDoused(entity_id) then
         return 0
     end
-
-    local _, lantern_type = GetLanternType(entity_id)
     if lantern_type.needs_power and GetStorageFloat(entity_id, POWER_LOST_STORAGE) > 0 then
         return 0
     end

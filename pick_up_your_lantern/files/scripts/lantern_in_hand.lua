@@ -36,6 +36,7 @@
 local MOD_ID = "pick_up_your_lantern"
 dofile_once("data/scripts/lib/utilities.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
 
 -- Spring-damper pendulum tuning constants
 local SPRING_K = 0.05
@@ -50,6 +51,16 @@ local TOLERANCE_VEL = 0.004
 local MAX_TARGET_ANGLE = 0.6
 local MAX_ANGLE = 0.7
 local VELOCITY_THRESHOLD = 0.05
+
+-- Open fire in hand: coals below the hand at the scale of the in-hand sprite (6 px at 60%), and the share of the
+-- fire particles that are real fire cells; the others are only visual, so the holder does not catch fire at once.
+local OPEN_FIRE_COALS_OFFSET_Y = 3.6
+local OPEN_FIRE_REAL_CHANCE = 0.1
+
+---Open fire config of each held lantern by entity ID, false for lanterns without one. Lantern scripts share one
+---Lua state per script file, so the type is looked up once per lantern.
+---@type table<number, LanternOpenFire|false>
+open_fire_by_lantern = open_fire_by_lantern or {}
 
 local entity_id = GetUpdatedEntityID()
 local x, y, _, scale_x, scale_y = EntityGetTransform(entity_id)
@@ -102,3 +113,16 @@ SetStorageFloat(entity_id, "lantern_swing_vel", angle_vel)
 SetStorageFloat(entity_id, "lantern_swing_phase", step_phase)
 
 EntitySetTransform(entity_id, x, y, angle, scale_x or 1, scale_y or 1)
+
+-- The fire hangs below the hand at the coals of the sprite, turned by the swing like the sprite.
+local open_fire = open_fire_by_lantern[entity_id]
+if open_fire == nil then
+    local _, lantern_type = GetLanternType(entity_id)
+    open_fire = lantern_type.open_fire or false
+    open_fire_by_lantern[entity_id] = open_fire
+end
+if open_fire and not IsLanternExtinguished(entity_id) and not IsLanternDoused(entity_id) then
+    local coals_x = x - math.sin(angle) * OPEN_FIRE_COALS_OFFSET_Y
+    local coals_y = y + math.cos(angle) * OPEN_FIRE_COALS_OFFSET_Y
+    EmitOpenFire(open_fire, coals_x, coals_y, OPEN_FIRE_REAL_CHANCE)
+end

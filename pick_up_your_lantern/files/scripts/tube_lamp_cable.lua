@@ -67,8 +67,7 @@ local INDUCTION_ARC_PARTICLES = 6
 -- A lamp in the world hangs by the upper end of one of its wires, relative to the lamp origin (tube_lamp.png).
 local ATTACH_OFFSET_X = 5
 local ATTACH_OFFSET_Y = -0.5
--- Middle of the tube relative to the lamp origin, and its length: the lamp is taken as a thin rod.
-local TUBE_CENTER_OFFSET_Y = 2.5
+-- Length of the tube: the lamp is taken as a thin rod.
 local TUBE_LENGTH = 19
 
 ---@type RopeKind
@@ -242,10 +241,7 @@ end
 ---@param shift number How far the attachment point has to move towards the anchor.
 ---@return nil
 local function HoldLampOnCable(lamp_id, attach_x, attach_y, dir_x, dir_y, shift)
-    local x, y, rotation = EntityGetTransform(lamp_id)
-    local center_x, center_y = OffsetToWorld(x, y, rotation, 0, TUBE_CENTER_OFFSET_Y)
-    HoldBodyOnHangingRope(lamp_id, attach_x, attach_y, center_x, center_y, dir_x, dir_y, shift,
-        12 / (TUBE_LENGTH * TUBE_LENGTH))
+    HoldBodyOnHangingRope(lamp_id, attach_x, attach_y, dir_x, dir_y, shift, 12 / (TUBE_LENGTH * TUBE_LENGTH))
 end
 
 ---Moves a cable after its lamp, pays out segments and snaps the cable once it is too long. The player snaps it by

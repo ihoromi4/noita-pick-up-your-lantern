@@ -124,27 +124,28 @@ end
 ---Holds a body in the world at the length of its rope by the point the rope is attached to: moves its physics
 ---body so that the point is back on the circle around the anchor, and takes away the speed of the point away from
 ---the anchor as an impulse at the point would, which also turns the body, so it swings on the rope.
----The impulse needs only the ratio of mass to moment of inertia of the body, not the mass itself.
+---The arm of the impulse is taken from the centre of mass of the Box2D body itself; the impulse needs only the
+---ratio of mass to moment of inertia of the body, not the mass itself.
 ---@param entity_id number Entity ID of the body.
 ---@param attach_x number World X coordinate of the attachment point.
 ---@param attach_y number World Y coordinate of the attachment point.
----@param center_x number World X coordinate of the centre of mass.
----@param center_y number World Y coordinate of the centre of mass.
 ---@param dir_x number Direction from the anchor to the attachment point, X.
 ---@param dir_y number Direction from the anchor to the attachment point, Y.
 ---@param shift number How far the attachment point has to move towards the anchor.
 ---@param mass_over_inertia number Ratio of the mass to the moment of inertia around the centre, per square pixel.
 ---@return nil
-function HoldBodyOnHangingRope(entity_id, attach_x, attach_y, center_x, center_y, dir_x, dir_y, shift,
-                               mass_over_inertia)
-    local arm_x, arm_y = attach_x - center_x, attach_y - center_y
+function HoldBodyOnHangingRope(entity_id, attach_x, attach_y, dir_x, dir_y, shift, mass_over_inertia)
     -- Box2D may count y and the angle the other way around than the game.
     local _, physics_down = GameVecToPhysicsVec(0, 1)
     local angle_sign = physics_down < 0 and -1 or 1
 
     for _, body_id in ipairs(PhysicsBodyIDGetFromEntity(entity_id) or {}) do
         local body_x, body_y, angle, vel_x, vel_y, angular_vel = PhysicsBodyIDGetTransform(body_id)
-        if body_x ~= nil then
+        local center_physics_x, center_physics_y = PhysicsBodyIDGetWorldCenter(body_id)
+        if body_x ~= nil and center_physics_x ~= nil then
+            local center_x, center_y = PhysicsPosToGamePos(center_physics_x, center_physics_y)
+            local arm_x, arm_y = attach_x - center_x, attach_y - center_y
+
             local game_x, game_y = PhysicsPosToGamePos(body_x, body_y)
             body_x, body_y = GamePosToPhysicsPos(game_x - dir_x * shift, game_y - dir_y * shift)
 
@@ -253,16 +254,29 @@ function RenderHangingRope(rope)
     end
 end
 
+---Checks whether a rope has come to rest: no point moved farther than the tolerance in the last step.
+---@param rope HangingRope
+---@param tolerance number Largest movement of a point at rest, in pixels.
+---@return boolean
+function IsHangingRopeAtRest(rope, tolerance)
+    for _, point in ipairs(rope.points) do
+        if math.abs(point.x - point.prev_x) > tolerance or math.abs(point.y - point.prev_y) > tolerance then
+            return false
+        end
+    end
+
+    return true
+end
+
 ---Matches ropes to the loaded anchor entities of a kind: anchors loaded from a save or streamed in get a rope
----hanging straight down, and ropes of unloaded anchors are dropped. Segment sprites of no known rope, left from
----an earlier session, are removed.
+---hanging straight down, and ropes of unloaded anchors are dropped.
 ---@param kind RopeKind
 ---@param ropes table<number, HangingRope> Ropes of this kind by anchor entity ID; updated in place.
 ---@param on_drop fun(rope: HangingRope)|nil Called for each dropped rope, after its sprites are removed.
----@param loose_ropes HangingRope[]|nil Loose pieces of this kind, whose sprites are kept as well.
----@return nil
-function SyncHangingRopes(kind, ropes, on_drop, loose_ropes)
+---@return boolean created Whether a rope was created for an anchor that came in.
+function SyncHangingRopeAnchors(kind, ropes, on_drop)
     local loaded = {}
+    local created = false
     for _, anchor_id in ipairs(EntityGetWithTag(kind.anchor_tag) or {}) do
         loaded[anchor_id] = true
         if ropes[anchor_id] == nil then
@@ -270,16 +284,12 @@ function SyncHangingRopes(kind, ropes, on_drop, loose_ropes)
             local segment_count = math.max(1, math.floor(GetStorageFloat(anchor_id, kind.segment_count_storage)))
             ropes[anchor_id] = CreateHangingRope(kind, anchor_id, x, y, x, y + segment_count * kind.segment_length,
                 segment_count)
+            created = true
         end
     end
 
-    local known_segments = {}
     for anchor_id, rope in pairs(ropes) do
-        if loaded[anchor_id] then
-            for _, segment_id in ipairs(rope.segment_ids) do
-                known_segments[segment_id] = true
-            end
-        else
+        if not loaded[anchor_id] then
             RemoveHangingRopeSprites(rope)
             ropes[anchor_id] = nil
             if on_drop ~= nil then
@@ -287,14 +297,39 @@ function SyncHangingRopes(kind, ropes, on_drop, loose_ropes)
             end
         end
     end
-    for _, rope in ipairs(loose_ropes or {}) do
-        for _, segment_id in ipairs(rope.segment_ids) do
-            known_segments[segment_id] = true
+
+    return created
+end
+
+---Removes the segment sprites with a tag that belong to no known rope, left from an earlier session or streamed in
+---with a chunk.
+---@param segment_tag string Tag of the segment sprite entities.
+---@param rope_maps table<any, HangingRope>[] Tables of the known ropes; their keys do not matter.
+---@return nil
+function RemoveOrphanRopeSegments(segment_tag, rope_maps)
+    local known_segments = {}
+    for _, rope_map in ipairs(rope_maps) do
+        for _, rope in pairs(rope_map) do
+            for _, segment_id in ipairs(rope.segment_ids) do
+                known_segments[segment_id] = true
+            end
         end
     end
-    for _, segment_id in ipairs(EntityGetWithTag(kind.segment_tag) or {}) do
+    for _, segment_id in ipairs(EntityGetWithTag(segment_tag) or {}) do
         if not known_segments[segment_id] then
             EntityKill(segment_id)
         end
     end
+end
+
+---Matches ropes to the loaded anchor entities of a kind, see SyncHangingRopeAnchors(), and removes the segment
+---sprites of no known rope of the kind.
+---@param kind RopeKind
+---@param ropes table<number, HangingRope> Ropes of this kind by anchor entity ID; updated in place.
+---@param on_drop fun(rope: HangingRope)|nil Called for each dropped rope, after its sprites are removed.
+---@param loose_ropes HangingRope[]|nil Loose pieces of this kind, whose sprites are kept as well.
+---@return nil
+function SyncHangingRopes(kind, ropes, on_drop, loose_ropes)
+    SyncHangingRopeAnchors(kind, ropes, on_drop)
+    RemoveOrphanRopeSegments(kind.segment_tag, { ropes, loose_ropes or {}, })
 end

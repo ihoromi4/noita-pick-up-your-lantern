@@ -45,12 +45,17 @@ function GetOrCreateVariableStorage(entity_id, name)
     })
 end
 
----Reads a float value from a named VariableStorageComponent.
+---Reads a float value from a named VariableStorageComponent. A missing storage reads as 0 and is not created, so
+---reading does not add components to every entity it checks.
 ---@param entity_id number The target entity ID.
 ---@param name string The variable storage name.
 ---@return number value The float value stored, or 0.0 if not found.
 function GetStorageFloat(entity_id, name)
-    local comp = GetOrCreateVariableStorage(entity_id, name)
+    local comp = FindVariableStorage(entity_id, name)
+    if comp == nil then
+        return 0.0
+    end
+
     return ComponentGetValue2(comp, "value_float") or 0.0
 end
 
@@ -66,9 +71,13 @@ end
 ---Reads a string value from a named VariableStorageComponent.
 ---@param entity_id number The target entity ID.
 ---@param name string The variable storage name.
----@return string value The string value stored, or an empty string if not found.
+---@return string value The string value stored, or an empty string if not found. Not created when missing.
 function GetStorageString(entity_id, name)
-    local comp = GetOrCreateVariableStorage(entity_id, name)
+    local comp = FindVariableStorage(entity_id, name)
+    if comp == nil then
+        return ""
+    end
+
     return ComponentGetValue2(comp, "value_string") or ""
 end
 

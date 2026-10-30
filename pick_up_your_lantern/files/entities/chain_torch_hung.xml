@@ -1,0 +1,15 @@
+<Entity tags="mortal,hittable,teleportable_NOT,prop,prop_physics,item_physics,item_pickup,lantern,pul_light_source" >
+
+    <!-- A chain torch hung on the ceiling with the left mouse button, see lantern_hang.lua. -->
+    <Base file="data/entities/props/physics/chain_torch.xml" />
+
+    <!-- Holds the torch right under the ceiling; lantern_anchor.lua detaches it when kicked or when the ceiling is
+         gone. A joint is only created with the physics body, so the torch spawned by a biome has none. -->
+    <PhysicsJointComponent
+        nail_to_wall="1"
+        breakable="1"
+        pos_x="5.5"
+        pos_y="1"
+    ></PhysicsJointComponent>
+
+</Entity>

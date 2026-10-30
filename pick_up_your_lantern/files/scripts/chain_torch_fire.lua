@@ -1,8 +1,7 @@
---- Open fire of a chain torch, in the world and in hand.
---- - In the world the particle emitters of the torch burn at its coals. In hand the engine turns and mirrors the
----   emitters with the aim of the player, so the fire and sparks are created here instead, at the coals of the
----   torch sprite as it swings in hand. Most of the fire in hand is only visual; the few real fire cells, and
----   those of the emitters in the world, set burning materials around alight.
+--- Dousing and lighting again of a chain torch, in the world and in hand; runs every 10 frames.
+--- - The fire itself comes from the particle emitters of the torch in the world. In hand the engine turns and
+---   mirrors the emitters with the aim of the player, so lantern_in_hand.lua makes the fire at the coals of the
+---   swinging sprite instead, and lantern_belt.lua on the belt (EmitOpenFire()).
 --- - A torch whose coals are in a liquid is doused: its light, fog of war hole and fire are gone, and it shows the
 ---   dark sprite. Solid materials do not douse it. Doused, it lights again from fire: in the world when it catches
 ---   fire itself, in hand when its holder burns.
@@ -20,11 +19,6 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/hanging_rope.lua")
 -- at 60% of its size.
 local COALS_OFFSET_Y = 6
 local HAND_COALS_OFFSET_Y = 3.6
--- How often the coals are checked for a liquid, and how often a doused torch looks for fire to light again.
-local CHECK_INTERVAL_FRAMES = 5
--- Share of the fire particles in hand that are real fire cells; the others are only visual, so the holder does not
--- catch fire at once.
-local REAL_FIRE_CHANCE = 0.1
 -- Ignition probability of the DamageModelComponent of a doused torch, so it can catch fire in the world.
 local DOUSED_IGNITION_PROBABILITY = 1
 
@@ -44,7 +38,6 @@ if in_hand then
 else
     coals_x, coals_y = OffsetToWorld(x, y, rotation, 0, COALS_OFFSET_Y)
 end
-local frame = GameGetFrameNum()
 
 ---Checks whether the coals are in a liquid: a short ray through them stops at a liquid cell but not at a solid one.
 ---The ray stays inside the bail, clear of the torch body.
@@ -89,22 +82,12 @@ local function SetDoused(is_doused)
 end
 
 if IsLanternDoused(entity_id) then
-    if frame % CHECK_INTERVAL_FRAMES == 0 then
-        if IsTouchedByFire() and not AreCoalsInLiquid() then
-            SetDoused(false)
-        else
-            -- A torch hung with the left mouse button is a new entity that copied only the doused state.
-            ApplyDousedComponents(true)
-        end
+    if IsTouchedByFire() and not AreCoalsInLiquid() then
+        SetDoused(false)
+    else
+        -- A torch hung with the left mouse button is a new entity that copied only the doused state.
+        ApplyDousedComponents(true)
     end
-    return
-end
-
-if frame % CHECK_INTERVAL_FRAMES == 0 and AreCoalsInLiquid() then
+elseif AreCoalsInLiquid() then
     SetDoused(true)
-    return
-end
-
-if in_hand then
-    EmitOpenFire(entity_id, coals_x, coals_y, REAL_FIRE_CHANCE)
 end
