@@ -4,71 +4,15 @@ Development roadmap and release milestones for the **Pick Up Your Lantern** mod 
 
 ## Version 0.1 - MVP and Core Lifecycle
 
-The primary goal of version 0.1 is to deliver a fully functional, stable core gameplay loop for standard hanging oil lanterns (`lantern_small.xml`, `physics_lantern.xml`, `physics_lantern_small.xml`).
-
-- **World Physics and Anchors**:
-  - Migrate vanilla lanterns from `PhysicsBody2Component` to `PhysicsBodyComponent` to ensure full inventory compatibility.
-  - Establish proper ceiling attachment without clipping into solid pixels (`centered="0"`, custom offsets).
-  - Enable realistic kick (`kick`) reactions and detachment via Box2D joint physics.
-  - Support ceiling destruction detection: when the ceiling block is destroyed, the lantern detaches and falls.
-  - World persistence: ensure detached or picked-up lanterns do not respawn upon chunk reload or returning to the area.
-- **Pickup and Inventory Lifecycle**:
-  - Proximity pickup via the interaction key (`E`) within immediate melee reach.
-  - Integrate with standard `Quick Inventory` item slots (4 slots shared with flasks and stones; wands excluded).
-  - Strictly enforce non-stackable behavior (1 slot per lantern) and silent failure when inventory is full.
-  - Prevent consuming lantern contents (`drinkable="0"`).
-  - Add custom inventory UI icon with illuminated flask.
-- **Holding in Hand**:
-  - Render lantern sprite (flask container + animated flame) in the player's hand when selected as the active item.
-  - Provide 360-degree illumination and clear fog of war around the player.
-  - Implement smooth velocity-based swaying during walking and flying (`lantern_in_hand.lua`).
-  - Handle horizontal character flipping properly without sprite scale distortion.
-  - Guarantee player and environmental safety for closed lanterns in hand (no accidental fires or self-damage).
-  - Prevent lantern durability loss or breakage while held in hand.
-- **Throwing and Combat**:
-  - Support throwing via Right Mouse Button (RMB).
-  - Apply physics impact damage to enemies upon collision prior to shattering.
-  - Shatter on hard collisions, spilling oil and igniting it into a fire hazard.
-  - Preserve fixture intactness on soft landings, allowing re-pickup and kicking.
-- **True Dynamic Lighting**:
-  - Research and integrate true dynamic lighting options based on the "Light-Up Lanterns" mod (workshop ID: `2316356772`).
-  - Provide a toggle in Mod Settings for enhanced lighting shaders/raycasts.
-- **Player Vision and Limited Visibility**:
-  - Configurable player vision presets in Mod Settings (Vanilla 100%, Dim 75%, Dark 50%, Very Dark 25%, Minimal 10%, Pitch Black 0%).
-  - Dual-system vision scaling: proportional reduction of personal illumination and persistent map fog reveal radius.
-  - Runtime settings synchronization without game restart.
-  - Material illumination and burning entity lighting enhancements cutting through darkness.
+Version 0.1 delivers a fully functional, stable core gameplay loop for standard hanging oil lanterns: world physics and ceiling anchors, pickup into `Quick Inventory`, holding in hand with swaying light, throwing with shattering and oil fires, and configurable limited player vision. Features and implementation details: [version-0.1.md](versions/version-0.1.md).
 
 ## Version 0.1.1 - Item Radar Fix
 
-Version 0.1.1 is a patch release that improves compatibility with vanilla perks.
-
-- **Item Radar Compatibility**:
-  - Hide lanterns from the Item Radar perk by default, with a Mod Settings toggle to show them.
+Version 0.1.1 is a patch release that hides lanterns from the Item Radar perk, with a Mod Settings toggle to show them. Details: [version-0.1.1.md](versions/version-0.1.1.md).
 
 ## Version 0.2 - Passive Carrying and Atmosphere
 
-Version 0.2 focuses on passive utility and atmospheric carrying mechanics.
-
-- **Belt Attachment and Passive Illumination**:
-  - Automatically display the first available lantern from `Quick Inventory` on the character's belt/waist when hands are holding wands, flasks, or items (reference: "Extra Backpack", Steam ID: `3807317449`).
-  - Emit moderate passive ambient light from the belt (dimmer than active hand holding, but brighter than unlit player vision).
-  - `Belt lantern light` option in Mod Settings to scale the belt light relative to the lantern in hand (0-100%, 50% by default).
-  - Hide the belt lantern (sprite and light) whenever any lantern is the active held item, even if other lanterns remain in the inventory.
-  - Synchronize belt lantern movement with player locomotion.
-- **Lantern Properties and Dynamic States**:
-  - Distinct properties per lantern: light radius, fog of war hole size, light color, and durability differ between lantern types and are declared in the lantern XML files.
-  - Lantern quality tiers rolled on spawn, with better tiers becoming more likely in deeper biomes; tier is described by an atmospheric sentence in the item description.
-  - Rare lantern modifiers rolled independently of the tier, each described by a sentence in the item description: Flickering (20% wider but unstable light) and Short-lived (leaks a drop of oil every 5 seconds, fades over its limited burn time and goes out).
-  - `Lantern progression` option in Mod Settings to turn tiers and modifiers off (enabled by default).
-  - Oil-soaked state: diving into oil with a lantern in hand makes its light and fog of war hole 30% wider until it is submerged in water. The state is described by a sentence in the item description.
-  - Wet state: diving under water with a lantern in hand makes its light and fog of war hole 20% narrower until it is submerged in oil. The state is described by a sentence in the item description.
-- **Vision Fixes and Compatibility**:
-  - Restore limited vision after returning from polymorph, with a separate `Polymorphed vision` option in Mod Settings for the polymorphed form (`Same as player` by default).
-  - Dispel fog of war with duplicate chain torch variants spawned in some biomes (e.g., ghostly torches in Coal Pits).
-  - All-Seeing Eye spell (`X_RAY`) compatibility: reveal a slowly expanding circle around the cast point at vanilla brightness, then fade back to the previous lighting.
-  - All-Seeing Eye perk (`REMOVE_FOG_OF_WAR`) compatibility: reveal the whole level as in vanilla; holding Sunseed or Sunstone has the same effect.
-  - Fix flame sprite desync after throwing a held lantern while facing left.
+Version 0.2 focuses on passive utility and atmospheric carrying mechanics: a lantern on the belt that lights the way while hands are busy, distinct lantern properties with quality tiers and rare modifiers, oil-soaked and wet states, and vision fixes for polymorph, chain torches and All-Seeing Eye. Details: [version-0.2.md](versions/version-0.2.md).
 
 ## Version 0.3 - Variety and World Interactions
 
