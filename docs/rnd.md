@@ -32,6 +32,7 @@ This document contains an index of research, Noita engine technical details, and
 - [Belt Attachment and Passive Illumination](rnd/belt-attachment.md) - technical options for attaching a lantern to the player character and configuring lighting (reference: "Extra Backpack").
 - [Sprite Geometry and Positioning](rnd/sprite-geometry.md) - image geometry, `centered="0"`, axis offsets, and fixing ceiling clipping issues.
 - [Ceiling Anchors, Kicking, and Support Destruction](rnd/ceiling-anchors-and-kicking.md) - `PhysicsJointComponent` behavior, joint destruction on pickup, and hypotheses on detachment upon support destruction.
+- [Native Physics Chain for Chain Torches](rnd/native-chain-torch.md) - experiment with a real Box2D chain built with `PhysicsAddBodyImage` and `PhysicsAddJoint`, as the vanilla duplicate torches do: its links cannot be shot through, so chain torches stay on the Lua chain.
 - [Throwing and Impact Physics](rnd/throwing-and-impact-physics.md) - Box2D parameters (`gridworld_box2d`, `is_bullet`), speed thresholds for shattering and explosions.
 - [Lantern Throwing Mechanics and Controls](rnd/throwing-mechanics-and-controls.md) - research on throwing exclusively with RMB, LMB blocking, evaluation of tested configurations, and engine limitations.
 - [Fog of War Line-of-Sight and Shaders](rnd/line-of-sight-and-shaders.md) - analysis of vanilla fog/lighting system, 2D screen-space raymarching in `post_final.frag`, and technical limitations.
