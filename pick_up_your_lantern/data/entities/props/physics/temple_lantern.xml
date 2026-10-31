@@ -200,12 +200,6 @@
         speed_threshold="85.0"
     ></PhysicsBodyCollisionDamageComponent>
 
-    <CameraBoundComponent
-        _tags="enabled_in_world"
-        max_count="100"
-        distance="1000"
-    ></CameraBoundComponent>
-
     <!-- The vanilla plasma spill, from a death script: a MaterialInventoryComponent would also spill it when the
          held lantern is replaced by a hung one. -->
     <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/temple_lantern_death.lua" />

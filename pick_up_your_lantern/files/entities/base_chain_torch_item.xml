@@ -190,12 +190,6 @@
         damage_multiplier="0.002"
     ></PhysicsBodyCollisionDamageComponent>
 
-    <CameraBoundComponent
-        _tags="enabled_in_world"
-        max_count="100"
-        distance="1000"
-    ></CameraBoundComponent>
-
     <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/chain_torch_death.lua" />
 
     <LuaComponent script_damage_received="mods/pick_up_your_lantern/files/scripts/lantern_damage.lua" />

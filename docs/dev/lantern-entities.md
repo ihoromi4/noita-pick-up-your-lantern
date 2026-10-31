@@ -41,6 +41,8 @@ So `physics/lantern_small.xml` and `physics/temple_lantern.xml`, which use `Phys
 
 The body material must not have `platform_type="1"` in `data/materials.xml`, otherwise the player bumps into the lantern and stands on it. `glass_box2d` has `platform_type="0"`, and the `*_nohit` materials inherit none from `aluminium`. The vanilla mining lamp is made of `wood_prop` (`platform_type="1"`), so its override uses the twin `wood_prop_noplayerhit`.
 
+Lanterns have no `CameraBoundComponent`, unlike their vanilla files. With it, a lantern farther than its `distance` from the camera is frozen: the engine kills it and keeps only its file and position, then spawns it again from the file when the camera comes back. The respawned lantern loses its storages (quality tier, modifiers, `lantern_chain_checked`), so a chained lantern would build a second chain next to its old one. Without the component a lantern is saved with its chunk, as potions and wands are.
+
 ## Ceiling Anchors
 
 A lantern hangs on a `PhysicsJointComponent` with `nail_to_wall="1"`.

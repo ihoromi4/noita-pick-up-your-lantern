@@ -129,12 +129,6 @@
         speed_threshold="80.0"
     ></PhysicsBodyCollisionDamageComponent>
 
-    <CameraBoundComponent
-        _tags="enabled_in_world"
-        max_count="100"
-        distance="1000"
-    ></CameraBoundComponent>
-
     <LuaComponent script_physics_body_modified="data/scripts/props/physics_lantern_damaged.lua" />
 
     <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/mining_lamp_death.lua" />

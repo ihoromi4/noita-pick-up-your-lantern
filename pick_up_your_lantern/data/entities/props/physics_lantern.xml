@@ -126,12 +126,6 @@
         speed_threshold="80.0"
     ></PhysicsBodyCollisionDamageComponent>
 
-    <CameraBoundComponent
-        _tags="enabled_in_world"
-        max_count="100"
-        distance="1000"
-    ></CameraBoundComponent>
-
     <SpriteComponent
         _tags="character,enabled_in_world"
         alpha="1"
