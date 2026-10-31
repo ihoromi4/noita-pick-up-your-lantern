@@ -16,7 +16,7 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
 | [Developer Documentation](dev.md) | Architecture, engine quirks and implementation details. | Contributors |
 | [Functional Requirements](requirements.md) | What the mod is meant to do: the full feature specification. | Contributors, designers |
 | [Development Roadmap](roadmap.md) | Planned features grouped by release. | Everyone |
-| [Version Notes](versions/version-0.3.md) | What each release delivered, with fixed issues. Each file links to the previous one. | Everyone |
+| [Version Notes](versions/version-0.3.1.md) | What each release delivered, with fixed issues. Each file links to the previous one. | Everyone |
 | [Publishing to Steam Workshop](steam/steam_publishing.md) | How to upload and update the mod on the Steam Workshop. | Maintainers |
 
 ## Where to Start
@@ -30,7 +30,7 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
 
 ### I Want to Know What Is New
 
-1. Read the Summary in the latest [Version Notes](versions/version-0.3.md).
+1. Read the Summary in the latest [Version Notes](versions/version-0.3.1.md).
 2. Check the [Development Roadmap](roadmap.md) to see what comes next.
 
 ### I Want to Contribute

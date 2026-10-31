@@ -18,6 +18,10 @@ Version 0.2 focuses on passive utility and atmospheric carrying mechanics: a lan
 
 Version 0.3 expands the scope to other light fixtures and world interactions: pickable chain torches, mining lamps, temple lanterns and tube lamps, hanging a held lantern on the ceiling, enemy study, the cracked glass modifier and combined modifiers, settings presets, brighter fire enemies drawn to lanterns, and the Natural Fear mode. Details: [version-0.3.md](versions/version-0.3.md).
 
+## Version 0.3.1 - Lantern Modifier Hotfix
+
+Version 0.3.1 is a hotfix release that makes lantern modifiers work again and fixes a memory leak that slowed down the game and its closing. It also cleans up saves made with version 0.3. Details: [version-0.3.1.md](versions/version-0.3.1.md).
+
 ## Version 0.4
 
 > **Not ready yet**: this version is still in development and has not been released.

@@ -1,6 +1,10 @@
 # Version 0.4
 
-Tracking document for features, implementation progress, and known issues for **Version 0.4**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.3.md](version-0.3.md).
+Tracking document for features, implementation progress, and known issues for **Version 0.4**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.3.1.md](version-0.3.1.md).
+
+## Cleanup
+
+- [ ] Remove the temporary leaked component cleanup that was added in version 0.3.1. In version 0.3, every lit lantern with a modifier got a new empty `LuaComponent` on each illumination update. The cleanup removes these components from lanterns in saves made with version 0.3. To remove it, delete `files/scripts/leaked_component_cleanup.lua` and the two lines that load and call it in `init.lua`.
 
 ## Temple Lantern Modifiers
 
