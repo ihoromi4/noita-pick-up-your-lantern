@@ -10,3 +10,17 @@ Tracking document for features, implementation progress, and known issues for **
   - Concentrated Mana (`magic_liquid_mana_regeneration`);
   - Flummoxium (`material_confusion`);
   - Unstable Teleportatium (`magic_liquid_unstable_teleportation`).
+
+## Visual Polish and UI
+
+- [ ] Custom UI icons redesign: create dedicated pixel-art icons visually matching physical lantern props (`ui_lantern.png`, `ui_lantern_small.png`) with clear illumination.
+
+## Open-Flame Variants
+
+- [ ] Implement open-flame torches and braziers that actively ignite flammable materials, gases, and enemies on contact while held.
+- [ ] Immediate extinguishing upon liquid contact (without a delay).
+
+## Rogue Mode
+
+- [ ] A Mod Settings toggle that makes the player invisible to enemies while they stay far from light.
+- [ ] Investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).

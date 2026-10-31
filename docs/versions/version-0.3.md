@@ -2,10 +2,6 @@
 
 Tracking document for features, implementation progress, and known issues for **Version 0.3**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.2.md](version-0.2.md).
 
-## Visual Polish and UI
-
-- [ ] Custom UI icons redesign: create dedicated pixel-art icons visually matching physical lantern props (`ui_lantern.png`, `ui_lantern_small.png`) with clear illumination.
-
 ## Extended Light Fixture Support
 
 - [x] Support hanging chain torches (`chain_torch.xml`, `chain_torch_blue.xml`, `chain_torch_ghostly.xml`) and their duplicates: hang on a short chain, burn with an open fire in hand and on the belt, go out in liquids and light again from fire. Details: [lantern-entities.md](../dev/lantern-entities.md#chain-torches).
@@ -15,19 +11,9 @@ Tracking document for features, implementation progress, and known issues for **
 - [x] Hiisi Base fixtures: the tube lamp is the only lamp of the Hiisi Base itself, see [requirements.md](../requirements.md#light-fixture-catalog).
 - Research results and open issues: [extended-light-fixtures.md](../rnd/extended-light-fixtures.md).
 
-## Open-Flame Variants
-
-- [ ] Implement open-flame torches and braziers that actively ignite flammable materials, gases, and enemies on contact while held.
-- [ ] Immediate extinguishing upon liquid contact (without a delay).
-
 ## Strategic World Incentives
 
 - [x] Hang a held lantern on the ceiling above the player (up to 16 px) with LMB, then take the first wand (or the first item) from the Quick Inventory in hand; without a ceiling the lantern stays in hand. RMB keeps the vanilla throw. Details: [throwing-mechanics-and-controls.md](../rnd/throwing-mechanics-and-controls.md).
-
-## Rogue Mode
-
-- [ ] A Mod Settings toggle that makes the player invisible to enemies while they stay far from light.
-- [ ] Investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).
 
 ## Enemy Study
 
