@@ -14,10 +14,12 @@ Many light fixtures spawn only in a few biomes, often far from the start (for ex
 
 ## Debug Spawner
 
-`pick_up_your_lantern/files/scripts/debug_spawn_fixtures.lua` holds a `DEBUG_FIXTURES` list of `{ file, x, y }` entries. `init.lua` loads it and calls `UpdateDebugFixtureSpawns()` from `OnWorldPreUpdate`. Each spawn prints `[pick_up_your_lantern] DEBUG: spawned <file> at <x>, <y>` to the log.
+The spawner is a temporary test tool and is not part of the repository: create it on a feature branch, keep it uncommitted and remove it before merging.
 
-> [!IMPORTANT]
-> The spawner is a temporary test tool. Remove the script and its two lines in `init.lua` before merging a feature branch.
+- `pick_up_your_lantern/files/scripts/debug_spawn_fixtures.lua` holds a `DEBUG_FIXTURES` list of `{ file, x, y }` entries and defines `UpdateDebugFixtureSpawns()`.
+- `init.lua` loads it with `dofile_once` and calls `UpdateDebugFixtureSpawns()` from `OnWorldPreUpdate`.
+- Every 30 frames it spawns each entry once, following the [spawn rules](#spawn-rules), and prints `[pick_up_your_lantern] DEBUG: spawned <file> at <x>, <y>` to the log.
+- Each entry is spawned under a flag named by its index in the list: after inserting or reordering entries, start a new game.
 
 ## Spawn Rules
 
@@ -92,3 +94,14 @@ Temple lanterns hang on a chain far below the ceiling, so they are spawned below
 | --- | --- | --- |
 | 928, -45 | -95 | 8 links |
 | 780, -165 | -205 | 6 links |
+
+Chain torches were spawned under the same sloped cave ceiling: the `physics/` variants right under the ceiling, as `coalmine` spawns them at the marker, and the duplicates 32 px below it, where `physics_chain_torch.lua` expects them.
+
+| Spawn point x, y | File |
+| --- | --- |
+| 836, -167 | `physics/chain_torch.xml` |
+| 864, -160 | `physics/chain_torch_blue.xml` |
+| 896, -128 | `physics/chain_torch_ghostly.xml` |
+| 812, -140 | `physics_chain_torch.xml` |
+| 880, -112 | `physics_chain_torch_blue.xml` |
+| 912, -80 | `physics_chain_torch_ghostly.xml` |

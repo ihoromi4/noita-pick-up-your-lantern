@@ -11,7 +11,8 @@ Which vanilla entities the mod turns into pickable items, how they are rebuilt f
 - [Other Light Sources](#other-light-sources)
 - [Hanging Ropes](#hanging-ropes)
 - [Tube Lamp Cable](#tube-lamp-cable)
-- [Temple Lantern Chain](#temple-lantern-chain)
+- [Lantern Chains](#lantern-chains)
+- [Chain Torches](#chain-torches)
 - [Duplicate Torch Entities](#duplicate-torch-entities)
 
 ## Pickable Lanterns
@@ -26,6 +27,9 @@ The mod overrides the vanilla light fixtures below with full copies in `pick_up_
 | `physics_mining_lamp.xml` | Mining Lamp | `hills`, `winter`, `mountain_tree`, `lake` |
 | `physics_tubelamp.xml` | Tube Lamp | `snowcastle` (Hiisi Base), `vault`, `vault_frozen`, `robobase`, `rainforest`, `dragoncave`, `sandcave` |
 | `physics/temple_lantern.xml` | Temple Lantern | Holy Mountains (`temple_altar*`), `boss_arena`, `boss_arena_top`, secret chambers (`excavationsite_cube_chamber`, `snowcave_secret_chamber`, `snowcastle_hourglass_chamber`) |
+| `physics/chain_torch.xml`, `physics_chain_torch.xml` | Chain Torch | See [Duplicate Torch Entities](#duplicate-torch-entities) |
+| `physics/chain_torch_blue.xml`, `physics_chain_torch_blue.xml` | Blue Chain Torch | See [Duplicate Torch Entities](#duplicate-torch-entities) |
+| `physics/chain_torch_ghostly.xml`, `physics_chain_torch_ghostly.xml` | Ghostly Chain Torch | See [Duplicate Torch Entities](#duplicate-torch-entities) |
 
 Each entity carries the `lantern` tag, an `ItemComponent` that puts it into the Quick Inventory, and an `AbilityComponent` for throwing. Their light and durability are described in [Lantern Properties and Progression](lantern-properties-and-progression.md).
 
@@ -78,14 +82,13 @@ A lantern hangs on a `PhysicsJointComponent` with `nail_to_wall="1"`.
 - **Cable.** See [Tube Lamp Cable](#tube-lamp-cable).
 - `temple_lantern_01.png` (temple lantern) is 9×11 pixels: a transparent row at `y = 0`, the roof at `y = 1..2`, the glass at `y = 3..8`, a drop at `y = 9`. `centered="0"`, `offset_x="4.5"`, `offset_y="0.5"` put the origin at the top in the middle, where the vanilla chain is attached; `hang_offset_y = 1` hangs it right under the ceiling, like a small lantern. The in-hand sprite is the physics image (`temple_lantern_in_hand.xml`), the dark one has dimmed glass (`temple_lantern_out.png`).
 - The temple lantern shines blue like the vanilla one, but wider (radius 192 instead of 128) and brighter: `LightComponent` has no intensity, so red and green are raised from 30 to 80 and 100 while blue stays at 255. It keeps the vanilla plasma glow and spark particles, explosion and `plasma_fading` spill. The spill comes from a death script (`temple_lantern_death.lua`), not from a `MaterialInventoryComponent`, which would also spill when the held lantern is replaced by a hung one. `ExtinguishLantern()` removes particle emitters together with the light.
-- **Chain.** See [Temple Lantern Chain](#temple-lantern-chain).
+- **Chain.** See [Lantern Chains](#lantern-chains).
 - The tube lamp spins in flight: `min_torque="4"`, `max_torque="10"` on `PhysicsThrowableComponent`, as on the vanilla broken wand.
 
 ## Other Light Sources
 
 Besides the lanterns, `patch_lighting.lua` adds a fog of war hole to light sources that are not pickable, so they also dispel fog of war under limited vision:
 
-- chain torches: `chain_torch`, `chain_torch_blue`, `chain_torch_ghostly` and their duplicates;
 - torch stands: `physics_torch_stand.xml`, `physics_torch_stand_blue.xml`;
 - `physics_barrel_burning.xml`.
 
@@ -93,7 +96,7 @@ The hole is scaled by `Illuminated area size` when the game starts. It is added 
 
 ## Hanging Ropes
 
-`files/scripts/hanging_rope.lua` holds the rope shared by the tube lamp cable and the temple lantern chain:
+`files/scripts/hanging_rope.lua` holds the rope shared by the tube lamp cable and the lantern chains:
 
 - A rope is a chain of verlet points simulated in Lua: gravity, damping, segments pulled back to their length, and points stopped at surfaces with `RaytraceSurfaces`. Each segment is a sprite entity, placed at its upper point and turned along the segment every frame.
 - A `RopeKind` sets the segment length and sprite, the tags of the anchor and segment entities, and the anchor storage with the segment count. A slack rope (the cable) only pulls stretched segments back and stretches its sprites to the segment length; a rigid one (the chain) keeps every segment at its length and its sprites unscaled, and alternates the direction of its constraint passes.
@@ -121,18 +124,32 @@ The hole is scaled by `Illuminated area size` when the game starts. It is added 
 > [!NOTE]
 > The cable was first a `PhysicsBody2Component` chain built at runtime like the vanilla temple lantern chain. Spawned by the mod, it got no physics bodies, whether `PhysicsBody2InitFromComponents` was called from a world callback right after `EntityLoad` or from the cable's own `LuaComponent`. Every vanilla chain built this way also declares a root shape (`is_root="1"`) in its XML, except the hanging wire, which kills its entity after initialization. A physics chain also could not grow while carried, so both cables are Lua ropes now.
 
-## Temple Lantern Chain
+## Lantern Chains
 
-The vanilla temple lantern builds a physics chain up to the ceiling at runtime (`data/scripts/props/temple_lantern.lua`) out of `PhysicsBody2Component` shapes, which the item system cannot use (see [Physics System](#physics-system)). `files/scripts/temple_lantern_chain.lua` (`UpdateTempleLanternChains()`, every frame in `OnWorldPostUpdate`) hangs it on a rigid [hanging rope](#hanging-ropes) instead, for every type with `hangs_on_chain` in `LANTERN_TYPES`:
+The vanilla temple lantern builds a physics chain up to the ceiling at runtime (`data/scripts/props/temple_lantern.lua`), and a vanilla chain torch hangs on 4 links declared in `data/entities/base_chain_torch.xml`. Both are `PhysicsBody2Component` shapes, which the item system cannot use (see [Physics System](#physics-system)). `files/scripts/lantern_chain.lua` (`UpdateLanternChains()`, every frame in `OnWorldPostUpdate`) hangs these lanterns on a rigid [hanging rope](#hanging-ropes) instead, for every type with `chain` (`LanternChainConfig`) in `LANTERN_TYPES`:
 
-- **Look.** Each link is a `temple_lantern_chain_link.xml` sprite entity (tag `pul_chain_link`) with the vanilla link sprite `torch_hang_chain.png` (3×6 px), 6 px long and never stretched.
-- **Spawn.** A lantern seen in the world for the first time (no `lantern_chain_checked` storage) searches for the ceiling up to 200 px above its top with `RaytracePlatforms`, as the vanilla script does. It gets a chain of `floor(distance / 6)` links, as many as the vanilla script builds. Its ceiling joint and anchor script are removed. With the ceiling within 6 px, the lantern keeps its joint; without a ceiling it falls.
-- **Hanging.** The lantern is held at the length of its chain by its top with `HoldBodyOnHangingRope()`, taken as a 9×11 box, so it swings on the chain. While it pulls the chain taut, the links are laid on the straight line from the anchor to the lantern (`StraightenHangingRope()`) instead of being simulated: with both ends held, the step-by-step simulation gathers its remaining error in the last link, which then stands at an angle.
-- **Coming off.** The lantern comes off its chain when it is picked up, kicked (`temple_lantern_kick.lua` sets `lantern_chain_unhook`) or flung twice as far as the chain in a frame. The chain keeps hanging.
+- **Kinds.** The temple lantern hangs on a plain chain: anchor entity `lantern_chain.xml`, tag `pul_chain`. A chain torch (`has_ceiling_link`) hangs on a mounted chain: anchor entity `lantern_mounted_chain.xml`, tag `pul_mounted_chain`, and its top link shows the vanilla ceiling mount `torch_hang_chain_ceiling.png` (`lantern_chain_mount.xml`).
+- **Look.** Each link is a `lantern_chain_link.xml` sprite entity with the vanilla link sprite `torch_hang_chain.png` (3×6 px), 6 px long and never stretched. All links share the `pul_chain_link` tag, so each kind keeps the links of the other when it removes link sprites of no known chain.
+- **Spawn.** A lantern seen in the world for the first time (no `lantern_chain_checked` storage) searches for the ceiling above its top with `RaytracePlatforms`, up to `ceiling_search_distance`. Its ceiling joint and anchor script are removed; without a ceiling it falls.
+  - The temple lantern searches up to 200 px, as the vanilla script does, and gets a chain of `floor(distance / 6)` links, as many as the vanilla script builds. With the ceiling within 6 px, it keeps its joint.
+  - A chain torch has `link_count = 4`: its chain hangs from the ceiling right above it, and the torch drops to the end of the chain. It searches up to 48 px, as the duplicates spawn about 32 px below the ceiling.
+- **Hanging.** The lantern is held at the length of its chain by its top with `HoldBodyOnHangingRope()`, so it swings on the chain. `mass_over_inertia` takes the temple lantern as a 9×11 box and a chain torch as an 11×13 box; the centre of mass comes from the Box2D body, which keeps a torch from turning upside down. While the lantern pulls the chain taut, the links are laid on the straight line from the anchor to the lantern (`StraightenHangingRope()`) instead of being simulated: with both ends held, the step-by-step simulation gathers its remaining error in the last link, which then stands at an angle.
+- **Coming off.** The lantern comes off its chain when it is picked up, kicked (`lantern_chain_kick.lua` sets `lantern_chain_unhook`) or flung twice as far as the chain in a frame. The chain keeps hanging.
 - **Projectiles.** A projectile that collides with the world (`collide_with_world`, not `penetrate_world`) and passes within 2 px of a link in the last frame (its path is taken from `VelocityComponent.mVelocity`) breaks the closest link: the projectile is moved there and killed, and dies with its usual effect (**[Confirmed]**), the part above keeps hanging, the part below falls off with the lantern as a loose piece, lies on the floor and disappears after 10 seconds. A chain without a lantern breaks the same way.
 - **Ceiling destroyed.** The anchor checks the ceiling 4 px above it every 20 frames. Without it the whole chain falls as a loose piece.
-- **Saving.** A chain entity at the anchor (`temple_lantern_chain.xml`, tag `pul_chain`) keeps the link count in `chain_link_count`. The lantern keeps `lantern_on_chain` and the anchor position (`lantern_chain_anchor_x/y`), and is put back on the chain at that anchor after a reload. A lantern whose chain does not load within 3 seconds falls. Loose pieces are not saved.
-- A lantern hung with the left mouse button copies the state of the held one, `lantern_chain_checked` included, so it hangs on its joint right under the ceiling, without a chain.
+- **At rest.** A chain without a lantern whose links barely move for 30 frames is neither simulated nor rendered until something moves it. Link sprites of no known chain are removed right after chains are loaded and once a second. The chain states of lanterns are read from their storages once and cached.
+- **Saving.** The anchor entity keeps the link count in `chain_link_count`. The lantern keeps `lantern_on_chain` and the anchor position (`lantern_chain_anchor_x/y`), and is put back on the chain at that anchor after a reload. A lantern whose chain does not load within 3 seconds falls. Loose pieces are not saved.
+- **Hung with the left mouse button.** The hung lantern is loaded from the first file of its type and copies the state of the held one, `lantern_chain_checked` included, so it hangs on its joint right under the ceiling, without a chain. For chain torches the first file is `files/entities/chain_torch*_hung.xml`, which adds the `nail_to_wall` joint to the torch.
+
+## Chain Torches
+
+The three chain torches (plain, blue, ghostly) are pickable lanterns with an open fire. The `physics/chain_torch*.xml` overrides add the light, spark emitters, in-hand sprite and names of each type to the shared `files/entities/base_chain_torch_item.xml`; the duplicates `physics_chain_torch*.xml` include the `physics/` variant of their colour (see [Duplicate Torch Entities](#duplicate-torch-entities)).
+
+- **Body.** `torch_hang_unlit.png` (11×13 px) of `metal_nohit`, with `centered="0"`, `offset_x="5.5"`, `offset_y="0.5"`: the origin is at the top of the bail, where the vanilla chain is attached, and the coals are 6 px below it. `hang_offset_y = 1` hangs it right under the ceiling.
+- **Light.** The light, the fog of war hole and the torch particles sit on the root entity, not in a nested `Entity` as in vanilla: the illumination, belt and modifier code reads the components of the lantern itself. The light (radius 96) sits at the coals and is tinted to the sparks of the type: warm for the plain torch, `r="90" g="200" b="255"` for the blue one, `r="80" g="255" b="190"` for the ghostly one. The spark material is `open_fire.spark_material` in `LANTERN_TYPES`.
+- **Dousing.** `TorchComponent` is replaced by `chain_torch_fire.lua` (every 10 frames, in the world and in hand): a torch whose coals are in a liquid is doused (`lantern_doused` storage), and loses its light, fog of war hole and fire; solid materials do not douse it. A doused torch lights again from fire: in the world when it catches fire itself, in hand when its holder burns. The in-hand sprite switches between `chain_torch*_in_hand.xml` and the dark `chain_torch*_in_hand_out.xml`.
+- **Fire in hand and on the belt.** The engine turns and mirrors particle emitters in hand with the aim of the player, so the emitters work in the world only. In hand `lantern_in_hand.lua` and on the belt `lantern_belt.lua` make the fire at the coals with `EmitOpenFire()`: sparks of the type and fire, mostly cosmetic. In hand 10% of the fire particles are real fire cells that set burning materials around alight; on the belt the fire is only visual, so it does not set the player alight. In the world the fire emitter makes real fire cells that do not ignite creatures (`fire_cells_dont_ignite_damagemodel`).
+- **Durability.** Unbreakable in vanilla, a torch has `hp="1.0"` and soft impact damage (`speed_threshold="120"`, `damage_multiplier="0.002"`): falls and throws only dent it and may crack it, while projectiles and explosions break it. It breaks with a small pop without a hole, and `chain_torch_death.lua` scatters fire and sparks of its type from the coals.
 
 ## Duplicate Torch Entities
 
@@ -144,4 +161,6 @@ Each chain torch exists in two files with different paths, and different biomes 
 | `physics/chain_torch_blue.xml` | `physics_chain_torch_blue.xml` | No vanilla biome |
 | `physics/chain_torch_ghostly.xml` | `physics_chain_torch_ghostly.xml` | 24 biomes, including `excavationsite` (Coal Pits), `desert`, `rainforest`, `vault`, `snowcastle`, `tower`, `the_end` |
 
-The duplicates are an older version without `<Base file="data/entities/base_chain_torch.xml">`: the physics body and scripts are declared inline, and `LightComponent` and `TorchComponent` are tagged `enabled_in_world,enabled_in_hand`. The light still sits in a nested `Entity`, as in the `physics/` variants, so the same patch applies to both. Patch both paths whenever you patch a chain torch.
+In vanilla the duplicates are an older version without `<Base file="data/entities/base_chain_torch.xml">`: `PhysicsBodyComponent` with `centered="1"` (the origin in the middle of the head), a chain of 3 links built by `physics_chain_torch.lua` about 32 px above the torch, and `LightComponent` and `TorchComponent` tagged `enabled_in_world,enabled_in_hand` in a nested `Entity`.
+
+The mod overrides both paths. Each duplicate only includes the `physics/` variant of its colour, so both spawn the same pickable torch, and `LANTERN_TYPES` lists both files of each type. Biomes spawn a duplicate lower than a `physics/` variant, so the chain torches search for the ceiling up to 48 px above (see [Lantern Chains](#lantern-chains)).

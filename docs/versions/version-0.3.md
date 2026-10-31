@@ -8,12 +8,12 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Extended Light Fixture Support
 
-- [ ] Support hanging chain torches (`chain_torch.xml`, `chain_torch_blue.xml`, `chain_torch_ghostly.xml`).
+- [x] Support hanging chain torches (`chain_torch.xml`, `chain_torch_blue.xml`, `chain_torch_ghostly.xml`) and their duplicates: hang on a short chain, burn with an open fire in hand and on the belt, go out in liquids and light again from fire. Details: [lantern-entities.md](../dev/lantern-entities.md#chain-torches).
 - [x] Support mining lamps (`physics_mining_lamp.xml`).
-- [x] Support temple lanterns (`temple_lantern.xml`): hang on a chain that swings and breaks under projectiles. Details: [lantern-entities.md](../dev/lantern-entities.md#temple-lantern-chain).
+- [x] Support temple lanterns (`temple_lantern.xml`): hang on a chain that swings and breaks under projectiles. Details: [lantern-entities.md](../dev/lantern-entities.md#lantern-chains).
 - [x] Support fluorescent tube lamps (`physics_tubelamp.xml`): shine only while powered by a cable that follows the lamp, snaps and keeps sparking. Details: [tube-lamp-electricity.md](../rnd/tube-lamp-electricity.md).
 - [x] Hiisi Base fixtures: the tube lamp is the only lamp of the Hiisi Base itself, see [requirements.md](../requirements.md#light-fixture-catalog).
-- Progress and remaining work: [extended-light-fixtures-progress.md](../rnd/extended-light-fixtures-progress.md).
+- Research results and open issues: [extended-light-fixtures.md](../rnd/extended-light-fixtures.md).
 
 ## Open-Flame Variants
 
