@@ -1,70 +1,52 @@
 [h1]Noita, Pick Up Your Lantern![/h1]
 
-Those oil lanterns hanging from the ceilings of the Mines are no longer just decoration. Kick them down, pick them up, carry them through the darkness, and throw them at anything that lurks in it.
+The lanterns, lamps and torches that hang in the caves of Noita are no longer just decoration. Take them down, carry them through the dark, leave them behind to mark your way, or throw them at whatever waits in the shadows.
 
-[h2]Features[/h2]
+Out of the box, you see as in the normal game. To make the depths truly dark, pick a darker preset in Mod Settings. For a first run, try [b]Atmospheric[/b].
 
-[h3]Pick Up and Carry[/h3]
+[h2]What the Mod Changes[/h2]
+In the dark, the caves close in around you. You see only what light reveals, and every glowing thing starts to matter. A lantern becomes a light to carry, a lure to throw and a beacon to leave behind.
+
+Look closely before you grab the first light you see. Lights differ in brightness and sturdiness, and some of them hide quirks of their own. And you are not the only one who notices the light. Some creatures are drawn to it, while others would rather stay in the dark. The rest is yours to discover.
+
+[h2]How to Use[/h2]
 [list]
-[*] Pick up a lantern with the interaction key ([b]E[/b]) when standing next to it.
-[*] Lanterns go into your regular item slots alongside flasks and stones (one lantern per slot, no stacking).
-[*] Custom inventory icons with a glowing flame.
-[*] You cannot drink the oil out of a lantern. Please don't try.
-[*] The lantern lights up the area around you.
-[*] Holding a lantern is safe: it will not burn you, ignite the ground, or break in your hand.
-[*] Throw a lantern with the [b]Left[/b] or [b]Right Mouse Button[/b], or drop it from the inventory.
-[*] On a hard impact the glass shatters with a small explosion, spilling burning oil.
-[*] Lanterns and world light sources clear the fog of war around them - both hanging in the world and held in your hand.
-[*] Adjustable size of the illuminated area: 100%, 200%, 300% or 500%.
+[*] Walk up to a light and press the interaction key ([b]E[/b] by default) to pick it up.
+[*] A light takes one item slot, like a flask.
+[*] Select it to hold it in your hand. Select a wand, and the light moves to your belt, where it shines more softly.
+[*] The right mouse button throws the light. The left mouse button hangs it from the ceiling above you.
+[*] You can pick up a thrown or hung light again, but a hard hit may break it for good.
 [/list]
 
-[h3]Lantern on Your Belt[/h3]
-Your hands are busy with a wand or a flask? Your lantern stays with you anyway.
+[h2]Choose Your Darkness[/h2]
+Pick a preset in Mod Settings. Each preset sets the vision and lantern options at once:
 [list]
-[*] The first lantern in your inventory hangs on your belt and sways as you move.
-[*] It softly lights the way - dimmer than a lantern in your hand, but enough not to stumble in the dark.
-[*] Take any lantern in your hand, and the belt lantern steps aside.
-[*] Adjust its brightness in the settings, from [b]Off[/b] to as bright as in hand.
+[*][b]Light Touch[/b]: vision as in the normal game. You can still carry and throw lights, but all lanterns are of the same quality. This is the default.
+[*][b]Atmospheric[/b]: darker caves, and lanterns vary in quality.
+[*][b]Survival[/b]: without a light, you see only a few steps around you.
+[*][b]Pitch Black[/b]: total darkness. Without a light, you see nothing at all.
 [/list]
+The quality of a lantern sets how far its light reaches. The deeper you go, the better lanterns you find.
 
-[h3]Every Lantern Is Different[/h3]
-Look closely before you grab the first lantern you see!
-[list]
-[*] The large Lantern shines wider and is sturdier than the fragile Small Lantern.
-[*] Lanterns come in four qualities, from a soot-clouded lamp to a masterwork that drives the darkness far away. The deeper you go, the better lanterns you find.
-[*] Rarely a lantern has a quirk: a [b]Flickering[/b] one shines wider but wavers, and a [b]Short-lived[/b] one leaks oil and slowly burns out for good.
-[*] Dive into oil with a lantern in your hand, and it blazes wider. A swim in water leaves it dim until you find oil again.
-[*] The item description tells you everything about the lantern you carry.
-[*] Lantern quality and quirks are on in every settings preset except the default [b]Light Touch[/b], and you can toggle them on their own.
-[/list]
+You can change the preset in the middle of a run, and the darkness changes at once. Lantern quality takes effect starting from your next run.
 
-[h3]Player Vision and Darkness[/h3]
-Make the depths truly dark and turn your lantern into a survival tool!
+Two optional modes are off by default, and presets do not turn them on:
 [list]
-[*] Player vision presets: [b]Vanilla (100%)[/b], [b]Dim (75%)[/b], [b]Dark (50%)[/b], [b]Very Dark (25%)[/b], [b]Minimal (10%)[/b] and [b]Pitch Black (0%)[/b].
-[*] Lower settings shrink both your personal light and the area of the map you reveal.
-[*] [b]Pitch Black[/b] mode leaves unlit caves completely dark - you only see what your lantern, fires and other light sources illuminate.
-[*] Fire, lava, molten metals, toxic sludge, acid and sparks glow more brightly, and burning creatures light up their surroundings.
-[*] The darkness stays with you while polymorphed, and you can pick a separate vision for your polymorphed form.
-[*] All-Seeing Eye, Sunseed and Sunstone reveal the world just like in the vanilla game.
-[*] Vision can be changed at any time from the pause menu, no restart required.
-[*] Pick a settings preset to set everything at once: [b]Light Touch[/b], [b]Atmospheric[/b], [b]Survival[/b] or [b]Pitch Black[/b].
+[*][b]Natural Fear[/b]: creatures fear or seek the light, each according to its nature.
+[*][b]Enemy Study[/b]: watch enemies in the light to deal more damage to them.
 [/list]
 
 [h2]Documentation[/h2]
-Want to know exactly how lanterns, their quality and the darkness work, or what every setting does? Read the detailed [url=https://github.com/ihoromi4/noita-pick-up-your-lantern/blob/main/docs/index.md]documentation[/url] on GitHub.
+Want to know exactly how every light and creature behaves, or what each setting does? Read the detailed [url=https://github.com/ihoromi4/noita-pick-up-your-lantern/blob/main/docs/index.md]documentation[/url] on GitHub. Be warned: it spoils the surprises.
 
 [h2]Languages[/h2]
 English, Russian, Polish, Simplified Chinese.
 
 [h2]Compatibility[/h2]
-The mod replaces vanilla lantern entities and modifies shader files, so mods that change the same files may conflict. Unfortunately, the widely beloved “Light-Up Lanterns” is incompatible.
-
-[h2]Planned[/h2]
+The mod replaces the vanilla files of lanterns and other lights, and it changes how the game draws light and darkness. Other mods that change the same things may conflict with it.
 [list]
-[*] Support for more light fixtures and open-flame torches.
-[*] Extinguishing lanterns in water and relighting them with fire.
-[*] More liquids that change your lantern.
+[*][b]Light-Up Lanterns[/b] is not compatible. Both mods change the same lanterns, so please enable only one of them.
+[*][b]Apotheosis[/b] works together with this mod in any load order.
 [/list]
 
 [h2]Credits[/h2]
@@ -72,7 +54,6 @@ The mod replaces vanilla lantern entities and modifies shader files, so mods tha
 [*] The dynamic lighting approach is inspired by [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2316356772]Light-Up Lanterns[/url].
 [*] The belt lantern approach is inspired by [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3807317449]Extra Backpack[/url].
 [/list]
-We stand on the shoulders of giants...
 
 [i]Disclaimer: This mod was developed with the assistance of AI coding agents.[/i]
 
