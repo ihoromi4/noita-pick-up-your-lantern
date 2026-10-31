@@ -175,7 +175,9 @@ function UpdateLanternHang()
     end
 
     -- A lantern that cannot be hung is thrown with the left button as usual, see lantern_throw.lua.
-    local lantern_file, lantern_type = GetLanternType(lantern_id)
+    -- The first file of the type is the one to hang, whichever file the held lantern was loaded from.
+    local _, lantern_type = GetLanternType(lantern_id)
+    local lantern_file = lantern_type.files[1]
     if lantern_type.hang_offset_y == nil then
         return
     end
