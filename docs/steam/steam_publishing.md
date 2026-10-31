@@ -242,7 +242,7 @@ The project includes [`scripts/publish_workshop.py`](../../scripts/publish_works
 Execute a release in one command:
 
 ```bash
-scripts/publish_workshop.py "v0.2.0: Updated preview image and description"
+scripts/publish_workshop.py "v0.3.0: Updated preview image and description"
 ```
 
 ## Troubleshooting

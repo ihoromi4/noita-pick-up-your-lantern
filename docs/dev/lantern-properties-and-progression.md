@@ -48,10 +48,17 @@ Each lantern type declares its base values in the native component fields of its
 | `physics_lantern.xml` (large) | 280 | 1.2 | 255, 225, 180 | 0.5 |
 | `physics_lantern_small.xml` | 220 | 0.9 | 255, 205, 150 | 0.15 |
 | `physics/lantern_small.xml` | 220 | 0.9 | 255, 205, 150 | 0.15 |
+| `physics_mining_lamp.xml` | 180 | 0.8 | 255, 240, 210 | 0.7 |
+| `physics_tubelamp.xml` | 200 | 1.0 | 200, 230, 255 | 0.7 |
+| `physics/temple_lantern.xml` | 192 | 0.8 | 80, 100, 255 | 0.15 |
+| `physics/chain_torch.xml` | 96 | 0.8 | 255, 178, 118 | 1.0 |
+| `physics/chain_torch_blue.xml` | 96 | 0.8 | 90, 200, 255 | 1.0 |
+| `physics/chain_torch_ghostly.xml` | 96 | 0.8 | 80, 255, 190 | 1.0 |
 
 - `LightComponent`: `radius`, `r`, `g`, `b`.
 - `SpriteComponent` with `fog_of_war_hole="1"`: `special_scale_x`, `special_scale_y`. The component is declared in the lantern XML. `patch_lighting.lua` only removes it when `Illuminate the darkness` is off.
 - `DamageModelComponent`: `hp`.
+- The chain torches take the fog of war hole and `hp` from the shared `files/entities/base_chain_torch_item.xml`. The duplicates `physics_chain_torch*.xml` include their `physics/` variant, so they have the same values.
 
 The mod writes the scaled `radius` and `special_scale_x/y` back to the entity, and these values end up in save files. So the XML values are only a base: `EnsureLanternBaseIllumination` in `lantern_illumination.lua` reads them once, when the lantern first appears, and stores them as `lantern_base_light_radius` and `lantern_base_fog_hole_scale`.
 

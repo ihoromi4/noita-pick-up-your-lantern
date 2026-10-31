@@ -2,6 +2,16 @@
 
 Tracking document for features, implementation progress, and known issues for **Version 0.3**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.2.md](version-0.2.md).
 
+## Summary
+
+Lanterns are no longer the only lights you can take down. Mining lamps, tube lamps, temple lanterns and chain torches can now be picked up, carried and thrown. Each of them behaves in its own way. A tube lamp shines only while its power cable holds, and the torn cable sparks and shocks creatures nearby. A temple lantern swings on a long chain that a shot can break. A chain torch burns with an open fire, goes out in water and lights again from fire.
+
+The left mouse button now hangs a held lantern on the ceiling above you, and your hands take a wand. A lantern that survives a hit may crack and leak fire. A lantern can also carry several quirks at once.
+
+Creatures now react to lantern light. Fire creatures glow brightly in the dark, and lit lanterns lure them into a trance. With the new Natural Fear setting, Hiisi and insects are lured too, while zombies and other monsters fear the light and sometimes attack the lantern in a rage. With the new Enemy Study setting, you deal more damage to enemies you have watched in lantern light.
+
+Settings presets set all options at once, from the near-vanilla Light Touch to Pitch Black. The vision patch also works again together with Apotheosis.
+
 ## Extended Light Fixture Support
 
 - [x] Support hanging chain torches (`chain_torch.xml`, `chain_torch_blue.xml`, `chain_torch_ghostly.xml`) and their duplicates: hang on a short chain, burn with an open fire in hand and on the belt, go out in liquids and light again from fire. Details: [lantern-entities.md](../dev/lantern-entities.md#chain-torches).

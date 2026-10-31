@@ -4,21 +4,21 @@ Functional requirements for the **Pick Up Your Lantern** mod for Noita.
 
 ## Development Roadmap
 
-The release schedule, milestones, and phased breakdown of features across versions (v0.1, v0.2, v0.3, and v1.0) are maintained in the [Development Roadmap](roadmap.md).
+The release schedule, milestones, and phased breakdown of features across versions (v0.1, v0.1.1, v0.2, v0.3, v0.4 and v1.0) are maintained in the [Development Roadmap](roadmap.md).
 
 ## Light Fixture Catalog
 
-List of light fixtures in the game; only specific ones are pickable items, while others serve as environmental lights or potential future targets:
+List of light fixtures in the game. Both small lanterns, the large lantern, the temple lantern, the mining lamp, the tube lamp and the three chain torches are pickable items. Torch stands and the burning barrel serve as environmental lights or potential future targets:
 
 - Small Hanging Lantern (Small Lantern): In-game file `data/entities/props/physics/lantern_small.xml`. The most common lantern on a chain, found in Mines, Coalmine, Hiisi Base, and other biomes. Uses `PhysicsBody2Component` + `PhysicsJoint2Component`. Primary target for pickup, holding, and throwing.
 - Large Glass Lantern (Physics Lantern): In-game file `data/entities/props/physics_lantern.xml`. Lantern using legacy physics (`PhysicsBodyComponent` + `PhysicsJointComponent`). Found in Town biomes, liquid caves, and others. Fully pickable.
 - Alternative Small Lantern: In-game file `data/entities/props/physics_lantern_small.xml`. Legacy physics variant found in Snow Cave, Sand Cave, Meat, etc. Fully pickable.
 - Temple Lantern: In-game file `data/entities/props/physics/temple_lantern.xml`. Found in Holy Mountain biomes and temple altars.
 - Mining Lamp: In-game file `data/entities/props/physics_mining_lamp.xml`. Found in Hills, mine entrances, and near the lake.
-- Fluorescent Tube Lamp (Tubelamp): In-game file `data/entities/props/physics_tubelamp.xml`. Found in The Vault, Snowcastle, and Robobase. Environmental light source; non-oil, electric behavior.
-- Hanging Chain Torch: In-game file `data/entities/props/physics/chain_torch.xml`. Found in Dungeons, Crypt, and Wizard Cave.
-- Blue Hanging Chain Torch: In-game file `data/entities/props/physics/chain_torch_blue.xml`. Found in Pyramid.
-- Ghostly Green Chain Torch: In-game file `data/entities/props/physics_chain_torch_ghostly.xml`. Found in Fungi Cave, Coalmines, and temple entrances.
+- Fluorescent Tube Lamp (Tubelamp): In-game file `data/entities/props/physics_tubelamp.xml`. Found in The Vault, Snowcastle, and Robobase. Non-oil, electric behavior: it shines only while powered by its cable.
+- Hanging Chain Torch: In-game files `data/entities/props/physics/chain_torch.xml` and `data/entities/props/physics_chain_torch.xml`. Found in Dungeons, Crypt, and Wizard Cave.
+- Blue Hanging Chain Torch: In-game files `data/entities/props/physics/chain_torch_blue.xml` and `data/entities/props/physics_chain_torch_blue.xml`. Found in Pyramid.
+- Ghostly Green Chain Torch: In-game files `data/entities/props/physics/chain_torch_ghostly.xml` and `data/entities/props/physics_chain_torch_ghostly.xml`. Found in Fungi Cave, Coalmines, and temple entrances.
 - Torch Stand: In-game file `data/entities/props/physics_torch_stand.xml`. Found in Rainforest, Dragon Cave, and Crypt.
 - Blue Torch Stand: In-game file `data/entities/props/physics_torch_stand_blue.xml`. Found in Pyramid and Dark Rainforest.
 - Burning Barrel: In-game file `data/entities/props/physics_barrel_burning.xml`. Found in Snowy Depths and Meat biome. Heavy environmental object (non-pickable into inventory).
@@ -117,7 +117,7 @@ List of light fixtures in the game; only specific ones are pickable items, while
 - Rogue mode (Under Investigation):
   - Mod settings toggle for "Rogue": the player is invisible to enemies while they stay far from light.
   - Investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).
-- Enemy study (Under Investigation):
+- Enemy study:
   - A separate "Enemy Study" category in Mod Settings, not affected by presets: a toggle for the mechanic (off by default), the bonus of a fully studied enemy (10%, 25%, 50%, 100%) and the base study time (3, 5, 10, 30 seconds; 10 by default).
   - While an enemy is within the study radius, in direct line of sight of the player (raycast) and within the light radius of a lantern in the world or in hand (not on the belt) or of a projectile with the Light spell modifier (`LIGHT`), the player's damage against this enemy grows from 0% to the configured bonus. An enemy whose study has begun has a small semi-transparent dot above its head: yellow while it is being studied, red while its study is paused (out of light or sight), green once it is fully studied.
   - The player studies enemy types. Each enemy type has a knowledge counter: the sum of the study progress (0 to 1) of all its enemies, so five fully studied enemies give 5. Related enemies share part of their knowledge: other variants of the same enemy (e.g. a weak and a normal zombie) give half of theirs, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth. The study takes the base study time at knowledge 0 and shrinks linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge.
@@ -126,12 +126,12 @@ List of light fixtures in the game; only specific ones are pickable items, while
   - Fire-related enemies glow noticeably brighter than other enemies and dispel fog of war around themselves, so they stand out in darkness. Always on.
   - Vanilla fire enemies have tuned light; fire-related enemies of other mods are detected automatically.
   - Lit lanterns in the world attract fire-related enemies: they gather around the lantern and do not attack it. The light holds them in a trance: they notice the player only up close and fight as usual once they find prey (the player came close or hurt them). Enemies that already hunt are not lured. Lanterns in hand, in the inventory or on the belt do not attract. A Mod Settings toggle, on by default and not affected by presets.
-- Natural Fear Mode (Under Investigation):
+- Natural Fear Mode:
   - Mod settings toggle for "Natural Fear": enemy categories (`herd_id`) react to lantern light. Zombies and monsters avoid it and keep their distance from the player, while Hiisi prefer lit areas. Hiisi and insects (herds `orcs` and `fly`) are attracted to lit lanterns in the world, as fire enemies are. All other enemies (zombies, slime creatures and other monsters) fear the light of lanterns in the world and in hand, even while hunting, and keep to the dark. The toggle is off by default and not affected by presets.
 - Open-flame variants:
   - Separate class of open-flame lamps/torches that can actively ignite flammable surfaces and enemies on contact, extinguish quickly in liquid, and reignite near fire.
 - Limited Visibility Mode:
-  - Mod settings toggle where player's innate vision radius is reduced, making handheld lanterns essential for navigating dark biomes.
+  - The `Player vision` option reduces the player's innate vision radius, making handheld lanterns essential for navigating dark biomes. The settings presets set it together with the other options.
 - Dynamic Lighting Mode:
   - Mod settings toggle for true dynamic lighting (dependent on separate R&D into engine lighting hooks).
 

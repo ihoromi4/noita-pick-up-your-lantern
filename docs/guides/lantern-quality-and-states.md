@@ -19,6 +19,8 @@ No two lanterns are quite alike. Each lantern has its own light, quality and som
 | Small Lantern | Smaller, warm yellow | Fragile |
 | Mining Lamp | Small, white | Sturdy, but explodes when hit hard |
 | Tube Lamp | Wide, cold white | Sturdy, bursts like a small gas cylinder |
+| Temple Lantern | Wide, blue | Fragile, bursts and spills fading plasma |
+| Chain Torch | Small, in the colour of its fire | Very sturdy: only shots and explosions break it |
 
 ## Traits and States
 

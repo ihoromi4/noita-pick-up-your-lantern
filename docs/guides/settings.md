@@ -7,10 +7,11 @@ All options of the mod are in **Options → Mod Settings → Pick Up Your Lanter
 - [Preset](#preset)
 - [Lighting](#lighting)
 - [Gameplay](#gameplay)
+- [Enemy Study](#enemy-study)
 
 ## Preset
 
-The first option sets all other options at once. Pick the one that matches how dark you want the game to be:
+The first option sets all other options at once, except the options marked "not affected by presets". Pick the one that matches how dark you want the game to be:
 
 | Option | Light Touch | Atmospheric | Survival | Pitch Black |
 |---|---|---|---|---|
@@ -98,5 +99,35 @@ Fire creatures, such as Stendari and Liekkiö, that see a lit lantern in the wor
 Creatures react to lantern light by their nature. Hiisi and insects that see a lit lantern in the world gather around it, the same way fire creatures do. Spellbound by the light, they notice you only up close and wake up when hurt. Other creatures, such as zombies and Limanuljaska, fear lantern light, even of the lantern in your hands, and keep to the dark.
 
 - Default: off.
+- Applies: immediately.
+- Not affected by presets.
+
+## Enemy Study
+
+Watch enemies in lantern light to deal more damage to them. See [Studying Enemies](lanterns.md#studying-enemies). Presets do not change the options in this category.
+
+### Enemy Study
+
+Turns studying enemies on or off. When it is off, enemies you studied earlier take normal damage.
+
+- Default: off.
+- Applies: immediately.
+- Not affected by presets.
+
+### Studied Enemy Damage Bonus
+
+How much more damage you deal to a fully studied enemy. A partly studied enemy gets a part of this bonus.
+
+- Values: +10%, +25%, +50%, +100%.
+- Default: +25%.
+- Applies: immediately, also to enemies studied earlier.
+- Not affected by presets.
+
+### Base Study Time
+
+How long it takes to study an enemy of a type you know nothing about. Studying enemies of a type and its relatives shortens this time, down to half a second. Bosses always take two minutes.
+
+- Values: 3 s, 5 s, 10 s, 30 s.
+- Default: 10 s.
 - Applies: immediately.
 - Not affected by presets.
