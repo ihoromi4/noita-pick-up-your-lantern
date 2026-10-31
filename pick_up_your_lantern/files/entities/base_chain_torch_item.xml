@@ -140,7 +140,7 @@
         fire_damage_amount="0"
         fire_probability_of_ignition="0"
         critical_damage_resistance="1"
-        hp="0.5"
+        hp="1.0"
         is_on_fire="0"
         materials_create_messages="0"
         materials_damage="0"
@@ -181,9 +181,13 @@
         ></config_explosion>
     </ExplodeOnDamageComponent>
 
+    <!-- An iron torch, unbreakable in vanilla: falls and throws only dent it (and may crack it), it breaks from
+         projectiles and explosions. If impact damage is (speed - threshold) * multiplier, killing it with hp 1.0
+         takes a speed above 600, far over a throw (180) or a fall. -->
     <PhysicsBodyCollisionDamageComponent
         _tags="enabled_in_world"
-        speed_threshold="85.0"
+        speed_threshold="120.0"
+        damage_multiplier="0.002"
     ></PhysicsBodyCollisionDamageComponent>
 
     <CameraBoundComponent
