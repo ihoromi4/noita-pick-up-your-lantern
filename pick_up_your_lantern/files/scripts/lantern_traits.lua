@@ -21,6 +21,7 @@ local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local POWER_LOST_STORAGE = "lantern_power_lost"
 local DOUSED_STORAGE = "lantern_doused"
+local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
 
 -- Open fire of a torch carried by the player, as the vanilla torch emitters (data/entities/base_torch_particle.xml).
 -- Visual particles are cosmetic ones that rise on a negative gravity, as fire does; GameCreateParticle with
