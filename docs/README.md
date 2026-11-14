@@ -17,7 +17,7 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
 | [Functional Requirements](requirements.md) | What the mod is meant to do: the full feature specification. | Contributors, designers |
 | [Development Roadmap](roadmap.md) | Planned features grouped by release. | Everyone |
 | [Version Notes](versions/version-0.3.1.md) | What each release delivered, with fixed issues. Each file links to the previous one. | Everyone |
-| [Publishing to Steam Workshop](steam/steam_publishing.md) | How to upload and update the mod on the Steam Workshop. | Maintainers |
+| [Publishing to Steam Workshop](steam/steam_publishing.md) | Where the Workshop description lives and how to publish a release with `noitacli workshop`. | Maintainers |
 
 ## Where to Start
 
