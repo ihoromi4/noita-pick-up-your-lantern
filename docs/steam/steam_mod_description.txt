@@ -1,4 +1,4 @@
-[quote][b]Memory leak fixed in version 0.3.1.[/b] Version 0.3.0 had a memory leak. The game slowed down over time and took a long time to close. Version 0.3.1 fixes the leak. You can continue a run started with version 0.3.0, because the mod cleans it up as you play.[/quote]
+[quote][b]New in version 0.3.2.[/b] The All-Seeing Eye spell keeps the area bright while you stay where you cast it. Modifiers that change the projectile lifetime also change how long the area stays bright. If you still play a run started with version 0.3.0, please start a new game. Version 0.3.2 no longer cleans up the leftovers of the version 0.3.0 memory leak.[/quote]
 
 [h1]Noita, Pick Up Your Lantern![/h1]
 

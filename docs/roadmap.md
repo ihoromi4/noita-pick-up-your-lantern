@@ -24,9 +24,7 @@ Version 0.3.1 is a hotfix release that makes lantern modifiers work again and fi
 
 ## Version 0.3.2 - All-Seeing Eye Lifetime Fix
 
-> **Not ready yet**: this version is still in development and has not been released.
-
-Version 0.3.2 is a bug fix release. Spell modifiers that change the projectile lifetime will also change how long the All-Seeing Eye spell reveals the area. The revealed area also stays open while the player stays near the cast point. The temporary cleanup of saves made with version 0.3.0 is removed. Details: [version-0.3.2.md](versions/version-0.3.2.md). Open tasks: [Backlog](backlog.md).
+Version 0.3.2 is a bug fix release. Spell modifiers that change the projectile lifetime also change how long the All-Seeing Eye spell reveals the area. The revealed area also stays open while the player stays near the cast point. The temporary cleanup of saves made with version 0.3.0 is removed. Details: [version-0.3.2.md](versions/version-0.3.2.md).
 
 ## Version 0.4.0
 

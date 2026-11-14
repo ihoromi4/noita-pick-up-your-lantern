@@ -20,4 +20,4 @@ Spell modifiers that change the projectile lifetime now also change how long the
 - The All-Seeing Eye spell now keeps the area bright for 10 seconds before it starts to fade.
 - The area stays bright while you stay near the place where you cast the spell. The 10 seconds start when you walk away.
 - Modifiers that change the projectile lifetime also change how long the area stays bright. For example, Null Shot makes it last about 33 seconds, and Reduce Lifetime makes it last about 6.5 seconds.
-- Runs started with version 0.3.0 are no longer cleaned up. To continue such a run, play it with version 0.3.1 first, or start a new game.
+- Runs started with version 0.3.0 are no longer cleaned up. If you still play such a run, please start a new game.
