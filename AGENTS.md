@@ -12,10 +12,6 @@ You are working in a context of the **Pick Up Your Lantern** - a mod for Noita g
 
 - Use Conventional Commits naming convention for new commits
 
-## Development
-
-- Use Conventional Commits convention for commit naming
-
 ## Documentation
 
 - Write documentation in full sentences. Do not drop articles, conjunctions, prepositions, or verbs to save space
