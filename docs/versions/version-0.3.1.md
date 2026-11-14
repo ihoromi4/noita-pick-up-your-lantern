@@ -14,7 +14,7 @@ Version 0.3.1 is a hotfix for a bug in version 0.3.0. Lantern modifiers did not 
 ## Save Cleanup
 
 - [x] Remove the leaked empty components from saves made with version 0.3.0 (`leaked_component_cleanup.lua`). Each loaded lantern is checked once per session. The cleanup removes every `LuaComponent` that has the `enabled_in_world` and `enabled_in_hand` tags and no script. Lanterns in the world are cleaned when their part of the map is loaded. The number of removed components is written to the game log.
-- The cleanup is temporary and will be removed in version 0.4.0, see the [Backlog](../backlog.md#cleanup).
+- The cleanup was temporary. It was removed in version 0.3.2, see [version-0.3.2.md](version-0.3.2.md#cleanup).
 
 ## Release Notes
 

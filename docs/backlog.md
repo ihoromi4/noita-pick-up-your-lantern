@@ -21,10 +21,6 @@ This document lists the tasks that are not done yet. Tasks are grouped by topic.
   - Two other Hiisi have the `healer` herd too: the invisibility Hiisi (`scavenger_invis`) and the shield Hiisi (`scavenger_shield`). They likely have the same bug. The `healer` herd also has the coward (`coward`) and the healer drone (`healerdrone_physics`), which need a check.
   - A whole `healer` herd in the lured list would also attract the healer drone, which is a robot. The fix may need to recognize these Hiisi by their file names instead of the herd.
 
-## Cleanup
-
-- Remove the temporary leaked component cleanup that was added in version 0.3.1. In version 0.3.0, every lit lantern with a modifier got a new empty `LuaComponent` on each illumination update. The cleanup removes these components from lanterns in saves made with version 0.3.0. To remove it, delete `files/scripts/leaked_component_cleanup.lua` and the two lines that load and call it in `init.lua`.
-
 ## Temple Lantern Modifiers
 
 - Magic liquid modifier for the temple lantern (`physics/temple_lantern.xml`): with a small chance, a temple lantern is filled with a magic liquid instead of plasma.

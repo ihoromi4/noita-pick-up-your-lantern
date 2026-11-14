@@ -18,8 +18,6 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_attraction.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_fear.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/tube_lamp_cable.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_chain.lua")
--- Temporary: remove in version 0.4.0.
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/leaked_component_cleanup.lua")
 
 ---Appends mod translation keys into the global translation table.
 local function AppendTranslations()
@@ -76,7 +74,6 @@ function OnWorldPreUpdate()
     UpdateFireEnemyGlow()
     UpdateLanternAttraction()
     UpdateLanternFear()
-    UpdateLeakedComponentCleanup()
 end
 
 ---Called once every frame after the game world is updated.
