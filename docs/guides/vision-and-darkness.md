@@ -47,6 +47,6 @@ The `Polymorphed vision` setting picks how far you see while polymorphed. By def
 
 ## All-Seeing Eye, Sunseed and Sunstone
 
-- **All-Seeing Eye spell**: reveals a slowly growing circle around the place where you cast it, as bright as in vanilla. Once the circle covers the screen, the revealed area fades back into darkness over 10 seconds. Casting it again brightens the circle back up without flickering.
+- **All-Seeing Eye spell**: reveals a slowly growing circle around the place where you cast it, as bright as in vanilla. The circle stays bright for 10 seconds, and then the revealed area fades back into darkness over another 10 seconds. Modifiers that change the projectile lifetime also change how long the circle stays bright. Each frame of added lifetime adds 5 frames of light. For example, Increase Lifetime and Null Shot make it last longer, and Reduce Lifetime makes it shorter. Casting it again brightens the circle back up without flickering.
 - **All-Seeing Eye perk**: reveals the whole level, as in vanilla.
 - **Sunseed and Sunstone**: holding one reveals the whole level, the same as the perk.

@@ -140,7 +140,7 @@ The belt lantern is also recreated after polymorph. See [Belt Lantern](holding-a
 
 Both vanilla reveal mechanics work through the fog of war grid:
 
-- The **`X_RAY` spell** fires a stationary projectile, `data/entities/projectiles/deck/xray.xml` (`lifetime="1000"`, about 16.7 seconds). Its `MagicXRayComponent` (`radius="512"`, `steps_per_frame="8"`) gradually clears the fog of war around the cast point.
+- The **`X_RAY` spell** fires a stationary projectile, `data/entities/projectiles/deck/xray.xml`. Its `MagicXRayComponent` (`radius="512"`, `steps_per_frame="8"`) gradually clears the fog of war around the cast point. The projectile has `lifetime="1000"`, but it never lives that long. The engine removes it about 64 frames after the cast, once the component has cleared the full radius (512 / 8 = 64). Spell modifiers do not change this time.
 - The **`REMOVE_FOG_OF_WAR` perk** adds a `GameEffectComponent` to the player, and the engine clears the fog of war on the whole level. Holding Sunseed or Sunstone (`data/entities/items/pickup/sun/`) gives the same effect.
 
 In vanilla, the revealed area becomes visible thanks to the 35% ambient. The mod's shader blocks do not use the fog of war grid: they darken by distance from the player, scale the ambient and darken the background, so the revealed area went dark again.
@@ -152,9 +152,13 @@ In vanilla, the revealed area becomes visible thanks to the 35% ambient. The mod
   - **Perk:** `GameGetGameEffectCount(entity, "REMOVE_FOG_OF_WAR") > 0` sets `pul_reveal.x = 1.0`.
   - **Spell:** one active circle is sent to the shader as `pul_xray = (x, y, radius, strength)`. A new `pul_xray` entity starts a circle at the cast point.
     - The radius grows by 8/3 px per frame (three times slower than `steps_per_frame="8"`) up to 512 px.
-    - Once the strength is full and the circle covers the screen (`GameGetCameraBounds`, falling back to the virtual resolution 427×242) or reaches the maximum radius, the strength fades to 0 over 10 seconds (600 frames).
-    - The circle lives until the fade ends, even if the projectile is gone.
-  - **Repeated cast:** if a circle is still active, the new one takes over its radius and strength and then rises to full strength over 1 second (60 frames). Rapid casting does not make the screen flicker.
+    - The circle keeps its full strength until its reveal timer runs out. The reveal timer is the number of frames left before the circle starts to fade. Then the strength fades to 0 over 10 seconds (600 frames).
+    - The circle lives until the fade ends, even though the projectile is gone after about 64 frames.
+  - **Reveal timer:** `GetRevealFrames` reads the `ProjectileComponent` of the new projectile. Spell modifiers add `c.lifetime_add` to its `lifetime` field, while `mStartingLifetime` keeps the value from the XML. The `lifetime` field counts down every frame, and the script first sees the projectile one frame after the cast. The added lifetime is therefore `lifetime + 1 - mStartingLifetime`.
+    - The reveal timer is 600 frames (10 seconds) plus 5 frames for each frame of added lifetime. For example, `ZERO_DAMAGE` (+280) gives 2000 frames, and `LIFETIME_DOWN` (-42) gives 390 frames.
+    - The reveal timer is at least 60 frames, so the circle always reaches full strength.
+    - The constants are `XRAY_BASE_REVEAL_FRAMES`, `XRAY_LIFETIME_MULTIPLIER` and `XRAY_MIN_REVEAL_FRAMES`.
+  - **Repeated cast:** if a circle is still active, the new one takes over its radius and strength and then rises to full strength over 1 second (60 frames). Rapid casting does not make the screen flicker. The reveal timer comes from the new projectile, so the latest cast decides when the fading starts.
 
 The shader combines both into `pul_reveal_amount` (0.0 to 1.0, with a soft circle edge). It removes the distance darkening, restores the vanilla ambient (`mix(pul_vision.z, 1.0, pul_reveal_amount)`) and turns off the background darkening. Inside the revealed area, visibility matches vanilla.
 

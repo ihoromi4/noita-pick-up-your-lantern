@@ -151,7 +151,7 @@ The distribution of functions balances optimization needs with event responsiven
 
 Both vanilla revelation mechanics operate through the Fog of War grid (`tex_fog`):
 
-* **The `X_RAY` spell** casts a static projectile `data/entities/projectiles/deck/xray.xml` (`lifetime="1000"`, approximately 16.7 s). Its `MagicXRayComponent radius="512" steps_per_frame="8"` progressively clears the fog grid around the cast position.
+* **The `X_RAY` spell** casts a static projectile `data/entities/projectiles/deck/xray.xml`. Its `MagicXRayComponent radius="512" steps_per_frame="8"` progressively clears the fog grid around the cast position. The projectile has `lifetime="1000"`, but the engine removes it about 64 frames after the cast, with or without lifetime modifiers. See [All-Seeing Eye Projectile Lifetime](all-seeing-eye-lifetime.md).
 * **The `REMOVE_FOG_OF_WAR` perk** grants the player a `GameEffectComponent` with the same effect. The engine sets `mFogOfWarOpenEverywhere`, and fog disappears across the entire level. The same effect is provided by holding a Sunseed or Sunstone (`data/entities/items/pickup/sun/`).
 
 In vanilla, the revealed area becomes visible due to the 35% underground ambient light. The mod's shader blocks do not depend on `tex_fog`. Instead, they overlay fog based on distance from the player, scale ambient light by `pul_vision.z`, and darken the background. Consequently, the revealed area was darkened again.
@@ -165,7 +165,7 @@ Handled in [all_seeing_eye.lua](../../pick_up_your_lantern/files/scripts/all_see
   * Perk: `GameGetGameEffectCount(entity, "REMOVE_FOG_OF_WAR") > 0` → `pul_reveal.x = 1.0`;
   * Spell: a single circle is active and passed to the shader as `pul_xray = (x, y, radius, strength)`. A new entity tagged with `pul_xray` creates a circle centered at the cast location:
     * Radius expands by $8/3$ px per frame (three times slower than `steps_per_frame="8"`) up to $512$ px;
-    * Once strength is full and the circle covers the whole screen (`GameGetCameraBounds`, with a fallback to virtual resolution $427 \times 242$) or reaches maximum radius, reveal strength fades to $0$ over $10$ s ($600$ frames), returning to standard vision levels;
+    * The circle keeps full strength until its reveal timer runs out. The timer is $600$ frames plus $5$ frames for each frame of projectile lifetime added by spell modifiers, and at least $60$ frames. Then reveal strength fades to $0$ over $10$ s ($600$ frames), returning to standard vision levels;
     * The circle persists until fading finishes, even if the projectile entity has already disappeared.
   * Recasting: if a previous circle is still active, the new one adopts its radius and strength, and then strength ramps up to full over $1$ s ($60$ frames from $0$ to $1$). This prevents jarring cut-offs or screen flickering during rapid recasting.
 

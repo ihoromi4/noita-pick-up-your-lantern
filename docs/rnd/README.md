@@ -26,6 +26,7 @@ Features planned for the next versions are listed in the [Development Roadmap](.
 - [Lantern Throwing Mechanics and Controls](throwing-mechanics-and-controls.md) - research on throwing exclusively with RMB, LMB blocking, evaluation of tested configurations, and engine limitations.
 - [Fog of War Line-of-Sight and Shaders](line-of-sight-and-shaders.md) - analysis of vanilla fog/lighting system, 2D screen-space raymarching in `post_final.frag`, and technical limitations.
 - [Limited Player Vision and Darkness](player-vision-and-darkness.md) - architecture for overcoming vanilla 35% ambient light, patching `post_final.frag` shader, ECS interaction, and support for absolute Pitch Black.
+- [All-Seeing Eye Projectile Lifetime](all-seeing-eye-lifetime.md) - how spell modifiers change the `lifetime` of the All-Seeing Eye projectile, why the projectile disappears after about 64 frames, and how the reveal timer is computed.
 - [Diff Patch](diff-patch.md) - single-file library for applying unified diff patches to VFS files and shaders with variable replacement.
 - [Player Polymorph and Lighting System](polymorph-and-lighting.md) - engine polymorph mechanics, `polytools` library, bug with darkness loss after transformation, and fix options.
 - [Lantern Progression: Quality Tiers and Modifiers](lantern-progression.md) - depth-based quality tiers, rare modifiers (flickering, frail), current implementation, and future ideas.

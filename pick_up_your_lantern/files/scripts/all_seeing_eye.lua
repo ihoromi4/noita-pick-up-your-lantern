@@ -16,15 +16,19 @@ local XRAY_MAX_RADIUS = 512
 local XRAY_GROWTH_PER_FRAME = 8 / 3
 -- 1 second for the strength to rise from 0 to full after a cast.
 local XRAY_RISE_FRAMES = 60
--- 10 seconds of fading after the circle has covered the screen.
+-- 10 seconds of full strength for a cast without lifetime modifiers.
+local XRAY_BASE_REVEAL_FRAMES = 600
+-- Each frame of projectile lifetime added by modifiers adds this many frames of full strength.
+local XRAY_LIFETIME_MULTIPLIER = 5
+-- The circle always reaches full strength, even when modifiers shorten the lifetime a lot.
+local XRAY_MIN_REVEAL_FRAMES = XRAY_RISE_FRAMES
+-- 10 seconds of fading after the reveal timer runs out.
 local XRAY_FADE_FRAMES = 600
--- Fallback screen size from VIRTUAL_RESOLUTION_X/Y in data/magic_numbers.xml.
-local SCREEN_WIDTH = 427
-local SCREEN_HEIGHT = 242
 
 ---The single active reveal circle. A new cast replaces it, inheriting its radius and strength.
----The circle outlives its projectile until it fully fades out.
----@type {x: number, y: number, radius: number, strength: number, is_fading: boolean}?
+---The circle outlives its projectile, which MagicXRayComponent removes after about 64 frames.
+---`reveal_frames` is the reveal timer: the frames left before the circle starts to fade.
+---@type {x: number, y: number, radius: number, strength: number, reveal_frames: number, is_fading: boolean}?
 local xray_reveal = nil
 ---All-Seeing Eye projectiles that have already been cast, keyed by entity id.
 ---@type table<number, boolean>
@@ -57,35 +61,36 @@ function PatchXRayProjectile()
     ModTextFileSetContent(XRAY_PROJECTILE_PATH, nxml.tostring(xml))
 end
 
----Returns the camera rectangle in world coordinates.
----@return number x, number y, number width, number height
-local function GetScreenBounds()
-    if GameGetCameraBounds ~= nil then
-        return GameGetCameraBounds()
+---Returns the reveal timer for a new All-Seeing Eye projectile.
+---Spell modifiers add `c.lifetime_add` to the `lifetime` field, while `mStartingLifetime` keeps
+---the value from the XML. The field counts down every frame, and the script first sees
+---the projectile one frame after the cast, hence the `+ 1`.
+---@param entity_id number All-Seeing Eye projectile.
+---@return number frames Frames of full strength before the circle starts to fade.
+local function GetRevealFrames(entity_id)
+    local projectile = EntityGetFirstComponentIncludingDisabled(entity_id, "ProjectileComponent")
+    if projectile == nil then
+        return XRAY_BASE_REVEAL_FRAMES
     end
 
-    local cx, cy = GameGetCameraPos()
-    return cx - SCREEN_WIDTH / 2, cy - SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT
-end
+    local lifetime = ComponentGetValue2(projectile, "lifetime")
+    local starting_lifetime = ComponentGetValue2(projectile, "mStartingLifetime")
+    if lifetime == nil or starting_lifetime == nil or lifetime < 0 or starting_lifetime < 0 then
+        return XRAY_BASE_REVEAL_FRAMES
+    end
 
----Checks whether a circle covers the whole screen.
----@param x number Circle center x.
----@param y number Circle center y.
----@param radius number
----@return boolean
-local function IsScreenCovered(x, y, radius)
-    local sx, sy, sw, sh = GetScreenBounds()
-    local dx = math.max(math.abs(sx - x), math.abs(sx + sw - x))
-    local dy = math.max(math.abs(sy - y), math.abs(sy + sh - y))
-    return dx * dx + dy * dy <= radius * radius
+    local lifetime_add = lifetime + 1 - starting_lifetime
+    return math.max(XRAY_MIN_REVEAL_FRAMES, XRAY_BASE_REVEAL_FRAMES + lifetime_add * XRAY_LIFETIME_MULTIPLIER)
 end
 
 ---Starts a new reveal circle at the cast point of a new All-Seeing Eye projectile.
 ---The circle inherits the radius and strength of the previous one, so nothing disappears abruptly.
+---The reveal timer comes from the new projectile, so the latest cast decides when the fading starts.
 ---@param x number Cast point x.
 ---@param y number Cast point y.
+---@param reveal_frames number Frames of full strength before the circle starts to fade.
 ---@return nil
-local function StartXRayReveal(x, y)
+local function StartXRayReveal(x, y, reveal_frames)
     local radius, strength = 0.0, 1.0
     if xray_reveal ~= nil then
         radius, strength = xray_reveal.radius, xray_reveal.strength
@@ -96,6 +101,7 @@ local function StartXRayReveal(x, y)
         y = y,
         radius = radius,
         strength = strength,
+        reveal_frames = reveal_frames,
         is_fading = false,
     }
 end
@@ -109,7 +115,7 @@ local function RegisterXRayProjectiles()
         if not known_projectiles[entity_id] then
             local x, y = EntityGetTransform(entity_id)
             if x ~= nil and y ~= nil then
-                StartXRayReveal(x, y)
+                StartXRayReveal(x, y, GetRevealFrames(entity_id))
             end
         end
     end
@@ -118,8 +124,8 @@ local function RegisterXRayProjectiles()
 end
 
 ---Advances the reveal circle by the given number of frames.
----The circle expands while its strength rises to full. Once it is at full strength
----and covers the screen or reaches its maximum radius, it fades out over XRAY_FADE_FRAMES.
+---The circle expands while its strength rises to full. Once the reveal timer runs out,
+---it fades out over XRAY_FADE_FRAMES.
 ---@param frames number Frames passed since the last update.
 ---@return nil
 local function AdvanceXRayReveal(frames)
@@ -132,8 +138,8 @@ local function AdvanceXRayReveal(frames)
 
     if not reveal.is_fading then
         reveal.strength = math.min(1.0, reveal.strength + frames / XRAY_RISE_FRAMES)
-        if reveal.strength >= 1.0
-            and (reveal.radius >= XRAY_MAX_RADIUS or IsScreenCovered(reveal.x, reveal.y, reveal.radius)) then
+        reveal.reveal_frames = reveal.reveal_frames - frames
+        if reveal.reveal_frames <= 0 then
             reveal.is_fading = true
         end
         return
