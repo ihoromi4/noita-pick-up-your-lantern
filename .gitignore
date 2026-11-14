@@ -1,3 +1,6 @@
 logger.txt
 save00/
 noita/
+tmp/
+noita
+.claude/settings.local.json
