@@ -13,6 +13,7 @@ You are working in a context of the **Pick Up Your Lantern** - a mod for Noita g
 ## Rules
 
 - Use Conventional Commits naming convention for new commits
+- Never add Co-Authored-By trailers or any other AI attribution (e.g. "Generated with ...") to commit messages
 
 ## Documentation
 
