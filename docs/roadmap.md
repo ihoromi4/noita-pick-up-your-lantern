@@ -22,6 +22,12 @@ Version 0.3 expands the scope to other light fixtures and world interactions: pi
 
 Version 0.3.1 is a hotfix release that makes lantern modifiers work again and fixes a memory leak that slowed down the game and its closing. It also cleans up saves made with version 0.3. Details: [version-0.3.1.md](versions/version-0.3.1.md).
 
+## Version 0.3.2 - All-Seeing Eye Lifetime Fix
+
+> **Not ready yet**: this version is still in development and has not been released.
+
+Version 0.3.2 is a bug fix release. Spell modifiers that change the projectile lifetime will also change how long the All-Seeing Eye spell reveals the area. The revealed area also stays open while the player stays near the cast point. Details: [version-0.3.2.md](versions/version-0.3.2.md).
+
 ## Version 0.4
 
 > **Not ready yet**: this version is still in development and has not been released.
