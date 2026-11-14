@@ -1,6 +1,6 @@
 # Tube Lamp and Electricity
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 A fluorescent tube lamp cannot shine without power. Unlike oil lanterns, a pickable tube lamp shines only while it is wired to the ceiling or hit by electricity, so taking it down mostly costs the player a light source.
 

@@ -1,6 +1,6 @@
 # Native Physics Chain for Chain Torches
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Whether a pickable chain torch can hang on a real Box2D chain built the way the vanilla duplicates build theirs, instead of the Lua chain of `lantern_chain.lua`.
 

@@ -4,7 +4,7 @@ A Noita mod that allows picking up, holding, and throwing lanterns.
 
 ## Documentation
 
-Start with the [Documentation Index](docs/index.md).
+Start with the [Documentation Index](docs/README.md).
 
 The index is the single entry point to all project documentation, and this README deliberately links only to it. As the mod grows, documents get added, renamed and split, and keeping one entry point means only the index has to change, so links scattered across the repository never go stale or contradict each other.
 

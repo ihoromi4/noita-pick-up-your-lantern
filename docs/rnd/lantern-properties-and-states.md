@@ -1,6 +1,6 @@
 # Lantern Properties and Dynamic States
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Internal progression concept: lanterns differ from each other in properties and alter them depending on environmental conditions affecting the player or the lantern itself. The goal is to give the player a reason to search for a "better" lantern and intentionally interact with liquids in the world.
 

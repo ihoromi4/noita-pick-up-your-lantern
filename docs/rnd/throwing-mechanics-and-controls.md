@@ -1,6 +1,6 @@
 # Lantern Throwing Mechanics and Controls
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 This report documents the attempts to implement throwing a lantern exclusively with the right mouse button (RMB) while preserving vanilla physics, visual effects, and a clean user interface. None of the tested approaches solved all issues simultaneously.
 

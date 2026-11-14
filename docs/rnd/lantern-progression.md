@@ -1,6 +1,6 @@
 # Lantern Progression: Quality Tiers and Modifiers
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Internal gameplay progression: each lantern spawned in the world receives a quality tier and occasionally a modifier. The deeper the player descends, the better lanterns they find, providing a reason to search for and compare lanterns rather than just taking the first one encountered.
 

@@ -1,6 +1,6 @@
 # Limited Player Vision and Darkness
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Technical research and implementation overview of the Limited Player Vision system, overcoming vanilla Noita engine limitations, and creating the absolute darkness (Pitch Black 0%) mode in the **Pick Up Your Lantern** mod.
 

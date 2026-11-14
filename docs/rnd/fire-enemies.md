@@ -1,6 +1,6 @@
 # Fire Enemies: Glow and Attraction to Lanterns
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Research on the "Fire Enemies Lighting Rework" planned for version 0.3 (see [version-0.3.md](../versions/version-0.3.md#fire-enemies-lighting-rework)): fire-related enemies glow brighter than other enemies so they stand out in darkness, enemies of other mods are detected automatically, and lanterns attract fire enemies.
 

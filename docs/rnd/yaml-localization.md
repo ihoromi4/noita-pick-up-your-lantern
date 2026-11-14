@@ -1,6 +1,6 @@
 # YAML Localization
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 > [!NOTE]
 > Status: **Postponed**. The idea has been analyzed but not implemented. Translations are still stored in `pick_up_your_lantern/files/translations.csv`.

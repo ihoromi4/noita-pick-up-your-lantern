@@ -1,6 +1,6 @@
 # Enemy Study: Damage Bonus Against Observed Enemies
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Research on the "Enemy study" mechanic planned for version 0.3 (see [version-0.3.md](../versions/version-0.3.md#strategic-world-incentives)): the player grows a damage bonus against enemies by watching them in the light, and studies each enemy type faster the better they already know it and its relatives.
 

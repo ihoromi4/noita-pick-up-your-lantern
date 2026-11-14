@@ -1,6 +1,6 @@
 # Player Polymorph and Lighting System
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Investigation of the interaction between the limited vision and lighting systems of the **Pick Up Your Lantern** mod and player transformations into other entities (Polymorphine, Chaotic Polymorphine, Unstable Polymorphine, Cessation, etc.). The base visibility architecture is described in [Limited Player Vision and Darkness](player-vision-and-darkness.md).
 

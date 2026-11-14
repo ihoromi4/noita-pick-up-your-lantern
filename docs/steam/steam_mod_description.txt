@@ -39,7 +39,7 @@ Two optional modes are off by default, and presets do not turn them on:
 [/list]
 
 [h2]Documentation[/h2]
-Want to know exactly how every light and creature behaves, or what each setting does? Read the detailed [url=https://github.com/ihoromi4/noita-pick-up-your-lantern/blob/main/docs/index.md]documentation[/url] on GitHub. Be warned: it spoils the surprises.
+Want to know exactly how every light and creature behaves, or what each setting does? Read the detailed [url=https://github.com/ihoromi4/noita-pick-up-your-lantern/blob/main/docs/README.md]documentation[/url] on GitHub. Be warned: it spoils the surprises.
 
 [h2]Languages[/h2]
 English, Russian, Polish, Simplified Chinese.

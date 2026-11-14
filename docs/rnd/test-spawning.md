@@ -1,6 +1,6 @@
 # Spawning Fixtures for In-Game Tests
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Many light fixtures spawn only in a few biomes, often far from the start (for example, the mining lamp: `hills`, `winter`, `mountain_tree`, `lake`). To test a new pickable fixture quickly, the mod can spawn it at known ceiling points in the mountain hall, the entrance to the Mines, which every run passes in the first minute.
 

@@ -1,6 +1,6 @@
 # Vanilla Light Fixture Types
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 The game files (`data/entities/props/`) contain three main entities for hanging oil lanterns:
 

@@ -1,6 +1,6 @@
 # Extended Light Fixtures
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Results of the version 0.3 item "Extended Light Fixture Support" ([version-0.3.md](../versions/version-0.3.md#extended-light-fixture-support)): making the mining lamp, the tube lamp, the temple lantern and the chain torches pickable like lanterns. All of them are pickable and checked in game. How they are built now is described in [Lantern Entities](../dev/lantern-entities.md); this page keeps what was learned on the way and why the final design was chosen.
 

@@ -1,6 +1,6 @@
 # Sprite Geometry and Positioning
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 - **[Confirmed]** The lantern spawn marker on biome maps (`spawn_lamp`, color `0xffffff00`) is placed in the first air pixel (`dy = 0`) immediately below solid ceiling pixels (`dy = -1, -2, -3`).
 - **[Confirmed]** The sprites `lantern_small.png` and `lantern.png` have a size of `9x13` pixels, but different vertical fill:

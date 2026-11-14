@@ -1,6 +1,6 @@
 # Fog of War Line-of-Sight and Shaders
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 Investigation of the Fog of War and Lighting systems in Noita, along with an analysis of the feasibility of implementing Line-of-Sight fog clearance via shaders.
 

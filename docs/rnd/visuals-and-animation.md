@@ -1,6 +1,6 @@
 # Visual Rendering and In-Hand Animation
 
-[← Back to R&D Index](../rnd.md)
+[← Back to R&D Index](README.md)
 
 - **[Confirmed]** When the lantern is in the world, its glass body is rendered by the physics engine from `PhysicsImageShapeComponent` (`lantern_small.png` / `lantern.png`), while `SpriteComponent` renders only the animated flame (`lantern_small_flame.xml` / `lantern_flame.xml`).
 - **[Confirmed]** When the lantern is held in hands (`enabled_in_hand`), `PhysicsBodyComponent` is disabled and the body from `PhysicsImageShapeComponent` stops rendering. Therefore, a separate `SpriteComponent` (`_tags="character,enabled_in_hand"`, `_enabled="0"`) is used for hands, referencing a composite spritesheet of the bulb combined with the frame-by-frame flame animation (`lantern_small_in_hand.xml` and `lantern_in_hand.xml`).
