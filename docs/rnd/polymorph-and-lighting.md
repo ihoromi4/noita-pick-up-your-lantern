@@ -16,7 +16,7 @@ Investigation of the interaction between the limited vision and lighting systems
 
 ## Discovered Bug
 
-After the player transforms (observed with Chaotic Polymorphine) into another entity, the surrounding level becomes visible, and upon returning to the original form, visibility remains near-vanilla. Darkness is restored only after modifying mod settings. The bug reproduces across different biomes and is biome-independent. The bug is tracked in [version-0.2.md](../versions/version-0.2.md#known-issues-and-next-steps).
+After the player transforms (observed with Chaotic Polymorphine) into another entity, the surrounding level becomes visible, and upon returning to the original form, visibility remains near-vanilla. Darkness is restored only after modifying mod settings. The bug reproduces across different biomes and is biome-independent. The bug is tracked in [version-0.2.0.md](../versions/version-0.2.0.md#known-issues-and-next-steps).
 
 The root cause lies in `UpdatePlayerVision` ([player_vision.lua](../../pick_up_your_lantern/files/scripts/player_vision.lua)), which is called every frame from `OnWorldPreUpdate`:
 

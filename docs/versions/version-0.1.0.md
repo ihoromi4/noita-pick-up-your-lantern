@@ -1,6 +1,6 @@
-# Version 0.1 - MVP and Core Lifecycle
+# Version 0.1.0 - MVP and Core Lifecycle
 
-Tracking document for features, implementation progress, and known issues for **Version 0.1**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md).
+Tracking document for features, implementation progress, and known issues for **Version 0.1.0**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md).
 
 ## World Physics and Anchors
 

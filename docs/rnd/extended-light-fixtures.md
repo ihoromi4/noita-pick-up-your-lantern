@@ -2,7 +2,7 @@
 
 [← Back to R&D Index](README.md)
 
-Results of the version 0.3 item "Extended Light Fixture Support" ([version-0.3.md](../versions/version-0.3.md#extended-light-fixture-support)): making the mining lamp, the tube lamp, the temple lantern and the chain torches pickable like lanterns. All of them are pickable and checked in game. How they are built now is described in [Lantern Entities](../dev/lantern-entities.md); this page keeps what was learned on the way and why the final design was chosen.
+Results of the version 0.3.0 item "Extended Light Fixture Support" ([version-0.3.0.md](../versions/version-0.3.0.md#extended-light-fixture-support)): making the mining lamp, the tube lamp, the temple lantern and the chain torches pickable like lanterns. All of them are pickable and checked in game. How they are built now is described in [Lantern Entities](../dev/lantern-entities.md); this page keeps what was learned on the way and why the final design was chosen.
 
 ## Contents
 
@@ -77,4 +77,4 @@ All fixtures share the lantern features: quality tiers and modifiers, the belt, 
 
 ## Later Ideas
 
-- Version 0.4 plans a magic liquid modifier for the temple lantern: a rare dark lantern that spills Concentrated Mana, Flummoxium or Unstable Teleportatium when it breaks. See [version-0.4.md](../versions/version-0.4.md#temple-lantern-modifiers).
+- Version 0.4.0 plans a magic liquid modifier for the temple lantern: a rare dark lantern that spills Concentrated Mana, Flummoxium or Unstable Teleportatium when it breaks. See the [Backlog](../backlog.md#temple-lantern-modifiers).

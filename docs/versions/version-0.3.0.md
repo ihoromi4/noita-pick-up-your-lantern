@@ -1,6 +1,6 @@
-# Version 0.3 - Variety and World Interactions
+# Version 0.3.0 - Variety and World Interactions
 
-Tracking document for features, implementation progress, and known issues for **Version 0.3**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.2.md](version-0.2.md).
+Tracking document for features, implementation progress, and known issues for **Version 0.3.0**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.2.0.md](version-0.2.0.md).
 
 ## Summary
 

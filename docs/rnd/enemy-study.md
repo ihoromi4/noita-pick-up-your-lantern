@@ -2,7 +2,7 @@
 
 [← Back to R&D Index](README.md)
 
-Research on the "Enemy study" mechanic planned for version 0.3 (see [version-0.3.md](../versions/version-0.3.md#strategic-world-incentives)): the player grows a damage bonus against enemies by watching them in the light, and studies each enemy type faster the better they already know it and its relatives.
+Research on the "Enemy study" mechanic planned for version 0.3.0 (see [version-0.3.0.md](../versions/version-0.3.0.md#strategic-world-incentives)): the player grows a damage bonus against enemies by watching them in the light, and studies each enemy type faster the better they already know it and its relatives.
 
 - [Requirements](#requirements)
 - [Approach Overview](#approach-overview)
@@ -140,7 +140,7 @@ Everything that counts as light for study is marked with the `pul_light_source` 
 
 - The Light spell modifier adds `data/entities/misc/light.xml` (a `LightComponent` with radius 200) through `extra_entities`. Extra entities are merged into the projectile entity (e.g. `homing.xml` holds only a `HomingComponent`, which must sit on the projectile), so the tag on the root of `light.xml` alone may not reach the projectile. `files/scripts/patch_light_sources.lua` therefore tags the root and the `LightComponent` and adds a `LuaComponent` (`execute_on_added`, `remove_after_executed`) that calls `EntityAddTag` on the entity the components end up on.
 - Many vanilla projectiles have their own `LightComponent`. Reading only the tagged component keeps ordinary spells out of the study and reads the radius of the Light modifier, not the projectile's own light.
-- New light sources (chain torches, mining lamps and other fixtures of version 0.3, light sources of other mods) join the study by getting the same tag: in their XML files, or by adding their path to `LIGHT_SOURCE_PATHS` in `patch_light_sources.lua`.
+- New light sources (chain torches, mining lamps and other fixtures of version 0.3.0, light sources of other mods) join the study by getting the same tag: in their XML files, or by adding their path to `LIGHT_SOURCE_PATHS` in `patch_light_sources.lua`.
 - Radius: the current `radius` of the source's `LightComponent`. For lanterns it already includes the illumination setting, quality tier, liquid state and the per-frame changes of modifiers (flickering, fading), which `GetLanternAppliedLightRadius` from `lantern_illumination.lua` does not.
 - **[Needs verification]** `LightComponent.radius` is the outer radius of the light sprite with a soft falloff. The visibly lit area is smaller. An "effective radius" factor (e.g. ×0.6) should be calibrated in-game so that an enemy counts as lit only where the player actually sees it lit.
 - The player's own light is excluded on purpose. With vanilla vision every enemy near the player would be lit, and the mechanic would lose its link to lanterns.

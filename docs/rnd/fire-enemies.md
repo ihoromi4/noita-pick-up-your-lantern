@@ -2,7 +2,7 @@
 
 [← Back to R&D Index](README.md)
 
-Research on the "Fire Enemies Lighting Rework" planned for version 0.3 (see [version-0.3.md](../versions/version-0.3.md#fire-enemies-lighting-rework)): fire-related enemies glow brighter than other enemies so they stand out in darkness, enemies of other mods are detected automatically, and lanterns attract fire enemies.
+Research on the "Fire Enemies Lighting Rework" planned for version 0.3.0 (see [version-0.3.0.md](../versions/version-0.3.0.md#fire-enemies-lighting-rework)): fire-related enemies glow brighter than other enemies so they stand out in darkness, enemies of other mods are detected automatically, and lanterns attract fire enemies.
 
 - [Requirements](#requirements)
 - [Vanilla Fire Enemies](#vanilla-fire-enemies)
@@ -125,7 +125,7 @@ The engine has no Lua call that sends an `AnimalAIComponent` to a point, and no 
 
 ### Design
 
-`files/scripts/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../versions/version-0.3.md#natural-fear-mode) mode, which attracts Hiisi and insects.
+`files/scripts/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../versions/version-0.3.0.md#natural-fear-mode) mode, which attracts Hiisi and insects.
 
 - **Lured enemies**: root entities with the `enemy` tag within the attraction radius of a lure lantern, plus the enemies attracted earlier (to release them). An enemy is lured when:
   - `Lanterns attract fire enemies` is on and it has the `pul_fire_enemy` tag, which the glow scan adds to every enemy it lights;
@@ -187,7 +187,7 @@ Work state at the end of 2026-10-27:
 Next steps:
 
 1. Tune `LURE_ENTER_CHANCE`, `LURE_LEAVE_CHANCE`, `LEASH_DISTANCE`, `ATTRACTION_RADIUS_FACTOR` and `TRANCE_DETECTION_RANGE` by feel.
-2. Slime creatures and other monsters avoid lantern light in the [Natural Fear](../versions/version-0.3.md#natural-fear-mode) mode instead of being attracted (see [In-Game Findings](#in-game-findings)).
+2. Slime creatures and other monsters avoid lantern light in the [Natural Fear](../versions/version-0.3.0.md#natural-fear-mode) mode instead of being attracted (see [In-Game Findings](#in-game-findings)).
 
 ### Open Questions
 

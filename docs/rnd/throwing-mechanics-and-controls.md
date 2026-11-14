@@ -179,7 +179,7 @@ In vanilla scripts (e.g., `data/scripts/items/potion_glass_break.lua`), the engi
 
 ## Hanging the Lantern on LMB
 
-Instead of blocking LMB (version 0.3), the left button is given its own action: hang the lantern under the ceiling above the player as if it had just spawned. RMB retains the vanilla throw along the dotted line.
+Instead of blocking LMB (version 0.3.0), the left button is given its own action: hang the lantern under the ceiling above the player as if it had just spawned. RMB retains the vanilla throw along the dotted line.
 
 ### Behavior
 

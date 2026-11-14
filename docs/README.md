@@ -16,6 +16,7 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
 | [Developer Documentation](dev/README.md) | Architecture, engine quirks and implementation details. | Contributors |
 | [Functional Requirements](requirements.md) | What the mod is meant to do: the full feature specification. | Contributors, designers |
 | [Development Roadmap](roadmap.md) | Planned features grouped by release. | Everyone |
+| [Backlog](backlog.md) | Tasks that are not done yet, grouped by topic. | Contributors |
 | [Version Notes](versions/version-0.3.1.md) | What each release delivered, with fixed issues. Each file links to the previous one. | Everyone |
 | [Publishing to Steam Workshop](steam/steam_publishing.md) | Where the Workshop description lives and how to publish a release with `noitacli workshop`. | Maintainers |
 
@@ -44,12 +45,12 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
    - light, quality tiers, modifiers and liquid states: [Lantern Properties and Progression](dev/lantern-properties-and-progression.md);
    - limited vision, shaders, polymorph, the All-Seeing Eye and the fire enemy glow: [Vision and Lighting](dev/vision-and-lighting.md);
    - enemy study, luring enemies to lanterns and Natural Fear: [Creatures and Light](dev/creatures-and-light.md).
-4. Check the [Functional Requirements](requirements.md) and the [Development Roadmap](roadmap.md) before adding a feature, and the current version notes in [versions/](versions/) for open tasks. Engine research and rejected approaches are collected in the [R&D Notes](rnd/README.md).
+4. Check the [Functional Requirements](requirements.md) and the [Development Roadmap](roadmap.md) before adding a feature, and the [Backlog](backlog.md) for open tasks. Engine research and rejected approaches are collected in the [R&D Notes](rnd/README.md).
 5. Follow the code style and commit conventions in [AGENTS.md](../AGENTS.md). See the [README](../README.md) for running the tests.
 
 ### I Want to Publish a Release
 
-1. Make sure every item in the current version notes in [versions/](versions/) is done.
+1. Make sure that the notes of the release version in [versions/](versions/) are complete.
 2. Follow [Publishing to Steam Workshop](steam/steam_publishing.md).
 
 ## Writing Documentation

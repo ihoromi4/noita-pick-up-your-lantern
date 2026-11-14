@@ -5,6 +5,8 @@ You are working in a context of the **Pick Up Your Lantern** - a mod for Noita g
 ## Core directories and files
 
 - `docs/`: Markdown documentation of the mod.
+- `docs/backlog.md`: Tasks that are not done yet, grouped by topic.
+- `docs/versions/`: Completed work and release notes for each version.
 - `pick_up_your_lantern/`: Source files of the mod.
 - `pick_up_your_lantern/init.lua`: Mod initialization file.
 

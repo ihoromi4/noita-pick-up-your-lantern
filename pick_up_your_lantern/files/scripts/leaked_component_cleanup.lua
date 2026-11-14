@@ -1,5 +1,5 @@
---- Temporary cleanup for saves made with version 0.3 (to be removed in version 0.4).
---- In version 0.3 the modifier script path was lost, so every lit lantern with a modifier got a new empty
+--- Temporary cleanup for saves made with version 0.3.0 (to be removed in version 0.4.0).
+--- In version 0.3.0 the modifier script path was lost, so every lit lantern with a modifier got a new empty
 --- LuaComponent on each illumination update. Thousands of them pile up on a lantern and slow down saving the game.
 --- Each loaded lantern is checked once per session, and the empty components are removed from it.
 
@@ -42,7 +42,7 @@ local SCRIPT_FIELDS = {
 -- Entity IDs are not reused within a session, so a checked lantern never needs a second check.
 local checked_lanterns = {}
 
----Checks whether a LuaComponent is one of the empty components left by the version 0.3 leak.
+---Checks whether a LuaComponent is one of the empty components left by the version 0.3.0 leak.
 ---@param comp number LuaComponent ID.
 ---@return boolean
 local function IsLeakedComponent(comp)
