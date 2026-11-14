@@ -165,7 +165,7 @@ Handled in [all_seeing_eye.lua](../../pick_up_your_lantern/files/scripts/all_see
   * Perk: `GameGetGameEffectCount(entity, "REMOVE_FOG_OF_WAR") > 0` → `pul_reveal.x = 1.0`;
   * Spell: a single circle is active and passed to the shader as `pul_xray = (x, y, radius, strength)`. A new entity tagged with `pul_xray` creates a circle centered at the cast location:
     * Radius expands by $8/3$ px per frame (three times slower than `steps_per_frame="8"`) up to $512$ px;
-    * The circle keeps full strength until its reveal timer runs out. The timer is $600$ frames plus $5$ frames for each frame of projectile lifetime added by spell modifiers, and at least $60$ frames. Then reveal strength fades to $0$ over $10$ s ($600$ frames), returning to standard vision levels;
+    * The circle keeps full strength until its reveal timer runs out. The timer is $600$ frames plus $5$ frames for each frame of projectile lifetime added by spell modifiers, and at least $60$ frames. The timer waits while the player stays within $64$ px of the cast point, and it starts to count down once the player first leaves this distance. Then reveal strength fades to $0$ over $10$ s ($600$ frames), returning to standard vision levels;
     * The circle persists until fading finishes, even if the projectile entity has already disappeared.
   * Recasting: if a previous circle is still active, the new one adopts its radius and strength, and then strength ramps up to full over $1$ s ($60$ frames from $0$ to $1$). This prevents jarring cut-offs or screen flickering during rapid recasting.
 

@@ -24,11 +24,14 @@ local XRAY_LIFETIME_MULTIPLIER = 5
 local XRAY_MIN_REVEAL_FRAMES = XRAY_RISE_FRAMES
 -- 10 seconds of fading after the reveal timer runs out.
 local XRAY_FADE_FRAMES = 600
+-- The reveal timer waits while the player stays within this distance from the cast point.
+local XRAY_HOLD_DISTANCE = 64
 
 ---The single active reveal circle. A new cast replaces it, inheriting its radius and strength.
 ---The circle outlives its projectile, which MagicXRayComponent removes after about 64 frames.
 ---`reveal_frames` is the reveal timer: the frames left before the circle starts to fade.
----@type {x: number, y: number, radius: number, strength: number, reveal_frames: number, is_fading: boolean}?
+---`is_released` turns on once the player first leaves the hold distance and never turns off.
+---@type {x: number, y: number, radius: number, strength: number, reveal_frames: number, is_released: boolean, is_fading: boolean}?
 local xray_reveal = nil
 ---All-Seeing Eye projectiles that have already been cast, keyed by entity id.
 ---@type table<number, boolean>
@@ -86,6 +89,7 @@ end
 ---Starts a new reveal circle at the cast point of a new All-Seeing Eye projectile.
 ---The circle inherits the radius and strength of the previous one, so nothing disappears abruptly.
 ---The reveal timer comes from the new projectile, so the latest cast decides when the fading starts.
+---The new circle is not released, so its timer waits again until the player leaves the cast point.
 ---@param x number Cast point x.
 ---@param y number Cast point y.
 ---@param reveal_frames number Frames of full strength before the circle starts to fade.
@@ -102,6 +106,7 @@ local function StartXRayReveal(x, y, reveal_frames)
         radius = radius,
         strength = strength,
         reveal_frames = reveal_frames,
+        is_released = false,
         is_fading = false,
     }
 end
@@ -123,12 +128,35 @@ local function RegisterXRayProjectiles()
     known_projectiles = alive
 end
 
+---Checks whether the reveal timer of the circle waits for the player to leave the cast point.
+---The circle is released once the player first moves farther than XRAY_HOLD_DISTANCE.
+---Without a player, the timer does not wait, but the circle is not released either.
+---@param reveal table The active reveal circle.
+---@param player_x number? Player x, nil without a player entity.
+---@param player_y number? Player y, nil without a player entity.
+---@return boolean
+local function IsXRayRevealHeld(reveal, player_x, player_y)
+    if reveal.is_released or player_x == nil or player_y == nil then
+        return false
+    end
+
+    local dx, dy = player_x - reveal.x, player_y - reveal.y
+    if dx * dx + dy * dy > XRAY_HOLD_DISTANCE * XRAY_HOLD_DISTANCE then
+        reveal.is_released = true
+        return false
+    end
+
+    return true
+end
+
 ---Advances the reveal circle by the given number of frames.
----The circle expands while its strength rises to full. Once the reveal timer runs out,
----it fades out over XRAY_FADE_FRAMES.
+---The circle expands while its strength rises to full. The reveal timer counts down
+---once the player has left the cast point. When it runs out, the circle fades out over XRAY_FADE_FRAMES.
 ---@param frames number Frames passed since the last update.
+---@param player_x number? Player x, nil without a player entity.
+---@param player_y number? Player y, nil without a player entity.
 ---@return nil
-local function AdvanceXRayReveal(frames)
+local function AdvanceXRayReveal(frames, player_x, player_y)
     local reveal = xray_reveal
     if reveal == nil then
         return
@@ -138,7 +166,9 @@ local function AdvanceXRayReveal(frames)
 
     if not reveal.is_fading then
         reveal.strength = math.min(1.0, reveal.strength + frames / XRAY_RISE_FRAMES)
-        reveal.reveal_frames = reveal.reveal_frames - frames
+        if not IsXRayRevealHeld(reveal, player_x, player_y) then
+            reveal.reveal_frames = reveal.reveal_frames - frames
+        end
         if reveal.reveal_frames <= 0 then
             reveal.is_fading = true
         end
@@ -152,13 +182,15 @@ local function AdvanceXRayReveal(frames)
 end
 
 ---Passes the All-Seeing Eye spell circle to the shader.
+---@param player_x number? Player x, nil without a player entity.
+---@param player_y number? Player y, nil without a player entity.
 ---@return nil
-local function UpdateXRayReveal()
+local function UpdateXRayReveal(player_x, player_y)
     local frame = GameGetFrameNum()
     local frames = last_update_frame ~= nil and math.max(0, frame - last_update_frame) or 0
     last_update_frame = frame
 
-    AdvanceXRayReveal(frames)
+    AdvanceXRayReveal(frames, player_x, player_y)
     RegisterXRayProjectiles()
 
     local reveal = xray_reveal
@@ -172,7 +204,8 @@ end
 
 ---Updates All-Seeing Eye reveals every frame.
 ---The perk reveals the whole level, the spell reveals a circle around its cast point.
----The spell circle does not depend on the player, so it keeps going while the player entity is missing.
+---The spell circle waits while the player stays near the cast point.
+---Without a player entity, the circle keeps going and its timer counts down as usual.
 ---@param player_entity number? Entity currently controlled by the player, nil when dead.
 ---@return nil
 function UpdateAllSeeingEye(player_entity)
@@ -182,5 +215,9 @@ function UpdateAllSeeingEye(player_entity)
     end
     GameSetPostFxParameter("pul_reveal", perk_reveal, 0.0, 0.0, 0.0)
 
-    UpdateXRayReveal()
+    local player_x, player_y = nil, nil
+    if player_entity ~= nil then
+        player_x, player_y = EntityGetTransform(player_entity)
+    end
+    UpdateXRayReveal(player_x, player_y)
 end

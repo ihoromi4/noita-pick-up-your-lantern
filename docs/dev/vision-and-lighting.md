@@ -153,12 +153,15 @@ In vanilla, the revealed area becomes visible thanks to the 35% ambient. The mod
   - **Spell:** one active circle is sent to the shader as `pul_xray = (x, y, radius, strength)`. A new `pul_xray` entity starts a circle at the cast point.
     - The radius grows by 8/3 px per frame (three times slower than `steps_per_frame="8"`) up to 512 px.
     - The circle keeps its full strength until its reveal timer runs out. The reveal timer is the number of frames left before the circle starts to fade. Then the strength fades to 0 over 10 seconds (600 frames).
+    - The reveal timer waits while the player stays near the cast point. The cast point is the position of the projectile, which does not move after the cast. The timer starts to count down only when the player first moves farther than the hold distance, `XRAY_HOLD_DISTANCE` (64 px), from the cast point.
+    - The circle then gets the `is_released` flag, which never turns off. Coming back to the cast point does not pause the timer or the fading.
+    - Without a player entity, for example after death, the timer counts down as usual. `UpdateAllSeeingEye` passes the position of the player or the polymorphed creature to `UpdateXRayReveal`.
     - The circle lives until the fade ends, even though the projectile is gone after about 64 frames.
   - **Reveal timer:** `GetRevealFrames` reads the `ProjectileComponent` of the new projectile. Spell modifiers add `c.lifetime_add` to its `lifetime` field, while `mStartingLifetime` keeps the value from the XML. The `lifetime` field counts down every frame, and the script first sees the projectile one frame after the cast. The added lifetime is therefore `lifetime + 1 - mStartingLifetime`.
     - The reveal timer is 600 frames (10 seconds) plus 5 frames for each frame of added lifetime. For example, `ZERO_DAMAGE` (+280) gives 2000 frames, and `LIFETIME_DOWN` (-42) gives 390 frames.
     - The reveal timer is at least 60 frames, so the circle always reaches full strength.
     - The constants are `XRAY_BASE_REVEAL_FRAMES`, `XRAY_LIFETIME_MULTIPLIER` and `XRAY_MIN_REVEAL_FRAMES`.
-  - **Repeated cast:** if a circle is still active, the new one takes over its radius and strength and then rises to full strength over 1 second (60 frames). Rapid casting does not make the screen flicker. The reveal timer comes from the new projectile, so the latest cast decides when the fading starts.
+  - **Repeated cast:** if a circle is still active, the new one takes over its radius and strength and then rises to full strength over 1 second (60 frames). Rapid casting does not make the screen flicker. The reveal timer comes from the new projectile, so the latest cast decides when the fading starts. The circle moves to the new cast point, and its timer waits again until the player leaves it.
 
 The shader combines both into `pul_reveal_amount` (0.0 to 1.0, with a soft circle edge). It removes the distance darkening, restores the vanilla ambient (`mix(pul_vision.z, 1.0, pul_reveal_amount)`) and turns off the background darkening. Inside the revealed area, visibility matches vanilla.
 

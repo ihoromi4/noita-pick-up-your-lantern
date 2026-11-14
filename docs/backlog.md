@@ -8,15 +8,6 @@ This document lists the tasks that are not done yet. Tasks are grouped by topic.
 - When a task is done, remove it from this document.
 - Then describe the result in one to three sentences in the notes of the version that includes it. The notes are the `version-X.Y.Z.md` files in [versions/](versions/). Put the description under `Completed Work` or under a section for its topic. If the version has no notes file yet, create it with the first completed task.
 
-## All-Seeing Eye Spell
-
-- Change: the reveal circle stays open while the player stays near the cast point. The cast point is the position of the All-Seeing Eye projectile. The projectile has `speed_min="0"` and `speed_max="0"`, so it does not move after the cast. The reveal timer starts to count down only when the player first moves farther than the hold distance from the cast point. The reveal timer is the number of frames left before the circle starts to fade. It is the `reveal_frames` field of the circle in `files/scripts/all_seeing_eye.lua`. The hold distance is a new constant, for example `XRAY_HOLD_DISTANCE`, and its value is still to be chosen.
-  - While the player stays within the hold distance, the timer does not start, and the circle keeps its full strength.
-  - Once the player has left, the timer counts down until the end and does not stop again. Coming back to the cast point does not pause the timer or the fading. The circle needs a flag, for example `is_released`, that turns on once and never turns off.
-  - The reveal timer starts from a value that depends on the projectile lifetime, see `GetRevealFrames`. The circle already keeps its own timer and cast point in the script. It must stay that way, because `MagicXRayComponent` removes the projectile about 64 frames after the cast.
-  - A repeated cast moves the circle to the new cast point. The hold distance is then measured from the new cast point. The new circle starts with the flag turned off, so the timer waits again until the player leaves.
-  - Without a player entity, for example after death, the timer counts down as usual. `UpdateAllSeeingEye` already receives the player entity, so it can pass the player position to `UpdateXRayReveal`.
-
 ## Natural Fear Mode
 
 - The Giant Laser-Drone (Jättilaser-lennokki, `drone_lasership`) fears lantern light in the Natural Fear mode, but it should not. The drone is a robot, and robots are immune to fire. The guides say that creatures immune to fire do not fear the light.
