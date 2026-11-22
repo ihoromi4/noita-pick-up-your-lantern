@@ -67,11 +67,42 @@
 
     <!-- Dousing in liquids and lighting again from fire, in the world and in hand. Replaces the vanilla
          TorchComponent, which went out in solid materials too and was lit again by the item system when picked
-         up. The fire in hand comes from lantern_in_hand.lua. -->
+         up. The fire in hand comes from lantern_in_hand.lua. Runs every frame to drive the hiss AudioLoopComponent
+         while submerged; liquid raychecks and timer ticks run every 10 frames. -->
     <LuaComponent
         _tags="enabled_in_world,enabled_in_hand"
-        execute_every_n_frame="10"
+        execute_every_n_frame="1"
         script_source_file="mods/pick_up_your_lantern/files/scripts/chain_torch_fire.lua"
+    ></LuaComponent>
+
+    <AudioLoopComponent
+        _tags="pul_hiss_sound,enabled_in_world,enabled_in_hand"
+        file="data/audio/Desktop/materials.bank"
+        event_name="materials/chemical_reaction"
+        auto_play="0"
+        auto_play_if_enabled="0"
+        volume_autofade_speed="0.2"
+    ></AudioLoopComponent>
+
+    <!-- Detects lava and liquid_fire around the torch so hot liquids do not douse it and can relight it. -->
+    <MaterialAreaCheckerComponent
+        _tags="enabled_in_world,enabled_in_hand"
+        area_aabb.min_x="-8"
+        area_aabb.max_x="8"
+        area_aabb.min_y="-8"
+        area_aabb.max_y="8"
+        update_every_x_frame="5"
+        material="lava"
+        material2="liquid_fire"
+        look_for_failure="0"
+        count_min="1"
+        kill_after_message="0"
+    ></MaterialAreaCheckerComponent>
+
+    <LuaComponent
+        _tags="enabled_in_world,enabled_in_hand"
+        execute_every_n_frame="-1"
+        script_material_area_checker_success="mods/pick_up_your_lantern/files/scripts/chain_torch_hot_liquid.lua"
     ></LuaComponent>
 
     <!-- The vanilla torch particles (data/entities/base_torch_particle.xml), moved down to the coals, in the world

@@ -6,7 +6,7 @@ This document lists planned tasks that are not done yet. Released versions and c
 
 - Keep open tasks only in this document. Group them by topic.
 - Describe small features directly inside their backlog entry. For complex features or engine questions, write a design or research note in [R&D Notes](rnd/README.md) and link it from the backlog entry.
-- A finished task leaves the backlog. It moves to the notes of its release in the [Versions](versions/README.md) folder.
+- Never delete a finished task from this file alone. In the same edit, record it in the current release file in `docs/versions/` and update its summary in [Versions](versions/README.md).
 - When a task changes how the mod works, update [Player Guides](guides/README.md) and [Developer Documentation](dev/README.md). Those two sections are the source of truth for implemented behavior.
 
 ## Natural Fear Mode
@@ -42,7 +42,6 @@ This document lists planned tasks that are not done yet. Released versions and c
 
 ## Extinguishing and Submersion
 
-- Add a 3-second submersion timer for open-fire lanterns (chain torches) in water and other liquids. While the timer runs, the torch hisses and evaporates water into `steam`. The fire goes out and stops emitting light only when the 3-second timer expires. Leaving the liquid resets the timer. Once a torch goes out, it does not relight automatically and still requires fire.
 - Switch the inventory icon of an extinguished or doused lantern to an unlit variant. Currently, only unpowered tube lamps change their inventory icon.
 
 ## Additional Liquid Interactions

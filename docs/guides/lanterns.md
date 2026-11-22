@@ -59,8 +59,8 @@ A chain torch burns with an open fire, unlike the lanterns behind glass.
 
 - Its sparks fly in the world, in your hand and on your belt.
 - In your hand, some of its sparks are real fire: they set flammable materials around you alight. On your belt, its fire is only for show.
-- A torch goes out when its coals get into water or another liquid. It gives no light then.
-- A torch that went out lights again from fire: in the world when it catches fire, in your hand when you are burning.
+- A torch goes out after its coals stay submerged in a liquid for one second. While submerged, it hisses and reacts with the liquid just like fire does: water turns into steam, slime turns into slime clouds, and oil or alcohol catches fire. Leaving the liquid before the second is up stops the hissing and keeps the torch lit. Lava and liquid fire never put a chain torch out.
+- Once a torch goes out, it gives no light and does not relight on its own. It lights again from fire: in the world when it catches fire, in your hand when you are burning, or when dipped into lava or liquid fire.
 - A chain torch is very sturdy. Falls and throws only dent it, but shots and explosions break it, and it scatters fire around.
 
 ## Throwing
