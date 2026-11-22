@@ -12,7 +12,7 @@ Never write a straight double quote (`"`) in the description. Use typographic qu
 
 ## Publishing a Release
 
-1. Make sure every item in the current version notes in [versions/](../versions/) is done.
+1. Make sure every item in the current version notes in [Versions](../versions/README.md) is done.
 2. Check the Workshop files of the mod:
 
    ```bash

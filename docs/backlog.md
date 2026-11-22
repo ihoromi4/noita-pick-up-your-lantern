@@ -5,8 +5,7 @@ This document lists the tasks that are not done yet. Tasks are grouped by topic.
 ## Rules
 
 - Keep open tasks only in this document. Group them by topic.
-- When a task is done, remove it from this document.
-- Then describe the result in one to three sentences in the notes of the version that includes it. The notes are the `version-X.Y.Z.md` files in [versions/](versions/). Put the description under `Completed Work` or under a section for its topic. If the version has no notes file yet, create it with the first completed task.
+- A finished task leaves the backlog. It moves to the document of the next version in the [versions](versions/README.md) folder.
 
 ## Natural Fear Mode
 
