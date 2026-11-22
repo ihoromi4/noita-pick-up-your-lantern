@@ -1,6 +1,6 @@
 --- Dousing and lighting again of a chain torch, in the world and in hand.
---- Runs every frame to drive the hissing AudioLoopComponent while submerged; liquid checks and timer ticks run
---- every 10 frames.
+--- Runs every 10 frames when dry and switches itself to every frame only while submerged to drive the hissing
+--- AudioLoopComponent; liquid checks and timer ticks always run every 10 frames.
 --- - The fire itself comes from the particle emitters of the torch in the world. In hand the engine turns and
 ---   mirrors the emitters with the aim of the player, so lantern_in_hand.lua makes the fire at the coals of the
 ---   swinging sprite instead, and lantern_belt.lua on the belt (EmitOpenFire()).
@@ -47,24 +47,52 @@ local SUBMERSION_LAST_FRAME_STORAGE = "lantern_submersion_last_frame"
 local HOT_LIQUID_FRAME_STORAGE = "lantern_hot_liquid_frame"
 
 local HISS_AUDIO_TAG = "pul_hiss_sound"
+local HOT_LIQUID_CHECKER_TAG = "pul_hot_liquid_checker"
 local HISS_AUDIO_INTENSITY = 1.0
 local MISC_BANK = "data/audio/Desktop/misc.bank"
 local EXTINGUISH_EVENT = "game_effect/on_fire/game_effect_end"
 local IGNITE_EVENT = "game_effect/on_fire/create"
 
 local entity_id = GetUpdatedEntityID()
+local lua_comp = GetUpdatedComponentID()
+
+---Sets this LuaComponent's execution interval, avoiding redundant writes.
+---@param interval number Execution interval in frames (1 while submerged, 10 when idle).
+---@return nil
+local function SetScriptInterval(interval)
+    if ComponentGetValue2(lua_comp, "execute_every_n_frame") ~= interval then
+        ComponentSetValue2(lua_comp, "execute_every_n_frame", interval)
+    end
+end
+
+---Enables or disables the lava/liquid_fire MaterialAreaCheckerComponent so dry torches pay no scan cost.
+---@param enabled boolean
+---@return nil
+local function SetHotLiquidCheckerEnabled(enabled)
+    local checker = EntityGetFirstComponentIncludingDisabled(entity_id, "MaterialAreaCheckerComponent",
+        HOT_LIQUID_CHECKER_TAG)
+    if checker ~= nil and ComponentGetIsEnabled(checker) ~= enabled then
+        EntitySetComponentIsEnabled(entity_id, checker, enabled)
+    end
+end
+
 if IsLanternExtinguished(entity_id) then
+    SetScriptInterval(CHECK_INTERVAL_FRAMES)
+    SetHotLiquidCheckerEnabled(false)
     return
 end
 
 local frame = GameGetFrameNum()
+local submersion_frames = GetStorageFloat(entity_id, SUBMERSION_FRAMES_STORAGE)
+local last_frame = GetStorageFloat(entity_id, SUBMERSION_LAST_FRAME_STORAGE)
 
--- Drive the hissing loop every frame while the submersion timer is active. Stopping the call fades the loop out.
-if GetStorageFloat(entity_id, SUBMERSION_FRAMES_STORAGE) > 0 then
+-- Between 10-frame liquid checks while actively submerged, only keep the hissing audio loop alive.
+if ComponentGetValue2(lua_comp, "execute_every_n_frame") == 1
+    and submersion_frames > 0
+    and last_frame > 0
+    and (frame - last_frame) < CHECK_INTERVAL_FRAMES
+then
     GameEntityPlaySoundLoop(entity_id, HISS_AUDIO_TAG, HISS_AUDIO_INTENSITY)
-end
-
-if frame % CHECK_INTERVAL_FRAMES ~= 0 then
     return
 end
 
@@ -113,24 +141,30 @@ local function IsTouchedByFire()
     return damage_model ~= nil and ComponentGetValue2(damage_model, "is_on_fire")
 end
 
----Resets the submersion countdown timer when the torch is no longer submerged in a dousing liquid.
+---Resets the submersion countdown timer and restores the 10-frame idle polling interval.
 ---@return nil
 local function ResetSubmersionTimer()
-    if GetStorageFloat(entity_id, SUBMERSION_FRAMES_STORAGE) > 0 then
+    if submersion_frames > 0 then
         SetStorageFloat(entity_id, SUBMERSION_FRAMES_STORAGE, 0)
+        submersion_frames = 0
     end
+    if last_frame > 0 then
+        SetStorageFloat(entity_id, SUBMERSION_LAST_FRAME_STORAGE, 0)
+        last_frame = 0
+    end
+    SetScriptInterval(CHECK_INTERVAL_FRAMES)
 end
 
 ---Emits real fire cells at the coals so Noita's cellular simulation runs the native fire reaction for
 ---whatever liquid surrounds the torch.
 ---@return nil
 local function EmitSubmersionReactionFire()
-    SetRandomSeed(frame, entity_id)
     for _ = 1, SUBMERSION_FIRE_COUNT do
-        local px = coals_x + (Random() * 2 - 1) * SUBMERSION_FIRE_SPREAD_X
-        local py = coals_y + (Random() * 2 - 1) * SUBMERSION_FIRE_SPREAD_Y
-        local vel_x = (Random() * 2 - 1) * SUBMERSION_FIRE_VEL_X_MAX
-        local vel_y = SUBMERSION_FIRE_VEL_Y_MIN + Random() * (SUBMERSION_FIRE_VEL_Y_MAX - SUBMERSION_FIRE_VEL_Y_MIN)
+        local px = coals_x + (math.random() * 2 - 1) * SUBMERSION_FIRE_SPREAD_X
+        local py = coals_y + (math.random() * 2 - 1) * SUBMERSION_FIRE_SPREAD_Y
+        local vel_x = (math.random() * 2 - 1) * SUBMERSION_FIRE_VEL_X_MAX
+        local vel_y = SUBMERSION_FIRE_VEL_Y_MIN
+            + math.random() * (SUBMERSION_FIRE_VEL_Y_MAX - SUBMERSION_FIRE_VEL_Y_MIN)
         GameCreateParticle("fire", px, py, 1, vel_x, vel_y, false, false, false)
     end
 end
@@ -166,18 +200,19 @@ local function SetDoused(is_doused)
     RefreshLanternIllumination(entity_id)
 end
 
-local in_hot_liquid = IsInHotLiquid()
+local in_liquid = AreCoalsInLiquid()
+SetHotLiquidCheckerEnabled(in_liquid)
+local in_hot_liquid = in_liquid and IsInHotLiquid()
 
 if IsLanternDoused(entity_id) then
-    if in_hot_liquid or (IsTouchedByFire() and not AreCoalsInLiquid()) then
+    if in_hot_liquid or (IsTouchedByFire() and not in_liquid) then
         SetDoused(false)
     else
         -- A torch hung with the left mouse button is a new entity that copied only the doused state.
         ApplyDousedComponents(true)
+        ResetSubmersionTimer()
     end
-elseif not in_hot_liquid and AreCoalsInLiquid() then
-    local last_frame = GetStorageFloat(entity_id, SUBMERSION_LAST_FRAME_STORAGE)
-    local submersion_frames = GetStorageFloat(entity_id, SUBMERSION_FRAMES_STORAGE)
+elseif in_liquid and not in_hot_liquid then
     if last_frame == 0 or (frame - last_frame) > SUBMERSION_MAX_TICK_GAP then
         submersion_frames = 0
     end
@@ -188,8 +223,9 @@ elseif not in_hot_liquid and AreCoalsInLiquid() then
         SetDoused(true)
     else
         SetStorageFloat(entity_id, SUBMERSION_FRAMES_STORAGE, submersion_frames)
-        GameEntityPlaySoundLoop(entity_id, HISS_AUDIO_TAG, HISS_AUDIO_INTENSITY)
+        SetScriptInterval(1)
         EmitSubmersionReactionFire()
+        GameEntityPlaySoundLoop(entity_id, HISS_AUDIO_TAG, HISS_AUDIO_INTENSITY)
     end
 else
     ResetSubmersionTimer()

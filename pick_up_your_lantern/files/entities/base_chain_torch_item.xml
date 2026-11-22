@@ -67,11 +67,11 @@
 
     <!-- Dousing in liquids and lighting again from fire, in the world and in hand. Replaces the vanilla
          TorchComponent, which went out in solid materials too and was lit again by the item system when picked
-         up. The fire in hand comes from lantern_in_hand.lua. Runs every frame to drive the hiss AudioLoopComponent
-         while submerged; liquid raychecks and timer ticks run every 10 frames. -->
+         up. The fire in hand comes from lantern_in_hand.lua. Runs every 10 frames when dry and switches itself
+         to every frame while submerged to drive the hiss AudioLoopComponent. -->
     <LuaComponent
         _tags="enabled_in_world,enabled_in_hand"
-        execute_every_n_frame="1"
+        execute_every_n_frame="10"
         script_source_file="mods/pick_up_your_lantern/files/scripts/chain_torch_fire.lua"
     ></LuaComponent>
 
@@ -84,9 +84,11 @@
         volume_autofade_speed="0.2"
     ></AudioLoopComponent>
 
-    <!-- Detects lava and liquid_fire around the torch so hot liquids do not douse it and can relight it. -->
+    <!-- Detects lava and liquid_fire around the torch so hot liquids do not douse it and can relight it.
+         Disabled by default in dry air; enabled by chain_torch_fire.lua only while the coals touch a liquid. -->
     <MaterialAreaCheckerComponent
-        _tags="enabled_in_world,enabled_in_hand"
+        _tags="pul_hot_liquid_checker"
+        _enabled="0"
         area_aabb.min_x="-8"
         area_aabb.max_x="8"
         area_aabb.min_y="-8"
