@@ -18,7 +18,6 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
 | [Development Roadmap](roadmap.md) | Planned features grouped by release. | Everyone |
 | [Backlog](backlog.md) | Tasks that are not done yet, grouped by topic. | Contributors |
 | [Versions](versions/README.md) | List of releases and what each version delivered, with fixed issues. | Everyone |
-| [Publishing to Steam Workshop](steam/steam_publishing.md) | Where the Workshop description lives and how to publish a release with `noitacli workshop`. | Maintainers |
 
 ## Where to Start
 
@@ -51,7 +50,9 @@ Welcome to the documentation of **Pick Up Your Lantern**, a Noita mod that lets 
 ### I Want to Publish a Release
 
 1. Make sure that the notes of the release version in [Versions](versions/README.md) are complete.
-2. Follow [Publishing to Steam Workshop](steam/steam_publishing.md).
+2. Update [steam_mod_description.txt](steam/steam_mod_description.txt) if the Workshop page text needs changes.
+3. Check and upload the release using the Steam Workshop publishing guide in the `tools/noitakit` documentation. Start from its README or run `noitacli workshop --help` to find the commands.
+4. Restore the short placeholder in `pick_up_your_lantern/workshop.xml` with `git checkout pick_up_your_lantern/workshop.xml` before the next commit.
 
 ## Writing Documentation
 
