@@ -6,6 +6,7 @@ The mod can make the underground truly dark, so a lantern becomes something you 
 
 - [Limited Vision](#limited-vision)
 - [Light Sources in the Darkness](#light-sources-in-the-darkness)
+- [Snowy Biomes](#snowy-biomes)
 - [Polymorph](#polymorph)
 - [All-Seeing Eye, Sunseed and Sunstone](#all-seeing-eye-sunseed-and-sunstone)
 
@@ -38,6 +39,15 @@ Light cuts through the darkness no matter how far it is from you:
 - explosions.
 
 The `Illuminate the darkness` setting controls whether lanterns and other light sources clear the fog of war around them. The `Illuminated area size` setting makes their light reach further.
+
+## Snowy Biomes
+
+Snowy Depths and Hiisi Base have a faint bluish glow in the open air when limited vision is active. Snow scatters weak light across open caverns, so you can read the shape of large rooms even beyond the reach of a lantern.
+
+- The inside of solid walls, snow, ice, and steel stays dark as in other biomes.
+- Distant terrain edges and enemies appear as soft, dark silhouettes against the dim blue air.
+- Areas lit by a lantern, fire, or another light source keep their normal warm lighting and sharp details.
+- The glow fades in and out smoothly when you enter or leave either biome.
 
 ## Polymorph
 

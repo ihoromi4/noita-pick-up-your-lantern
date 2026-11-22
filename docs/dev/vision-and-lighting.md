@@ -10,6 +10,7 @@ How the mod limits the player's vision, lets light sources cut through the darkn
 - [Player Entity](#player-entity)
 - [Update Loop](#update-loop)
 - [Vision Presets](#vision-presets)
+- [Snowy Biome Diffused Air Light](#snowy-biome-diffused-air-light)
 - [Polymorph](#polymorph)
 - [All-Seeing Eye](#all-seeing-eye)
 - [Glowing Materials and Burning Entities](#glowing-materials-and-burning-entities)
@@ -40,14 +41,14 @@ flowchart TD
     Controller -->|PatchPlayerBaseVision| XML["player_base.xml"]
     Controller -->|ApplyPlayerVision| ECS["Player entity (LightComponent, FogOfWarRadiusComponent)"]
     Controller -->|PatchShaderVision| ShaderFile["post_final.frag"]
-    WorldLoop["OnWorldPreUpdate"] -->|GameSetPostFxParameter| ShaderUniforms["pul_vision, pul_player_pos, pul_xray, pul_reveal"]
+    WorldLoop["OnWorldPreUpdate"] -->|GameSetPostFxParameter| ShaderUniforms["pul_vision, pul_player_pos, pul_xray, pul_reveal, pul_biome_ambient"]
     ShaderUniforms --> FinalRender["Post-processing"]
     ECS --> FinalRender
 ```
 
 ## Shader Patch
 
-`PatchShaderVision()` applies four patches from `files/patches/vision/` to `post_final.frag` with the [Diff Patch Library](architecture.md#diff-patch-library).
+`PatchShaderVision()` applies five patches from `files/patches/vision/` to `post_final.frag` with the [Diff Patch Library](architecture.md#diff-patch-library).
 
 ### Uniforms
 
@@ -59,6 +60,7 @@ flowchart TD
 - `pul_vision.w`: on/off flag. `0.0` returns vanilla rendering, for example on the death screen.
 - `pul_player_pos.xy`: player world position.
 - `pul_xray`, `pul_reveal`: areas revealed by the All-Seeing Eye. See [All-Seeing Eye](#all-seeing-eye).
+- `pul_biome_ambient`: `vec4(r, g, b, strength)` for diffused air light in snowy biomes. See [Snowy Biome Diffused Air Light](#snowy-biome-diffused-air-light).
 
 ### Darkness Around the Player
 
@@ -119,6 +121,26 @@ color = mix(color, color * fog_of_war, fade * (1.0 - pul_vision.z));
 | Very Dark | 0.25 | 87 px | 64 px | 64 | 0.25 (8.7%) |
 | Minimal | 0.1 | 35 px | 25 px | 25.6 | 0.1 (3.5%) |
 | Pitch Black | 0.0 | disabled | disabled | 0 | 0.0 (0%) |
+
+## Snowy Biome Diffused Air Light
+
+Under limited vision, large open caverns and long-range enemies in Snowy Depths (`$biome_snowcave`) and Hiisi Base (`$biome_snowcastle`) reach farther than a held lantern lights. To keep these biomes readable without breaking the darkness, the mod adds a faint bluish ambient glow to open air while leaving the inside of solid terrain dark.
+
+### Biome Detection
+
+[biome_ambient.lua](../../pick_up_your_lantern/files/scripts/biome_ambient.lua) runs every frame from `UpdatePlayerVision()` in [player_vision.lua](../../pick_up_your_lantern/files/scripts/player_vision.lua):
+
+- `SampleViewportAmbient()` calls `BiomeMapGetName()` at five points around the camera center: the center itself and four offsets (`±160 px` horizontally, `±90 px` vertically).
+- Both `$biome_snowcave` and `$biome_snowcastle` map to `SNOW_AMBIENT` (`r = 0.032`, `g = 0.060`, `b = 0.100`, `strength = 1.0`). The target strength is the fraction of sampled points that fall inside a matching biome.
+- `UpdateBiomeAmbient()` moves the current color and strength toward the target over 60 frames (`FADE_FRAMES`) and writes `pul_biome_ambient` via `GameSetPostFxParameter`. This makes transitions across the Holy Mountain exits smooth.
+
+### Shader Mask and Erosion-Dilation
+
+In both biomes, the engine draws the cave background wall (`background_snowcave.png` and `background_snowcastle.png`) into `tex_fg` with alpha 1.0, so `tex_bg` is completely covered. [05_biome_ambient.patch.txt](../../pick_up_your_lantern/files/patches/vision/05_biome_ambient.patch.txt) therefore runs right around `color_fg.rgb *= lights` in `post_final.frag`:
+
+- **Air mask from unlit albedo.** Before `lights` is applied, `color_fg.rgb` still holds the unlit pixel color. The cave background textures stay below `0.231` (`59/255`) in every channel, while solid materials in these biomes (`steel`, `snowrock`, `ice`, `snow`) start at `0.333` (`85/255`) or higher. The shader classifies open air with `1.0 - smoothstep(0.24, 0.31, max(r, max(g, b)))`.
+- **Morphological smearing.** Outside lit areas (`fog_of_war < 1.0`), the shader samples 8 directions on two rings (`2.5 px` and `5.5 px` in virtual world pixels) around the current fragment. It combines the eroded minimum, the dilated maximum, and the weighted average of the air mask. Solid terrain edges and enemy sprites become soft, misty dark silhouettes instead of sharp 1-pixel cutouts, while deep solid terrain stays pure black.
+- **Scoping and performance.** The sampling loop runs only when `pul_vision.w > 0.5`, `pul_biome_ambient.a > 0.001`, and the fragment is outside full light (`(1.0 - fog_of_war) * fade * (1.0 - pul_vision.z) * (1.0 - pul_reveal_amount) > 0.001`). Inside lantern light, under the All-Seeing Eye, in Vanilla vision, or in other biomes, the loop is skipped completely.
 
 ## Polymorph
 
