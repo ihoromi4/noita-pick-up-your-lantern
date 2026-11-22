@@ -1,13 +1,16 @@
 # Backlog
 
-This document lists the tasks that are not done yet. Tasks are grouped by topic. The release schedule is in the [Development Roadmap](roadmap.md).
+This document lists planned releases and tasks that are not done yet. Released versions and completed work live in [Versions](versions/README.md). Detailed functional specifications live in [Functional Requirements](requirements.md).
 
 ## Rules
 
-- Keep open tasks only in this document. Group them by topic.
-- A finished task leaves the backlog. It moves to the document of the next version in the [versions](versions/README.md) folder.
+- Keep open tasks only in this document. Group them by target release, and by topic inside each release.
+- Put bugs and ideas without a target release under [Unscheduled](#unscheduled).
+- A finished task leaves the backlog. It moves to the notes of its release in the [Versions](versions/README.md) folder.
 
-## Natural Fear Mode
+## Unscheduled
+
+### Natural Fear Mode
 
 - The Giant Laser-Drone (Jättilaser-lennokki, `drone_lasership`) fears lantern light in the Natural Fear mode, but it should not. The drone is a robot, and robots are immune to fire. The guides say that creatures immune to fire do not fear the light.
   - Cause: the immunity is never checked in code. `IsFearful` in `files/scripts/lantern_fear.lua` filters only by fire enemies, lured herds, and excluded enemies. The drone has the `robot` herd, so it counts as fearful.
@@ -20,7 +23,9 @@ This document lists the tasks that are not done yet. Tasks are grouped by topic.
   - Two other Hiisi have the `healer` herd too: the invisibility Hiisi (`scavenger_invis`) and the shield Hiisi (`scavenger_shield`). They likely have the same bug. The `healer` herd also has the coward (`coward`) and the healer drone (`healerdrone_physics`), which need a check.
   - A whole `healer` herd in the lured list would also attract the healer drone, which is a robot. The fix may need to recognize these Hiisi by their file names instead of the herd.
 
-## Temple Lantern Modifiers
+## Version 0.4.0
+
+### Temple Lantern Modifiers
 
 - Magic liquid modifier for the temple lantern (`physics/temple_lantern.xml`): with a small chance, a temple lantern is filled with a magic liquid instead of plasma.
 - A lantern with this modifier gives no light.
@@ -29,41 +34,43 @@ This document lists the tasks that are not done yet. Tasks are grouped by topic.
   - Flummoxium (`material_confusion`);
   - Unstable Teleportatium (`magic_liquid_unstable_teleportation`).
 
-## Visual Polish and UI
+### Visual Polish and UI
 
 - Custom UI icons redesign: create dedicated pixel-art icons visually matching physical lantern props (`ui_lantern.png`, `ui_lantern_small.png`) with clear illumination.
 
-## Open-Flame Variants
+### Open-Flame Variants
 
 - Implement open-flame torches and braziers that actively ignite flammable materials, gases, and enemies on contact while held.
 - Immediate extinguishing upon liquid contact (without a delay).
 
-## Rogue Mode
+### Rogue Mode
 
 - A Mod Settings toggle that makes the player invisible to enemies while they stay far from light.
 - Investigate whether the player's visibility can be set per enemy type (e.g., zombies see in the dark, Hiisi do not).
 
-## Extinguishing and Submersion
+## Version 1.0.0 - Polished State Simulation
+
+### Extinguishing and Submersion
 
 - Implement a 2-second submersion timer: lanterns submerged in water or non-flammable liquids extinguish and cease emitting light.
 - Dynamic state tracking: switch inventory icon to an unlit flask when extinguished.
 - Update in-hand and belt sprites to render unlit containers without flame animations.
 - Magical and hermetic lanterns remain lit underwater.
 
-## Additional Liquid Interactions
+### Additional Liquid Interactions
 
 - React to other liquids besides oil and water (e.g., alcohol flicker, toxic sludge tint, blood dimming).
 
-## Reignition Mechanics
+### Reignition Mechanics
 
 - Reignite unlit lanterns when exposed to open fire, burning materials, or high environmental heat.
 
-## Full Playthrough Guarantee in Darkness
+### Full Playthrough Guarantee in Darkness
 
 - Verify that the game can be fully completed with the mod enabled at the darkest vision presets (Minimal 10% and Pitch Black 0%).
 - Guarantee that every biome, including the main path, side biomes, parallel worlds, and boss arenas, offers at least one reliable way to get sufficient illumination (e.g., spawned lanterns, light fixtures, glowing materials, or light sources the player can bring along).
 - Close any biome where no light source can be obtained, by adding guaranteed lantern spawns or other light sources.
 
-## Full Release Polish
+### Full Release Polish
 
 - Finalized balance, performance optimization, and compatibility verification.

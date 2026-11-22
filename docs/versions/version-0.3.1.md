@@ -1,6 +1,6 @@
 # Version 0.3.1 - Lantern Modifier Hotfix
 
-Tracking document for features, implementation progress, and known issues for **Version 0.3.1**. Functional requirements are defined in [requirements.md](../requirements.md) and milestone planning in [roadmap.md](../roadmap.md). Previous milestone progress is tracked in [version-0.3.0.md](version-0.3.0.md).
+Tracking document for features, implementation progress, and known issues for **Version 0.3.1**. Functional requirements are defined in [requirements.md](../requirements.md), and all releases are listed in [Versions](README.md). Previous milestone progress is tracked in [version-0.3.0.md](version-0.3.0.md).
 
 ## Summary
 

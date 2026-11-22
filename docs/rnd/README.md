@@ -7,7 +7,7 @@ This document contains an index of research, Noita engine technical details, and
 
 ## Planned Features
 
-Features planned for the next versions are listed in the [Development Roadmap](../roadmap.md). These ideas still need research:
+Features planned for the next versions are listed in the [Backlog](../backlog.md). These ideas still need research:
 
 - Player can pick up open-flame oil lamps and braziers that ignite combustible materials and surrounding enemies, extinguish when submerged in liquid, and reignite near fire.
 - "Rogue" mode, where the player is invisible to enemies while they stay far from light (possibly per enemy type: e.g., zombies see in the dark, Hiisi do not).

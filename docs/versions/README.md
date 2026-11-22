@@ -10,9 +10,9 @@ This folder lists the versions of **Pick Up Your Lantern** and the work that bel
 
 ## Version List
 
-- [0.1.0](version-0.1.0.md): MVP and core lifecycle. Adds pickable hanging oil lanterns, holding, throwing, dynamic lighting, and limited player vision.
-- [0.1.1](version-0.1.1.md): Item Radar fix. Hides lanterns from the Item Radar perk by default, with a Mod Settings toggle to show them.
-- [0.2.0](version-0.2.0.md): Passive carrying and atmosphere. Adds the belt lantern, quality tiers, rare modifiers, liquid states, and vision fixes for polymorph, chain torches, and the All-Seeing Eye.
-- [0.3.0](version-0.3.0.md): Variety and world interactions. Adds pickable chain torches, mining lamps, temple lanterns, and tube lamps, ceiling hanging, Enemy Study, Cracked glass, settings presets, fire enemy glow and luring, and Natural Fear.
-- [0.3.1](version-0.3.1.md): Lantern modifier hotfix. Restores the lantern modifier script, fixes the memory leak on lanterns with modifiers, and adds temporary save cleanup for version 0.3.0.
 - [0.3.2](version-0.3.2.md): All-Seeing Eye lifetime fix. Scales the All-Seeing Eye reveal time with projectile lifetime modifiers, holds the reveal near the cast point, and removes the temporary save cleanup.
+- [0.3.1](version-0.3.1.md): Lantern modifier hotfix. Restores the lantern modifier script, fixes the memory leak on lanterns with modifiers, and adds temporary save cleanup for version 0.3.0.
+- [0.3.0](version-0.3.0.md): Variety and world interactions. Adds pickable chain torches, mining lamps, temple lanterns, and tube lamps, ceiling hanging, Enemy Study, Cracked glass, settings presets, fire enemy glow and luring, and Natural Fear.
+- [0.2.0](version-0.2.0.md): Passive carrying and atmosphere. Adds the belt lantern, quality tiers, rare modifiers, liquid states, and vision fixes for polymorph, chain torches, and the All-Seeing Eye.
+- [0.1.1](version-0.1.1.md): Item Radar fix. Hides lanterns from the Item Radar perk by default, with a Mod Settings toggle to show them.
+- [0.1.0](version-0.1.0.md): MVP and core lifecycle. Adds pickable hanging oil lanterns, holding, throwing, dynamic lighting, and limited player vision.

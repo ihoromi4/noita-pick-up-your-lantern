@@ -2,9 +2,9 @@
 
 Functional requirements for the **Pick Up Your Lantern** mod for Noita.
 
-## Development Roadmap
+## Releases and Planned Work
 
-The release schedule, milestones, and phased breakdown of features across versions (v0.1.0, v0.1.1, v0.2.0, v0.3.0, v0.3.1, v0.3.2, v0.4.0 and v1.0.0) are maintained in the [Development Roadmap](roadmap.md).
+Completed releases are listed in [Versions](versions/README.md). Planned releases and open tasks are maintained in the [Backlog](backlog.md).
 
 ## Light Fixture Catalog
 
