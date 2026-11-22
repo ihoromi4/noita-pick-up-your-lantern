@@ -1,12 +1,14 @@
 # Backlog
 
-This document lists planned releases and tasks that are not done yet. Released versions and completed work live in [Versions](versions/README.md). Detailed functional specifications live in [Functional Requirements](requirements.md).
+This document lists planned releases and tasks that are not done yet. Released versions and completed work live in [Versions](versions/README.md). Current implemented behavior is documented in [Player Guides](guides/README.md) and [Developer Documentation](dev/README.md).
 
 ## Rules
 
 - Keep open tasks only in this document. Group them by target release, and by topic inside each release.
 - Put bugs and ideas without a target release under [Unscheduled](#unscheduled).
+- Describe small features directly inside their backlog entry. For complex features or engine questions, write a design or research note in [R&D Notes](rnd/README.md) and link it from the backlog entry.
 - A finished task leaves the backlog. It moves to the notes of its release in the [Versions](versions/README.md) folder.
+- When a task changes how the mod works, update [Player Guides](guides/README.md) and [Developer Documentation](dev/README.md). Those two sections are the source of truth for implemented behavior.
 
 ## Unscheduled
 

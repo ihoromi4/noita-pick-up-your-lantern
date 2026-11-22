@@ -1,6 +1,6 @@
 # Version 0.1.1 - Item Radar Fix
 
-Tracking document for features, implementation progress, and known issues for **Version 0.1.1**. Functional requirements are defined in [requirements.md](../requirements.md), and all releases are listed in [Versions](README.md). Previous milestone progress is tracked in [version-0.1.0.md](version-0.1.0.md).
+Tracking document for features, implementation progress, and known issues for **Version 0.1.1**. All releases are listed in [Versions](README.md). Previous milestone progress is tracked in [version-0.1.0.md](version-0.1.0.md).
 
 ## Item Radar Compatibility
 

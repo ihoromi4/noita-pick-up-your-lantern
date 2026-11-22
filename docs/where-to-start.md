@@ -32,7 +32,7 @@ This guide suggests which documents to read first, depending on your goal.
    - light, quality tiers, modifiers and liquid states: [Lantern Properties and Progression](dev/lantern-properties-and-progression.md);
    - limited vision, shaders, polymorph, the All-Seeing Eye and the fire enemy glow: [Vision and Lighting](dev/vision-and-lighting.md);
    - enemy study, luring enemies to lanterns and Natural Fear: [Creatures and Light](dev/creatures-and-light.md).
-4. Check the [Functional Requirements](requirements.md) and the [Backlog](backlog.md) before adding a feature or picking up an open task. Engine research and rejected approaches are collected in the [R&D Notes](rnd/README.md).
+4. Check the [Backlog](backlog.md) before adding a feature or picking up an open task. Engine research and rejected approaches are collected in the [R&D Notes](rnd/README.md).
 5. Follow the code style and commit conventions in [AGENTS.md](../AGENTS.md). See the [README](../README.md) for running the tests.
 
 ## I Want to Publish a Release

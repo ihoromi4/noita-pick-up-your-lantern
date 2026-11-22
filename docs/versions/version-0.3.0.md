@@ -1,6 +1,6 @@
 # Version 0.3.0 - Variety and World Interactions
 
-Tracking document for features, implementation progress, and known issues for **Version 0.3.0**. Functional requirements are defined in [requirements.md](../requirements.md), and all releases are listed in [Versions](README.md). Previous milestone progress is tracked in [version-0.2.0.md](version-0.2.0.md).
+Tracking document for features, implementation progress, and known issues for **Version 0.3.0**. All releases are listed in [Versions](README.md). Previous milestone progress is tracked in [version-0.2.0.md](version-0.2.0.md).
 
 ## Summary
 
@@ -18,7 +18,7 @@ Settings presets set all options at once, from the near-vanilla Light Touch to P
 - [x] Support mining lamps (`physics_mining_lamp.xml`).
 - [x] Support temple lanterns (`temple_lantern.xml`): hang on a chain that swings and breaks under projectiles. Details: [lantern-entities.md](../dev/lantern-entities.md#lantern-chains).
 - [x] Support fluorescent tube lamps (`physics_tubelamp.xml`): shine only while powered by a cable that follows the lamp, snaps and keeps sparking. Details: [tube-lamp-electricity.md](../rnd/tube-lamp-electricity.md).
-- [x] Hiisi Base fixtures: the tube lamp is the only lamp of the Hiisi Base itself, see [requirements.md](../requirements.md#light-fixture-catalog).
+- [x] Hiisi Base fixtures: the tube lamp is the only lamp of the Hiisi Base itself, see [lantern-entities.md](../dev/lantern-entities.md).
 - Research results and open issues: [extended-light-fixtures.md](../rnd/extended-light-fixtures.md).
 
 ## Strategic World Incentives
