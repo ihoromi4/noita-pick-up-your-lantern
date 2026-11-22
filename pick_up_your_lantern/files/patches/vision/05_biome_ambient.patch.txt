@@ -15,7 +15,7 @@
 +		if (max(pul_unlit_factor.r, max(pul_unlit_factor.g, pul_unlit_factor.b)) > 0.001)
 +		{
 +			float pul_fg_max = max(pul_fg_unlit.r, max(pul_fg_unlit.g, pul_fg_unlit.b));
-+			float pul_center_air = 1.0 - smoothstep(0.21, 0.29, pul_fg_max);
++			float pul_center_air = 1.0 - smoothstep(0.24, 0.31, pul_fg_max);
 +			vec2 pul_px = vec2(1.0) / world_viewport_size;
 +			float pul_erode = pul_center_air;
 +			float pul_dilate = pul_center_air;
@@ -28,7 +28,7 @@
 +				vec4 pul_s1 = texture2D(tex_fg, tex_coord + pul_dir * pul_px * 2.5);
 +				float pul_s1_a = pow(max(pul_s1.a, 0.0001), 0.5);
 +				vec3 pul_s1_rgb = clamp(pul_s1.rgb / pul_s1_a, vec3(0.0), vec3(1.0));
-+				float pul_a1 = 1.0 - smoothstep(0.21, 0.29, max(pul_s1_rgb.r, max(pul_s1_rgb.g, pul_s1_rgb.b)));
++				float pul_a1 = 1.0 - smoothstep(0.24, 0.31, max(pul_s1_rgb.r, max(pul_s1_rgb.g, pul_s1_rgb.b)));
 +				pul_erode = min(pul_erode, pul_a1);
 +				pul_dilate = max(pul_dilate, pul_a1);
 +				pul_sum += pul_a1 * 1.5;
@@ -37,7 +37,7 @@
 +				vec4 pul_s2 = texture2D(tex_fg, tex_coord + pul_dir * pul_px * 5.5);
 +				float pul_s2_a = pow(max(pul_s2.a, 0.0001), 0.5);
 +				vec3 pul_s2_rgb = clamp(pul_s2.rgb / pul_s2_a, vec3(0.0), vec3(1.0));
-+				float pul_a2 = 1.0 - smoothstep(0.21, 0.29, max(pul_s2_rgb.r, max(pul_s2_rgb.g, pul_s2_rgb.b)));
++				float pul_a2 = 1.0 - smoothstep(0.24, 0.31, max(pul_s2_rgb.r, max(pul_s2_rgb.g, pul_s2_rgb.b)));
 +				pul_erode = min(pul_erode, pul_a2);
 +				pul_dilate = max(pul_dilate, pul_a2);
 +				pul_sum += pul_a2;

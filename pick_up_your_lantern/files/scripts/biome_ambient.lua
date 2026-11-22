@@ -16,15 +16,18 @@ local SAMPLE_OFFSETS = {
     { x = 160, y = 0, },
 }
 
+local SNOW_AMBIENT = {
+    r = 0.032,
+    g = 0.060,
+    b = 0.100,
+    strength = 1.0,
+}
+
 ---Diffused air ambient definitions keyed by BiomeMapGetName() return value.
 ---@type table<string, {r: number, g: number, b: number, strength: number}>
 local BIOME_AMBIENTS = {
-    ["$biome_snowcave"] = {
-        r = 0.032,
-        g = 0.060,
-        b = 0.100,
-        strength = 1.0,
-    },
+    ["$biome_snowcave"] = SNOW_AMBIENT,
+    ["$biome_snowcastle"] = SNOW_AMBIENT,
 }
 
 local current_r = 0.0
