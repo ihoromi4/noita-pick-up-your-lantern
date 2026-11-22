@@ -4,7 +4,7 @@ You are working in a context of the **Pick Up Your Lantern** - a mod for Noita g
 
 ## Core directories and files
 
-- `docs/`: Markdown documentation of the mod.
+- `docs/`: Markdown documentation of the mod. The index of the documentation: @docs/README.md
 - `docs/backlog.md`: Tasks that are not done yet, grouped by topic.
 - `docs/versions/`: Completed work and release notes for each version.
 - `pick_up_your_lantern/`: Source files of the mod.
@@ -21,6 +21,10 @@ You are working in a context of the **Pick Up Your Lantern** - a mod for Noita g
 - Each sentence carries one idea. Prefer short sentences, around 20 words or fewer. A longer sentence is fine when splitting it would break a single idea apart
 - Explain each term the first time it appears. Always use the same word for the same concept
 - Before you hand over the text, reread every sentence. If a sentence needs a second read to make sense, rewrite it
+- Player guides describe behavior and settings in plain words, without code or file names
+- Developer documents describe how things work and why, with links to the source files
+- Only confirmed, implemented behavior goes into player guides and developer documents
+- Every new document needs a link from [Player Guides](docs/guides/README.md) or [Developer Documentation](docs/dev/README.md)
 
 ## Code style
 
