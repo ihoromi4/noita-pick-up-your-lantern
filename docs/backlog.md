@@ -42,10 +42,8 @@ This document lists planned tasks that are not done yet. Released versions and c
 
 ## Extinguishing and Submersion
 
-- Implement a 2-second submersion timer: lanterns submerged in water or non-flammable liquids extinguish and cease emitting light.
-- Dynamic state tracking: switch inventory icon to an unlit flask when extinguished.
-- Update in-hand and belt sprites to render unlit containers without flame animations.
-- Magical and hermetic lanterns remain lit underwater.
+- Add a 3-second submersion timer for open-fire lanterns (chain torches) in water and other liquids. While the timer runs, the torch hisses and evaporates water into `steam`. The fire goes out and stops emitting light only when the 3-second timer expires. Leaving the liquid resets the timer. Once a torch goes out, it does not relight automatically and still requires fire.
+- Switch the inventory icon of an extinguished or doused lantern to an unlit variant. Currently, only unpowered tube lamps change their inventory icon.
 
 ## Additional Liquid Interactions
 

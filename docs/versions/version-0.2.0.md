@@ -21,7 +21,8 @@ Your lantern now stays with you even when your hands are busy: it hangs on your 
 - [x] Rare lantern modifiers rolled independently of the tier, each described by a sentence in the item description: Flickering (20% wider but unstable light) and Short-lived (leaks a drop of oil every 5 seconds, fades over its limited burn time and goes out).
 - [x] `Lantern progression` option in Mod Settings to turn tiers and modifiers off (enabled by default).
 - [x] Oil-soaked state: diving into oil with a lantern in hand makes its light and fog of war hole 30% wider until it is submerged in water. The state is described by a sentence in the item description. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
-- [x] Wet state: diving under water with a lantern in hand makes its light and fog of war hole 20% narrower until it is submerged in oil. The state is described by a sentence in the item description.
+- [x] Wet state: diving under water with a closed oil lantern in hand leaves it lit, but makes its light and fog of war hole 20% narrower until it is submerged in oil. The state is described by a sentence in the item description.
+- [x] Unlit in-hand and belt sprites: burned-out lanterns switch to dark container sprites (`*_in_hand_out.xml`) without flame animations when held in hand or carried on the belt.
 
 ## Known Issues and Next Steps
 
