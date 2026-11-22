@@ -59,12 +59,12 @@ A lantern can have several modifiers at once, for example a flickering lantern t
 
 ## Oil and Water
 
-Dive completely under a liquid while holding a lantern, and the lantern changes:
+Dive completely under a liquid while holding an oil lantern (Lantern, Small Lantern or Mining Lamp), and the lantern changes:
 
 - **Oil-soaked**: after a dive into oil, its light and the cleared area are 30% wider.
 - **Wet**: after a dive into water, salt water or swamp, its light and the cleared area are 20% narrower.
 
-A state lasts until you dive with the lantern into the opposite liquid. It stays with the lantern in your inventory, on your belt and after a throw. A burnt-out lantern does not change.
+A state lasts until you dive with the lantern into the opposite liquid. Fire, hot liquids and hot biomes (such as the Desert, the Pyramid, the Lava Lake, or any biome with the Hot modifier) dry a wet lantern while you hold it, removing the wet state with a puff of steam and restoring its light. The state stays with the lantern in your inventory, on your belt and after a throw. A burnt-out lantern does not change. Tube lamps, temple lanterns and chain torches do not take on these states.
 
 ## Item Description
 

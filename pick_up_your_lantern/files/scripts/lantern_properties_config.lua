@@ -20,6 +20,8 @@
 ---@field open_fire LanternOpenFire|nil Open fire the lantern burns with, which the player carries in hand and on
 ---the belt, see chain_torch_fire.lua.
 ---@field chain LanternChainConfig|nil Chain a lantern spawned by a biome hangs on, see lantern_chain.lua.
+---@field supports_liquid_states boolean|nil Whether the lantern takes on liquid states (oil-soaked, wet) and dries
+---in fire, see lantern_liquid_state.lua.
 
 ---@class LanternOpenFire
 ---@field spark_material string Material of the sparks of the fire; the light is tinted to match.
@@ -50,6 +52,7 @@ LANTERN_TYPES = {
         files = { "data/entities/props/physics_lantern.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_lantern.png",
         hang_offset_y = 4,
+        supports_liquid_states = true,
     },
     -- Small Lantern
     {
@@ -59,12 +62,14 @@ LANTERN_TYPES = {
         },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_lantern_small.png",
         hang_offset_y = 4,
+        supports_liquid_states = true,
     },
     -- Mining Lamp
     {
         files = { "data/entities/props/physics_mining_lamp.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_mining_lamp.png",
         hang_offset_y = 7,
+        supports_liquid_states = true,
     },
     -- Tube Lamp: needs a power cable, so it is not hung back.
     {
@@ -252,3 +257,33 @@ LANTERN_LIQUID_STATES = {
 
 ---Description sentence of a burnt-out lantern. It replaces the modifier sentences and hides the liquid state.
 LANTERN_EXTINGUISHED_DESCRIPTION = "$item_description_lantern_extinguished"
+
+---Material tags of hot or burning liquids that dry a wet lantern on contact.
+---@type table<string, boolean>
+LANTERN_DRYING_MATERIAL_TAGS = {
+    fire = true,
+    fire_lava = true,
+    fire_strong = true,
+    hot = true,
+    lava = true,
+    molten = true,
+}
+
+---UI description key written by vanilla biome_modifiers.lua for the Hot biome modifier.
+LANTERN_HOT_BIOME_MODIFIER_DESC = "$biomemodifierdesc_hot"
+
+---Biome files that are always treated as hot (Desert, Pyramid, Lava Lake), including sub-biomes that do not
+---receive the Hot modifier in vanilla biome_modifiers.lua.
+---@type table<string, boolean>
+LANTERN_ALWAYS_HOT_BIOMES = {
+    ["data/biome/desert.xml"] = true,
+    ["data/biome/pyramid.xml"] = true,
+    ["data/biome/pyramid_entrance.xml"] = true,
+    ["data/biome/pyramid_hallway.xml"] = true,
+    ["data/biome/pyramid_left.xml"] = true,
+    ["data/biome/pyramid_right.xml"] = true,
+    ["data/biome/pyramid_top.xml"] = true,
+    ["data/biome/lavalake.xml"] = true,
+    ["data/biome/lavalake_pit.xml"] = true,
+    ["data/biome/lavalake_racing.xml"] = true,
+}

@@ -44,6 +44,7 @@ All mod files live in `pick_up_your_lantern/`:
 | `PatchGlowShaders` | `patch_materials.lua` | Applies the `files/patches/glow/` patches to widen the glow blur. |
 | `PatchItemRadar` | `patch_item_radar.lua` | Hooks the Item Radar perk script to hide lanterns. |
 | `PatchLightSources` | `patch_light_sources.lua` | Tags the light of the Light spell modifier with `pul_light_source`, so it lights enemies for study. |
+| `InitHotBiomes` | `lantern_liquid_state.lua` | Reads `_biomes_all.xml` and opens `biome_map.png` to detect hot biomes at runtime. |
 
 The vision and glow patches are described in [Vision and Lighting](vision-and-lighting.md).
 

@@ -51,10 +51,6 @@ This document lists planned tasks that are not done yet. Released versions and c
 
 - React to other liquids besides oil and water (e.g., alcohol flicker, toxic sludge tint, blood dimming).
 
-## Reignition Mechanics
-
-- Reignite unlit lanterns when exposed to open fire, burning materials, or high environmental heat.
-
 ## Full Playthrough Guarantee in Darkness
 
 - Verify that the game can be fully completed with the mod enabled at the darkest vision presets (Minimal 10% and Pitch Black 0%).

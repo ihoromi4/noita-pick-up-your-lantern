@@ -10,7 +10,7 @@ This folder lists the versions of **Pick Up Your Lantern** and the work that bel
 
 ## Version List
 
-- [0.4.0](version-0.4.0.md): In progress. Adds diffused bluish air ambient light with softened silhouettes in Snowy Depths and Hiisi Base.
+- [0.4.0](version-0.4.0.md): In progress. Adds diffused bluish air ambient light with softened silhouettes in Snowy Depths and Hiisi Base, dries wet oil lanterns in fire and hot biomes, and limits liquid states to oil lanterns.
 - [0.3.2](version-0.3.2.md): All-Seeing Eye lifetime fix. Scales the All-Seeing Eye reveal time with projectile lifetime modifiers, holds the reveal near the cast point, and removes the temporary save cleanup.
 - [0.3.1](version-0.3.1.md): Lantern modifier hotfix. Restores the lantern modifier script, fixes the memory leak on lanterns with modifiers, and adds temporary save cleanup for version 0.3.0.
 - [0.3.0](version-0.3.0.md): Variety and world interactions. Adds pickable chain torches, mining lamps, temple lanterns, and tube lamps, ceiling hanging, Enemy Study, Cracked glass, settings presets, fire enemy glow and luring, and Natural Fear.

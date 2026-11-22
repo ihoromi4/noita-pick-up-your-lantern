@@ -125,17 +125,20 @@ Modifier behavior runs in `lantern_modifier.lua` through a `LuaComponent` tagged
 | Oil-soaked | `oil` | ×1.3 |
 | Wet | `water`, `water_salt`, `water_ice`, `water_fading`, `swamp` | ×0.8 |
 
-- Only the held lantern takes on a state, when the player is fully submerged with it.
+- Only held oil lanterns whose `LANTERN_TYPES` entry sets `supports_liquid_states = true` (Lantern, Small Lantern, Mining Lamp) take on a state when the player is fully submerged with them. Tube lamps, temple lanterns and chain torches are skipped.
 - The states exclude each other: a state lasts until the player dives with the lantern into the opposite liquid.
+- Fire and heat dry a wet lantern in hand: when the player catches fire, submerges in a hot liquid (`LANTERN_DRYING_MATERIAL_TAGS`: `fire`, `fire_lava`, `fire_strong`, `hot`, `lava`, `molten`), or stands in a hot biome (any biome with the `HOT` modifier, plus Desert, Pyramid and Lava Lake), the wet state resets to none (`LANTERN_LIQUID_STATE_NONE`) and the lantern emits cosmetic steam particles.
 - A burnt-out lantern takes no state, and its description shows no state sentence.
 - The state is stored on the lantern (`lantern_liquid_state`), so it survives the inventory, the belt, throws and saves. It does not depend on vanilla stains on the player.
 - The states work regardless of `Lantern progression`.
 
 Detection is in `UpdateLanternLiquidState` (`lantern_liquid_state.lua`), called from `OnWorldPostUpdate` every 10 frames:
 
-- the held lantern is the player's `Inventory2Component.mActiveItem` with the `lantern` tag (`FindPlayer`, `GetHeldItem` in `utils.lua`);
+- the held lantern is the player's `Inventory2Component.mActiveItem` with the `lantern` tag (`FindPlayer`, `GetHeldItem` in `utils.lua`) and `supports_liquid_states = true`;
 - submersion is `DamageModelComponent.mAirAreWeInWater`, the same check the game uses for drowning;
-- the liquid is `CellFactory_GetName(mLiquidMaterialWeAreIn)`.
+- the liquid is `CellFactory_GetName(mLiquidMaterialWeAreIn)` and its tags come from `CellFactory_GetTags(mLiquidMaterialWeAreIn)`;
+- fire contact is either a submerged material carrying a tag from `LANTERN_DRYING_MATERIAL_TAGS` (e.g. `liquid_fire`, `lava`) or `DamageModelComponent.is_on_fire` on the player when not submerged;
+- hot biome detection (`InitHotBiomes` at init, resolved lazily after `init_biome_modifiers()`) reads `data/biome/_biomes_all.xml` and checks `BiomeGetValue(filename, "mModifierUIDescription") == "$biomemodifierdesc_hot"` together with `LANTERN_ALWAYS_HOT_BIOMES`, matching named biomes via `BiomeMapGetName` and unnamed `_EMPTY_` biomes (Lava Lake, parts of the Pyramid) via `ModImageGetPixel` on `data/biome_impl/biome_map.png`.
 
 ## Item Description
 

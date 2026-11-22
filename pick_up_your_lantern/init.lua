@@ -41,6 +41,7 @@ PatchBurningEntity()
 PatchGlowShaders()
 PatchItemRadar()
 PatchLightSources()
+InitHotBiomes()
 
 local has_logged_init = false
 
