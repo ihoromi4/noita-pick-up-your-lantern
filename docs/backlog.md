@@ -35,11 +35,6 @@ This document lists planned tasks that are not done yet. Released versions and c
 
 - Custom UI icons redesign: create dedicated pixel-art icons visually matching physical lantern props (`ui_lantern.png`, `ui_lantern_small.png`) with clear illumination.
 
-## Open-Flame Variants
-
-- Implement open-flame torches and braziers that actively ignite flammable materials, gases, and enemies on contact while held.
-- Immediate extinguishing upon liquid contact (without a delay).
-
 ## Rogue Mode
 
 - A Mod Settings toggle that makes the player invisible to enemies while they stay far from light.

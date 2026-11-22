@@ -21,6 +21,11 @@ Settings presets set all options at once, from the near-vanilla Light Touch to P
 - [x] Hiisi Base fixtures: the tube lamp is the only lamp of the Hiisi Base itself, see [lantern-entities.md](../dev/lantern-entities.md).
 - Research results and open issues: [extended-light-fixtures.md](../rnd/extended-light-fixtures.md).
 
+## Open-Flame Variants
+
+- [x] Chain torches burn with an open fire while held in hand and ignite flammable materials, gases, and creatures on contact. On the belt, the fire is cosmetic only. Details: [lantern-entities.md](../dev/lantern-entities.md#chain-torches).
+- [x] Chain torches extinguish immediately upon liquid contact (without a submersion delay) and light again from fire.
+
 ## Strategic World Incentives
 
 - [x] Hang a held lantern on the ceiling above the player (up to 16 px) with LMB, then take the first wand (or the first item) from the Quick Inventory in hand; without a ceiling the lantern stays in hand. RMB keeps the vanilla throw. Details: [throwing-mechanics-and-controls.md](../rnd/throwing-mechanics-and-controls.md).
