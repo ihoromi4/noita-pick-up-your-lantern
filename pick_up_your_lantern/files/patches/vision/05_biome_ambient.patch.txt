@@ -1,9 +1,9 @@
-# Adds biome-specific diffused air ambient light (e.g. Snowy Depths) to open cavern space
+# Adds biome-specific diffused air ambient light (e.g. Snowy Depths and Hiisi Base) to open cavern space
 # with morphological erosion-dilation smearing of solid silhouettes in unlit areas,
 # while keeping the inside of solid materials dark.
 --- data/shaders/post_final.frag
 +++ data/shaders/post_final.frag
-@@ -448,3 +448,46 @@
+@@ -448,3 +448,40 @@
  	// apply the lighting to the foreground
 +	vec3 pul_fg_unlit = color_fg.rgb;
  	if (ENABLE_LIGHTING)
@@ -15,35 +15,31 @@
 +		if (max(pul_unlit_factor.r, max(pul_unlit_factor.g, pul_unlit_factor.b)) > 0.001)
 +		{
 +			float pul_fg_max = max(pul_fg_unlit.r, max(pul_fg_unlit.g, pul_fg_unlit.b));
-+			float pul_center_air = 1.0 - smoothstep(0.24, 0.31, pul_fg_max);
++			float pul_center_air = clamp((0.31 - pul_fg_max) * 14.285714, 0.0, 1.0);
 +			vec2 pul_px = vec2(1.0) / world_viewport_size;
++			vec2 pul_r1 = pul_px * 2.5;
++			vec2 pul_r2 = pul_px * 5.5;
++			vec2 pul_r2d = pul_r2 * 0.70710678;
 +			float pul_erode = pul_center_air;
 +			float pul_dilate = pul_center_air;
 +			float pul_sum = pul_center_air * 2.0;
-+			float pul_weight = 2.0;
-+			for (int pul_i = 0; pul_i < 8; pul_i++)
-+			{
-+				float pul_ang = float(pul_i) * 0.78539816;
-+				vec2 pul_dir = vec2(cos(pul_ang), sin(pul_ang));
-+				vec4 pul_s1 = texture2D(tex_fg, tex_coord + pul_dir * pul_px * 2.5);
-+				float pul_s1_a = pow(max(pul_s1.a, 0.0001), 0.5);
-+				vec3 pul_s1_rgb = clamp(pul_s1.rgb / pul_s1_a, vec3(0.0), vec3(1.0));
-+				float pul_a1 = 1.0 - smoothstep(0.24, 0.31, max(pul_s1_rgb.r, max(pul_s1_rgb.g, pul_s1_rgb.b)));
-+				pul_erode = min(pul_erode, pul_a1);
-+				pul_dilate = max(pul_dilate, pul_a1);
-+				pul_sum += pul_a1 * 1.5;
-+				pul_weight += 1.5;
-+
-+				vec4 pul_s2 = texture2D(tex_fg, tex_coord + pul_dir * pul_px * 5.5);
-+				float pul_s2_a = pow(max(pul_s2.a, 0.0001), 0.5);
-+				vec3 pul_s2_rgb = clamp(pul_s2.rgb / pul_s2_a, vec3(0.0), vec3(1.0));
-+				float pul_a2 = 1.0 - smoothstep(0.24, 0.31, max(pul_s2_rgb.r, max(pul_s2_rgb.g, pul_s2_rgb.b)));
-+				pul_erode = min(pul_erode, pul_a2);
-+				pul_dilate = max(pul_dilate, pul_a2);
-+				pul_sum += pul_a2;
-+				pul_weight += 1.0;
-+			}
-+			float pul_air_avg = pul_sum / pul_weight;
++			vec4 pul_s;
++			float pul_a;
++			#define PUL_TAP(OFF, W) pul_s = texture2D(tex_fg, tex_coord + (OFF)); pul_a = clamp((0.31 - max(pul_s.r, max(pul_s.g, pul_s.b)) * inversesqrt(max(pul_s.a, 0.0001))) * 14.285714, 0.0, 1.0); pul_erode = min(pul_erode, pul_a); pul_dilate = max(pul_dilate, pul_a); pul_sum += pul_a * (W);
++			PUL_TAP(vec2( pul_r1.x, 0.0), 1.5)
++			PUL_TAP(vec2(-pul_r1.x, 0.0), 1.5)
++			PUL_TAP(vec2(0.0,  pul_r1.y), 1.5)
++			PUL_TAP(vec2(0.0, -pul_r1.y), 1.5)
++			PUL_TAP(vec2( pul_r2.x, 0.0), 1.0)
++			PUL_TAP(vec2(-pul_r2.x, 0.0), 1.0)
++			PUL_TAP(vec2(0.0,  pul_r2.y), 1.0)
++			PUL_TAP(vec2(0.0, -pul_r2.y), 1.0)
++			PUL_TAP(vec2( pul_r2d.x,  pul_r2d.y), 1.0)
++			PUL_TAP(vec2(-pul_r2d.x,  pul_r2d.y), 1.0)
++			PUL_TAP(vec2( pul_r2d.x, -pul_r2d.y), 1.0)
++			PUL_TAP(vec2(-pul_r2d.x, -pul_r2d.y), 1.0)
++			#undef PUL_TAP
++			float pul_air_avg = pul_sum * 0.0625;
 +			float pul_morph = mix(pul_erode, pul_dilate, 0.5);
 +			float pul_air_mask = mix(pul_air_avg, pul_morph, 0.45);
 +			float pul_air_mist = 0.85 + 0.3 * noise_perlin2.x;
