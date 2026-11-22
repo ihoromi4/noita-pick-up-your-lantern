@@ -24,6 +24,7 @@ local VISION_SHADER_PATCHES = {
     PATCH_DIR .. "02_fog_restriction.patch.txt",
     PATCH_DIR .. "03_ambient_baseline.patch.txt",
     PATCH_DIR .. "04_bg_leakage.patch.txt",
+    PATCH_DIR .. "05_biome_ambient.patch.txt",
 }
 
 local VANILLA_FOG_RADIUS = 256
@@ -241,6 +242,7 @@ end
 function UpdatePlayerVision(force_refresh)
     local entity, is_polymorphed = FindPlayerEntity()
     UpdateAllSeeingEye(entity)
+    UpdateBiomeAmbient(entity)
     if entity == nil then
         ApplyShaderVision(1.0)
         return

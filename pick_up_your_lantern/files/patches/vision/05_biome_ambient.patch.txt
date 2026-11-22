@@ -1,0 +1,19 @@
+# Adds biome-specific diffused air ambient light (e.g. Snowy Depths) to open cavern space
+# so silhouettes of solid terrain and distant enemies remain readable in darkness,
+# while keeping the inside of solid materials dark.
+--- data/shaders/post_final.frag
++++ data/shaders/post_final.frag
+@@ -448,3 +448,13 @@
+ 	// apply the lighting to the foreground
++	vec3 pul_fg_unlit = color_fg.rgb;
+ 	if (ENABLE_LIGHTING)
+ 		color_fg.rgb *= lights;
++	if (pul_vision.w > 0.5 && pul_biome_ambient.a > 0.001)
++	{
++		float pul_fg_max = max(pul_fg_unlit.r, max(pul_fg_unlit.g, pul_fg_unlit.b));
++		float pul_air_mask = 1.0 - smoothstep(0.21, 0.29, pul_fg_max);
++		float pul_air_mist = 0.85 + 0.3 * noise_perlin2.x;
++		float pul_air_dark = fade * (1.0 - pul_vision.z) * (1.0 - pul_reveal_amount);
++		vec3 pul_air_light = (pul_fg_unlit * 0.21 + pul_biome_ambient.rgb * pul_air_mist) * pul_biome_ambient.a;
++		color_fg.rgb += pul_air_light * pul_air_mask * pul_air_dark * (vec3(1.0) - fog_of_war);
++	}
