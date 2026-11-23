@@ -14,27 +14,45 @@ dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 
 -- Share of the lantern light radius that looks visibly lit: calibrated in-game against darkness.
 local LIT_RADIUS_FACTOR = 0.35
+-- Belt lantern entity tag: not tagged with `pul_light_source` so creature attraction/fear ignore it,
+-- but included here with its own reduced `LightComponent.radius` (`belt_light_scale`).
+local BELT_TAG = "pul_belt"
 
 local cached_frame = nil
 local cached_lit_areas = {}
 
----Gathers the areas lit by light sources: lanterns in the world and in the player's hands, and projectiles with
----the Light spell modifier. Lanterns in the inventory have their light disabled, extinguished lanterns have none,
----and the belt lantern is a separate entity without the light source tag, so none of them count.
----Only the tagged LightComponent is read, as a projectile may also carry its own light.
+---Appends a lit circle from a LightComponent to `areas` when its effective radius is positive.
+---@param areas table[] Lit circles as `{ x, y, radius_sq }`.
+---@param source_id number Light source entity ID.
+---@param light_comp number|nil Enabled LightComponent ID.
+---@return nil
+local function AddLitArea(areas, source_id, light_comp)
+    if light_comp == nil then
+        return
+    end
+
+    -- The current radius already includes the quality tier, liquid state, modifiers, and belt scale.
+    local radius = ComponentGetValue2(light_comp, "radius") * LIT_RADIUS_FACTOR
+    local x, y = EntityGetTransform(source_id)
+    if radius > 0 and x ~= nil then
+        table.insert(areas, { x, y, radius * radius, })
+    end
+end
+
+---Gathers the areas lit by light sources: lanterns in the world, in the player's hands, on the player's belt,
+---and projectiles with the Light spell modifier. Lanterns in the inventory have their light disabled, and
+---extinguished lanterns have none, so neither counts.
+---For tagged light sources, only the tagged LightComponent is read, as a projectile may carry its own light.
 ---@return table[] areas Lit circles as `{ x, y, radius_sq }`.
 local function CollectLitAreas()
     local areas = {}
     for _, source_id in ipairs(EntityGetWithTag(LIGHT_SOURCE_TAG) or {}) do
         local light_comp = EntityGetFirstComponent(source_id, "LightComponent", LIGHT_SOURCE_TAG)
-        if light_comp ~= nil then
-            -- The current radius already includes the quality tier, liquid state and modifiers of lanterns.
-            local radius = ComponentGetValue2(light_comp, "radius") * LIT_RADIUS_FACTOR
-            local x, y = EntityGetTransform(source_id)
-            if radius > 0 and x ~= nil then
-                table.insert(areas, { x, y, radius * radius, })
-            end
-        end
+        AddLitArea(areas, source_id, light_comp)
+    end
+    for _, belt_id in ipairs(EntityGetWithTag(BELT_TAG) or {}) do
+        local light_comp = EntityGetFirstComponent(belt_id, "LightComponent")
+        AddLitArea(areas, belt_id, light_comp)
     end
 
     return areas

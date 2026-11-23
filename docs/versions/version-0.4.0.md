@@ -19,4 +19,4 @@ Tracking document for completed work in **Version 0.4.0**. All releases are list
 
 ### Visibility API and Enemy Study Migration
 
-- [x] Moved the **Enemy Study** mechanic, its settings, markers, and documentation to the **In Game Wiki** mod. Exported `files/scripts/visibility_api.lua` (`IsPointVisible`, `IsEntityVisible`) so other mods can query whether a point or entity is lit by a lantern or the Light spell modifier. Details: [Creatures and Light](../dev/creatures-and-light.md#visibility-api).
+- [x] Moved the **Enemy Study** mechanic, its settings, markers, and documentation to the **In Game Wiki** mod. Exported `files/scripts/visibility_api.lua` (`IsPointVisible`, `IsEntityVisible`, `GetLitAreas`) calibrated at `0.35` of the light radius, covering lanterns in the world, in hand, on the player's belt (at its reduced `belt_light_scale` radius), and projectiles with the Light spell modifier. Details: [Creatures and Light](../dev/creatures-and-light.md#visibility-api).

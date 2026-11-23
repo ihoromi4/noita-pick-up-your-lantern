@@ -54,7 +54,7 @@ The radius of a source is the current `radius` of its tagged `LightComponent`. F
 
 `files/scripts/visibility_api.lua` exports a module table for other mods (such as **In Game Wiki**) to check whether a point or an entity is illuminated by a light source:
 
-- `IsPointVisible(x, y)` returns `true` when `(x, y)` lies within `LIT_RADIUS_FACTOR` (0.35) of the radius of any enabled `pul_light_source` light.
+- `IsPointVisible(x, y)` returns `true` when `(x, y)` lies within `LIT_RADIUS_FACTOR` (0.35) of the radius of any enabled `pul_light_source` light or an active belt lantern (`pul_belt`, which uses its own reduced `belt_light_scale` radius).
 - `IsEntityVisible(entity_id)` resolves the entity's hitbox centre (falling back to its transform) and calls `IsPointVisible`.
 - Lit areas are cached per frame (`GameGetFrameNum`), so multiple queries in the same frame scan light sources once.
 
