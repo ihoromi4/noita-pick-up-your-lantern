@@ -31,7 +31,6 @@ Features planned for the next versions are listed in the [Backlog](../backlog.md
 - [Player Polymorph and Lighting System](polymorph-and-lighting.md) - engine polymorph mechanics, `polytools` library, bug with darkness loss after transformation, and fix options.
 - [Lantern Progression: Quality Tiers and Modifiers](lantern-progression.md) - depth-based quality tiers, rare modifiers (flickering, frail), current implementation, and future ideas.
 - [Lantern Properties and Dynamic States](lantern-properties-and-states.md) - lantern quality tiers, depth progression, and lighting changes depending on liquids (oil, water, etc.).
-- [Enemy Study](enemy-study.md) - damage bonus against enemies watched in the light: line of sight and lit area checks, per-enemy bonus storage, damage hooks, and study markers above enemies.
 - [Natural Fear](natural-fear.md) - creatures that lanterns do not attract run from lantern light through the native Escaping AI state; vanilla burning and the AI state table.
 - [Fire Enemies](fire-enemies.md) - brighter light of fire-related enemies: vanilla list, runtime light, detection heuristic for enemies of other mods, and attraction of fire enemies to lanterns in the world through the AI home position.
 - [Spawning Fixtures for In-Game Tests](test-spawning.md) - a temporary debug spawner for rare light fixtures, spawn rules, finding biomes and ceiling points in pixel scenes, tested points in the mountain hall at the entrance to the Mines.

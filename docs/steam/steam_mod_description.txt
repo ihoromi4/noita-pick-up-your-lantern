@@ -32,10 +32,9 @@ The quality of a lantern sets how far its light reaches. The deeper you go, the 
 
 You can change the preset in the middle of a run, and the darkness changes at once. Lantern quality takes effect starting from your next run.
 
-Two optional modes are off by default, and presets do not turn them on:
+One optional mode is off by default, and presets do not turn it on:
 [list]
 [*][b]Natural Fear[/b]: creatures fear or seek the light, each according to its nature.
-[*][b]Enemy Study[/b]: watch enemies in the light to deal more damage to them.
 [/list]
 
 [h2]Documentation[/h2]

@@ -16,3 +16,7 @@ Tracking document for completed work in **Version 0.4.0**. All releases are list
 ### Chain Torch Submersion Timer and Sounds
 
 - [x] Added a 1-second submersion timer for open-fire lanterns (chain torches) in water and other liquids. While submerged, a torch hisses with a looping sound and emits real `fire` cells so the engine runs the native reaction for each liquid (such as turning water into `steam`, turning slime into `cloud_slime`, or igniting oil and alcohol). Leaving the liquid stops the hissing and resets the timer, while `lava` and `liquid_fire` never douse a torch and relight a doused one. Dousing and relighting play vanilla extinguish and ignite sounds. Details: [Lanterns](../guides/lanterns.md#chain-torches) and [Lantern Entities](../dev/lantern-entities.md#chain-torches).
+
+### Visibility API and Enemy Study Migration
+
+- [x] Moved the **Enemy Study** mechanic, its settings, markers, and documentation to the **In Game Wiki** mod. Exported `files/scripts/visibility_api.lua` (`IsPointVisible`, `IsEntityVisible`) so other mods can query whether a point or entity is lit by a lantern or the Light spell modifier. Details: [Creatures and Light](../dev/creatures-and-light.md#visibility-api).

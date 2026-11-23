@@ -13,7 +13,6 @@ Hanging lanterns, lamps and torches are no longer just decoration: you can take 
 - [Knocking Lanterns Down](#knocking-lanterns-down)
 - [Luring Fire Creatures](#luring-fire-creatures)
 - [Scaring Creatures](#scaring-creatures)
-- [Studying Enemies](#studying-enemies)
 
 ## Which Lanterns Can Be Picked Up
 
@@ -105,15 +104,3 @@ With the `Natural Fear` setting, the creatures that lanterns do not lure, such a
 - They fear the light even while fighting you.
 - Now and then a scared creature flies into a rage (it looks berserk) and attacks the lantern it feared, or you if the lantern is in your hands. The rage passes after a few seconds. An enraged creature can break a lantern, and the darkness spreads.
 - Once the light is gone, they come back home.
-
-## Studying Enemies
-
-With the `Enemy study` setting, you learn how to fight an enemy by watching it in lantern light. See [Settings](settings.md#enemy-study).
-
-- You study an enemy while it is close to you, you can see it, and it stands in the light of a lantern. The lantern may hang or lie in the world, or be in your hands. A projectile with the Light spell modifier also lights enemies for study. The lantern on your belt does not count.
-- The longer you study an enemy, the more damage you deal to it, up to the bonus you chose in the settings.
-- The enemy keeps its bonus when it leaves the light or your sight. Its study simply pauses.
-- A small dot above the enemy shows its study. The dot is yellow while you study the enemy, red while the study is paused, and green once the enemy is fully studied.
-- You learn about enemy types, not only single enemies. Each enemy you study makes the next ones of the same type faster to study. Related enemies, such as a weak and a normal zombie, or all Hiisi, are faster to study too, but less so.
-- At first, an enemy takes the `Base study time` to study. Once you know its type well, it takes only half a second.
-- Bosses always take two minutes to study, and studying them teaches you nothing about other enemies.

@@ -32,7 +32,7 @@ Settings presets set all options at once, from the near-vanilla Light Touch to P
 
 ## Enemy Study
 
-- [x] Study conditions: while an enemy is within the study radius, in the player's line of sight (raycast) and lit by a lantern in the world or in hand (not on the belt) or by a projectile with the Light spell modifier (`LIGHT`), the player's damage against it grows from 0% to the configured bonus. The bonus is kept after the enemy leaves the light or sight. Details: [enemy-study.md](../rnd/enemy-study.md).
+- [x] Study conditions: while an enemy is within the study radius, in the player's line of sight (raycast) and lit by a lantern in the world or in hand (not on the belt) or by a projectile with the Light spell modifier (`LIGHT`), the player's damage against it grows from 0% to the configured bonus. The bonus is kept after the enemy leaves the light or sight. (Moved to **In Game Wiki** in version 0.4.0.)
 - [x] Knowledge: each enemy type has a counter equal to the sum of the study progress (0 to 1) of its enemies, so five fully studied enemies give 5. Other variants of the same enemy (e.g. a weak and a normal zombie) share half of their knowledge, the rest of its herd (`herd_id`, e.g. all Hiisi) a fifth.
 - [x] Study time: the base study time at knowledge 0, shrinking linearly to 0.5 seconds at knowledge 10. Bosses take 120 seconds and neither give nor get knowledge.
 - [x] Study indicator: a small semi-transparent dot above the head of an enemy whose study has begun: yellow while studied, red while paused (out of light or sight), green once fully studied.

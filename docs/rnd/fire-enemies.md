@@ -104,7 +104,7 @@ An offline run of the same rules over all vanilla files (with `<Base>` merging) 
 - `fade_out_time="1.0"`: the light fades out after the enemy dies, as the light of a burning entity does (see [Burning Entity Light](../dev/vision-and-lighting.md#burning-entity-light)).
 - The light is steady. `blinking_freq` below 1 makes the light blink at random every frame, which looks like a strobe. A smooth flicker would need a radius update every frame for each fire enemy, as the flickering lantern modifier does in `lantern_traits.lua`. **[Needs verification]** whether a flicker is worth that cost.
 - Fog of war hole: the `LightComponent` only lifts the darkness added by the mod shader (see [Darkness Around the Player](../dev/vision-and-lighting.md#darkness-around-the-player)). The vanilla fog of war of unexplored areas stays, so an enemy far in a new cave was hidden in it. Each fire enemy also gets a `SpriteComponent` with `fog_of_war_hole="1"` (`data/particles/fog_of_war_hole_64.xml`, alpha 0.55, centred on the hitbox), as lanterns have. Vanilla does the same for `wraith_glowing.xml`. The hole scale keeps the lantern proportion (1.2 for a 280 px light): `radius * 1.2 / 280`, multiplied by the `Illuminated area size` setting. It follows the `Illuminate the darkness` setting: when that is off, fire enemies get only the light.
-- The glow does not carry the `pul_light_source` tag, so it does not light enemies for [Enemy Study](enemy-study.md).
+- The glow does not carry the `pul_light_source` tag, so it does not count as a light source for the visibility API.
 
 Ideas not used:
 
