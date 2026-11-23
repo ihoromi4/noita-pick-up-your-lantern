@@ -1,17 +1,13 @@
 # Creatures and Light
 
-How enemies react to lantern light: the player studies enemies in the light, lanterns lure some enemies, and Natural Fear scares the others. For the player's view, see [Lanterns](../guides/lanterns.md#luring-fire-creatures). The bright glow of fire enemies is described in [Vision and Lighting](vision-and-lighting.md#fire-enemy-glow).
+How enemies react to lantern light: lanterns lure some enemies, Natural Fear scares the others, and the mod exports a visibility API for other mods. For the player's view, see [Lanterns](../guides/lanterns.md#luring-fire-creatures). The bright glow of fire enemies is described in [Vision and Lighting](vision-and-lighting.md#fire-enemy-glow).
 
 ## Contents
 
 - [Overview](#overview)
 - [Settings](#settings)
 - [Light Sources](#light-sources)
-- [Enemy Study](#enemy-study)
-  - [Scan](#scan)
-  - [Knowledge and Study Time](#knowledge-and-study-time)
-  - [Damage Bonus](#damage-bonus)
-  - [Study Markers](#study-markers)
+- [Visibility API](#visibility-api)
 - [Luring Enemies to Lanterns](#luring-enemies-to-lanterns)
   - [Lured Enemies and Lure Lanterns](#lured-enemies-and-lure-lanterns)
   - [Home and Leash](#home-and-leash)
@@ -25,11 +21,10 @@ How enemies react to lantern light: the player studies enemies in the light, lan
 
 ## Overview
 
-All three mechanics run from `OnWorldPreUpdate` in `init.lua`:
+Both creature reaction mechanics run from `OnWorldPreUpdate` in `init.lua`:
 
 | Function | Module | Interval | Setting |
 | --- | --- | --- | --- |
-| `UpdateEnemyStudy` | `enemy_study.lua` | 10 frames | `Enemy study` |
 | `UpdateLanternAttraction` | `lantern_attraction.lua` | 20 frames | `Lanterns attract fire enemies`, `Natural Fear` |
 | `UpdateLanternFear` | `lantern_fear.lua` | 30 frames, 5 frames after the attraction | `Natural Fear` |
 
@@ -40,8 +35,7 @@ Each mechanic handles only root entities. A child entity with the `enemy` tag is
 All options of these mechanics are marked `preset_excluded = true` in `settings.lua`. `GetPresetSettings()` skips such options, so `ApplyPreset` does not reset them and `SyncPreset` does not compare them. Without the flag, picking a preset would turn the mechanics off, and turning one on would switch the preset to `Custom`.
 
 - `fire_enemy_attraction` and `natural_fear` are in the `Gameplay` category.
-- `enemy_study`, `enemy_study_damage_bonus` and `enemy_study_duration` are in their own `Enemy Study` category.
-- All of them use the runtime scope and are read on every update, so a change applies immediately.
+- Both use the runtime scope and are read on every update, so a change applies immediately.
 
 ## Light Sources
 
@@ -54,54 +48,15 @@ Lanterns declare both tags in their own XML files. `EntityGetFirstComponent` ret
 
 The Light spell modifier (`LIGHT`) adds `data/entities/misc/light.xml` to a projectile through `extra_entities`. The engine merges an extra entity into the projectile, so a tag on the root of `light.xml` may not reach it. At startup, `PatchLightSources()` in `patch_light_sources.lua` tags the root and the `LightComponent` of `light.xml`. It also adds a `LuaComponent` with `light_source_tag.lua`, which tags the entity the components end up on and then removes itself. To add another light source, put its path into `LIGHT_SOURCE_PATHS`.
 
-The radius of a source is the current `radius` of its tagged `LightComponent`. For a lantern, this radius already includes `Illuminated area size`, the quality tier, the liquid state and the modifiers. `LightComponent.radius` is the outer edge of a soft light, and the visibly lit area is smaller. So all three mechanics take only a share of it, as described below.
+The radius of a source is the current `radius` of its tagged `LightComponent`. For a lantern, this radius already includes `Illuminated area size`, the quality tier, the liquid state and the modifiers. `LightComponent.radius` is the outer edge of a soft light, and the visibly lit area is smaller. So the visibility API and creature reactions take only a share of it, as described below.
 
-## Enemy Study
+## Visibility API
 
-The player's damage against an enemy grows while the enemy is watched in lantern light. Research and the rejected options are in [Enemy Study](../rnd/enemy-study.md).
+`files/scripts/visibility_api.lua` exports a module table for other mods (such as **In Game Wiki**) to check whether a point or an entity is illuminated by a light source:
 
-### Scan
-
-`UpdateEnemyStudy()` runs every 10 frames (`SCAN_INTERVAL_FRAMES`) while `Enemy study` is on.
-
-- Candidates are root entities with the `enemy` or `boss` tag within 400 px of the player (`STUDY_RADIUS`). The Dragon has only the `boss_dragon` tag, so it is listed separately. The target point is the hitbox centre (`EntityGetFirstHitboxCenter`).
-- An enemy is lit when its hitbox centre is within `LIT_RADIUS_FACTOR` (0.6) of the radius of a light source. Light sources are collected once per scan. No rays are cast from the light, so a lantern behind a thin wall still lights an enemy.
-- An enemy is in sight when `RaytraceSurfaces` from the player's hitbox centre to the enemy hits no solid cells. Liquids and gases do not block the line. The ray is cast only for lit enemies, because the light check is cheaper.
-- A fully studied enemy (`pul_study_done` storage) is skipped.
-
-### Knowledge and Study Time
-
-The study progress of an enemy grows from 0 to 1. It is kept in the `pul_study_progress` storage on the enemy and saved with it. The progress never decreases: an enemy out of light or sight only stops gaining it.
-
-The player studies enemy types, not single enemies. Every gain of progress is added to three run globals:
-
-| Level | Global | Key | Weight |
-| --- | --- | --- | --- |
-| Type | `pul_study_knowledge_<type>` | File path from `EntityGetFilename`, or the entity name as a fallback | 1 |
-| Family | `pul_study_family_knowledge_<family>` | File path without variant suffixes such as `_weak` or `_big` (`VARIANT_SUFFIXES`) | 0.5 |
-| Herd | `pul_study_herd_knowledge_<herd>` | `herd_id` of `GenomeDataComponent` | 0.2 |
-
-- The effective knowledge is `T + 0.5 × max(0, F − T) + 0.2 × max(0, H − F)`, where `T`, `F` and `H` are the type, family and herd knowledge. Each level excludes the level below it, so the enemy's own type is not counted twice.
-- The study time shrinks linearly from the `Base study time` at knowledge 0 to 30 frames (0.5 s) at knowledge 10 (`FULL_TYPE_KNOWLEDGE`). It is computed again on every scan.
-- The `player` herd is ignored: charmed enemies say nothing about their kind.
-- Bosses always take 7200 frames (120 s). They neither add to nor use any knowledge.
-- Run globals are used instead of a storage on the player, because polymorph replaces the player entity. They are saved with the run and reset in a new game.
-
-### Damage Bonus
-
-When the study of an enemy begins, it gets a `LuaComponent` with `enemy_study_damage.lua` in `script_damage_about_to_be_received`. The hook multiplies the damage by `1 + bonus × progress` when the responsible entity is the current player. Wand projectiles report the shooter, so spells and explosions get the bonus. The values returned by the hook replace the incoming damage, so damage numbers show the raised damage.
-
-With `Enemy study` off, the hook returns the damage unchanged. The bonus setting is read at hit time, so a change applies to enemies studied earlier too.
-
-### Study Markers
-
-A studied enemy gets a child entity `study_marker.xml` (tag `pul_study_marker`) above its head:
-
-- It has three dot sprites: yellow (`pul_study_in_progress`), red (`pul_study_paused`) and green (`pul_study_done`). The images are in `files/ui_gfx/`.
-- `InheritTransformComponent` with `only_position="1"` keeps the dot upright when the enemy turns.
-- The height is the top of the enemy's hitboxes plus a small margin, so it also fits large enemies.
-- At the end of each scan, every loaded marker shows one sprite and hides the other two: green for a fully studied enemy, yellow for an enemy studied in this scan, and red for all others. With `Enemy study` off, all markers are hidden.
-- The marker is found among the children of the enemy by its tag, so a reload never attaches a second one. It is removed together with the enemy.
+- `IsPointVisible(x, y)` returns `true` when `(x, y)` lies within `LIT_RADIUS_FACTOR` (0.6) of the radius of any enabled `pul_light_source` light.
+- `IsEntityVisible(entity_id)` resolves the entity's hitbox centre (falling back to its transform) and calls `IsPointVisible`.
+- Lit areas are cached per frame (`GameGetFrameNum`), so multiple queries in the same frame scan light sources once.
 
 ## Luring Enemies to Lanterns
 
@@ -187,9 +142,7 @@ On each update, an enemy in the light flies into a rage with a 5% chance (`RAGE_
 
 | File | Role |
 | --- | --- |
-| `files/scripts/enemy_study.lua` | Study scan, light and sight checks, progress, knowledge, markers |
-| `files/scripts/enemy_study_damage.lua` | Damage hook of a studied enemy |
-| `files/entities/study_marker.xml`, `files/ui_gfx/study_dot_*.png` | Study marker entity and its dot images |
+| `files/scripts/visibility_api.lua` | Exported visibility API (`IsPointVisible`, `IsEntityVisible`) for other mods |
 | `files/scripts/patch_light_sources.lua`, `files/scripts/light_source_tag.lua` | Mark the Light spell modifier as a light source |
 | `files/scripts/lantern_attraction.lua` | Lure lanterns, lured enemies, home, leash and trance |
 | `files/scripts/enemy_ai_home.lua` | Original AI values, home with leash, lured groups and exclusions, shared by the attraction and the fear |

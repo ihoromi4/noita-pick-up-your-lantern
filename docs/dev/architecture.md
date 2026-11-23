@@ -20,12 +20,11 @@ All mod files live in `pick_up_your_lantern/`:
 - `init.lua`: entry point. Applies startup patches and registers frame hooks.
 - `settings.lua`: Mod Settings definitions and settings presets (`PRESETS`, each listing only the values that differ from the option defaults). Each option's `change_fn` re-syncs the `preset` setting to the matching preset or `custom`. `ModSettingsUpdate` also stores `false` defaults, which vanilla `mod_settings_update` skips. See [Settings](../guides/settings.md) for the player-facing description.
 - `data/entities/props/`: full overrides of the vanilla light fixtures that become pickable lanterns, listed in `LANTERN_TYPES` of `files/scripts/lantern_properties_config.lua`. See [Lantern Entities](lantern-entities.md).
-- `files/entities/`: entities added by the mod. These are the belt lantern (`lantern_belt.xml`, see [Holding and Belt](holding-and-belt.md)), the chain and cable pieces and the shared chain torch base (see [Lantern Entities](lantern-entities.md)), and the study marker and the looks of fear and rage (see [Creatures and Light](creatures-and-light.md)).
-- `files/scripts/`: Lua modules and entity scripts.
+- `files/entities/`: entities added by the mod. These are the belt lantern (`lantern_belt.xml`, see [Holding and Belt](holding-and-belt.md)), the chain and cable pieces and the shared chain torch base (see [Lantern Entities](lantern-entities.md)), and the looks of fear and rage (see [Creatures and Light](creatures-and-light.md)).
+- `files/scripts/`: Lua modules, entity scripts, and the exported visibility API (`visibility_api.lua`).
 - `files/scripts/libs/`: third-party and helper libraries (`nxml.lua`, `diff_patch.lua`).
 - `files/patches/`: diff patches for vanilla shaders (`vision/`, `glow/`).
 - `files/props_gfx/`: in-hand sprites, burnt-out sprites and inventory icons.
-- `files/ui_gfx/`: dot images of the study marker.
 - `files/translations.csv`: translation keys appended to `data/translations/common.csv` at startup.
 
 ## Startup Patches
@@ -43,7 +42,7 @@ All mod files live in `pick_up_your_lantern/`:
 | `PatchBurningEntity` | `patch_materials.lua` | Adds a light to the burning effect entity. |
 | `PatchGlowShaders` | `patch_materials.lua` | Applies the `files/patches/glow/` patches to widen the glow blur. |
 | `PatchItemRadar` | `patch_item_radar.lua` | Hooks the Item Radar perk script to hide lanterns. |
-| `PatchLightSources` | `patch_light_sources.lua` | Tags the light of the Light spell modifier with `pul_light_source`, so it lights enemies for study. |
+| `PatchLightSources` | `patch_light_sources.lua` | Tags the light of the Light spell modifier with `pul_light_source`, so it counts as a light source for visibility checks and creature reactions. |
 | `InitHotBiomes` | `lantern_liquid_state.lua` | Reads `_biomes_all.xml` and opens `biome_map.png` to detect hot biomes at runtime. |
 
 The vision and glow patches are described in [Vision and Lighting](vision-and-lighting.md).
@@ -54,7 +53,7 @@ The vision and glow patches are described in [Vision and Lighting](vision-and-li
 | --- | --- | --- |
 | `OnPlayerSpawned` | `ApplyPlayerVision` | Applies the vision preset to the new player entity and logs the shader patch status once. |
 | `OnModSettingsChanged` | `UpdatePlayerVision(true)`, `UpdateLanternIllumination(true)` | Applies changed settings without restarting the run. |
-| `OnWorldPreUpdate` | `UpdatePlayerVision`, `UpdateLanternHang`, `UpdateLanternIllumination`, `UpdateEnemyStudy`, `UpdateFireEnemyGlow`, `UpdateLanternAttraction`, `UpdateLanternFear` | Sends shader parameters every frame. Hangs a held lantern on the ceiling on a left click, or returns a lantern thrown with the left button to the hand. Scales lantern light; the lantern scan runs every 30 frames. Studies enemies every 10 frames, gives fire enemies their glow every 30 frames, lures enemies to lanterns every 20 frames and scares them every 30 frames. See [Creatures and Light](creatures-and-light.md). |
+| `OnWorldPreUpdate` | `UpdatePlayerVision`, `UpdateLanternHang`, `UpdateLanternIllumination`, `UpdateFireEnemyGlow`, `UpdateLanternAttraction`, `UpdateLanternFear` | Sends shader parameters every frame. Hangs a held lantern on the ceiling on a left click, or returns a lantern thrown with the left button to the hand. Scales lantern light; the lantern scan runs every 30 frames. Gives fire enemies their glow every 30 frames, lures enemies to lanterns every 20 frames and scares them every 30 frames. See [Creatures and Light](creatures-and-light.md). |
 | `OnWorldPostUpdate` | `UpdateLanternBelt`, `UpdateLanternLiquidState`, `UpdateTubeLampCables`, `UpdateLanternChains` | Updates the belt lantern in the same frame before rendering. Checks liquid states every 10 frames. Cuts the power of tube lamps that leave the ceiling and moves their cables. Simulates the chains of temple lanterns and chain torches. |
 
 ## Entity Scripts
@@ -80,7 +79,6 @@ Scripts that the mod attaches to other entities at runtime:
 
 | Script | Attached to | Purpose |
 | --- | --- | --- |
-| `enemy_study_damage.lua` | An enemy whose study has begun | Raises the player's damage against it by its study bonus. |
 | `light_source_tag.lua` | The entity of the Light spell modifier | Tags the projectile with `pul_light_source`, then removes itself. |
 
 ## Item Lifecycle Tags
@@ -101,7 +99,7 @@ Vanilla lanterns have a `TorchComponent` that ignites nearby pixels and goes out
 
 - `lantern`: every pickable lantern, including other fixtures such as the mining lamp. The illumination scan, liquid states, belt and Item Radar filter look for it.
 - `pul_belt`: the belt lantern entity. It deliberately does not contain `lantern`, so the illumination scan never treats it as a real lantern.
-- `pul_light_source`: an entity and its `LightComponent` whose light counts for enemy study, luring and fear. Lanterns declare it in their XML files.
+- `pul_light_source`: an entity and its `LightComponent` whose light counts for visibility checks, luring and fear. Lanterns declare it in their XML files.
 - `pul_xray`: the All-Seeing Eye spell projectile.
 - `pul_cable`: a tube lamp cable entity at its ceiling anchor.
 - `pul_cable_segment`: a segment sprite of a tube lamp cable.
@@ -113,7 +111,6 @@ Vanilla lanterns have a `TorchComponent` that ignites nearby pixels and goes out
 - `pul_lantern_attracted`: an enemy that a lantern lures.
 - `pul_lantern_scared`, `pul_lantern_enraged`: an enemy that fears lantern light, and one that rages at a lantern.
 - `pul_lantern_fear_effect`, `pul_lantern_rage_effect`: the looks of fear and rage, child entities of the enemy.
-- `pul_study_marker`: the study marker above an enemy. Its sprites carry `pul_study_in_progress`, `pul_study_paused` and `pul_study_done`.
 
 ## Diff Patch Library
 

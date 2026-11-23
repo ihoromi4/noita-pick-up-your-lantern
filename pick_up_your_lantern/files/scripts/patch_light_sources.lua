@@ -1,5 +1,5 @@
 --- Light source patcher for Pick Up Your Lantern mod.
---- Marks vanilla light sources that count as light for enemy study with the `pul_light_source` tag.
+--- Marks vanilla light sources that count as light for visibility and creature reactions with the `pul_light_source` tag.
 --- Lanterns declare the tag in their own XML files; other light sources are patched here.
 
 local MOD_ID = "pick_up_your_lantern"
