@@ -12,8 +12,8 @@ local MOD_ID = "pick_up_your_lantern"
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 
--- Share of the lantern light radius that looks lit: the soft outer edge of the light does not count.
-local LIT_RADIUS_FACTOR = 0.6
+-- Share of the lantern light radius that looks visibly lit: calibrated in-game against darkness.
+local LIT_RADIUS_FACTOR = 0.35
 
 local cached_frame = nil
 local cached_lit_areas = {}
@@ -97,6 +97,7 @@ local function IsEntityVisible(entity_id)
 end
 
 return {
+    GetLitAreas = GetLitAreasForFrame,
     IsPointVisible = IsPointVisible,
     IsEntityVisible = IsEntityVisible,
 }
