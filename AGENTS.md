@@ -50,19 +50,23 @@ These rules protect the saves of the user and the meaning of a test result. The 
 
 ## Code style
 
-Follow LuaLS (Lua Language Server):
+- Use 4 spaces indentation for Python and Lua.
+- Follow PEP 8 guidelines for Python.
 
-- Use 4 spaces indentation.
+Lua style:
+
+- Follow LuaLS conventions for Lua.
 - Document function signatures using LDoc.
 - Variables names should use snake case.
 - Constants should use upper snake case.
 - Function names should use upper camel case.
 - Add a trailing comma to all fields in tables, including the last one.
 
-Markdown style guide:
+## Markdown style guide
 
 - Use a single H1 heading.
 - Add newlines before and after headings.
 - Do not add position numbering in headings.
 - Use section links `[Link Text](#anchor-name)`.
 - Use relative file links inside docs `[Other File Name](.../other-file.md)`.
+- After you edit Markdown files, check them with `scripts/mdlint <files>` and fix the reported problems. Without arguments, the script checks all Markdown files of the repository. The configuration lives in `.markdownlint-cli2.jsonc`.
