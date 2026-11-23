@@ -8,4 +8,4 @@ Technical documentation for contributors to the **Pick Up Your Lantern** mod for
 - [Throwing](throwing.md): throw setup, hanging on the left mouse button, flight physics, shattering and engine limitations.
 - [Lantern Properties and Progression](lantern-properties-and-progression.md): base properties per type, quality tiers, modifiers, liquid states and the item description.
 - [Vision and Lighting](vision-and-lighting.md): limited vision shader patch, vision presets, polymorph, the All-Seeing Eye, glowing materials and the fire enemy glow.
-- [Creatures and Light](creatures-and-light.md): enemy study, light sources for study, luring enemies to lanterns and Natural Fear.
+- [Creatures and Light](creatures-and-light.md): light sources, the visibility API, luring enemies to lanterns and Natural Fear.

@@ -19,7 +19,7 @@ local UPDATE_INTERVAL_FRAMES = 30
 local UPDATE_FRAME_OFFSET = 5
 local LANTERN_TAG = "lantern"
 local ENEMY_TAG = "enemy"
--- Share of the lantern light radius that looks lit, as for enemy study: the soft outer edge of the light does not
+-- Share of the lantern light radius that looks lit, matching the visibility API: the soft outer edge of the light does not
 -- scare. With the full radius, one lantern scared enemies over 330 px.
 local LIT_RADIUS_FACTOR = 0.6
 -- Scale of the lit area that scares, tuned by feel: enemies come closer to a lantern before they fear it.

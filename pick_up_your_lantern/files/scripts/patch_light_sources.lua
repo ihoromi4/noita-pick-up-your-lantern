@@ -69,7 +69,7 @@ local function PatchLightSource(path)
     ModTextFileSetContent(path, nxml.tostring(xml))
 end
 
----Marks all vanilla light sources that count for enemy study.
+---Marks all vanilla light sources that count for visibility checks and creature reactions.
 ---@return nil
 function PatchLightSources()
     for _, path in ipairs(LIGHT_SOURCE_PATHS) do
