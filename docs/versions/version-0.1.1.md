@@ -4,9 +4,9 @@ Tracking document for features, implementation progress, and known issues for **
 
 ## Item Radar Compatibility
 
-- [x] Hide lanterns from the Item Radar perk (`ITEM_RADAR`) by default ([#1](https://github.com/ihoromi4/noita-pick-up-your-lantern/issues/1)).
-- [x] Add "Show lanterns on Item Radar" toggle to Mod Settings (runtime, off by default).
-- [x] Mark all lantern entities with the `lantern` tag and filter them out in `data/scripts/perks/radar_item.lua` (`patch_item_radar.lua`, `item_radar_filter.lua`).
+- Hide lanterns from the Item Radar perk (`ITEM_RADAR`) by default ([#1](https://github.com/ihoromi4/noita-pick-up-your-lantern/issues/1)).
+- Add "Show lanterns on Item Radar" toggle to Mod Settings (runtime, off by default).
+- Mark all lantern entities with the `lantern` tag and filter them out in `data/scripts/perks/radar_item.lua` (`patch_item_radar.lua`, `item_radar_filter.lua`).
 
 ## Release Notes
 

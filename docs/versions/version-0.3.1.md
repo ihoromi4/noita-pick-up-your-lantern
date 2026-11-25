@@ -8,12 +8,12 @@ Version 0.3.1 is a hotfix for a bug in version 0.3.0. Lantern modifiers did not 
 
 ## Lantern Modifier Script
 
-- [x] Bug: the modifier script (`lantern_modifier.lua`) never ran, so lantern modifiers had no effect. A Flickering lantern did not flicker, a Cracked lantern did not leak fire, and a Short-lived lantern never burned out in hand or in the world. The cause was the `MODIFIER_SCRIPT` constant in `lantern_traits.lua`, which was deleted by mistake during the chain torch work. The `---@diagnostic disable: undefined-global` line in that file hid the error from LuaLS. Fixed: the constant is restored.
-- [x] Bug: memory leak on lanterns with modifiers. Without the script path, `AttachModifierScript` added an empty `LuaComponent` with no script. The check for an existing script never found it, so a new empty component was added on every illumination update. Every lit lantern with a modifier gained a new component every 30 frames. One test save held about 45,700 of them on 11 lanterns, and the game took a long time to save and close. Fixed by the restored constant.
+- Bug: the modifier script (`lantern_modifier.lua`) never ran, so lantern modifiers had no effect. A Flickering lantern did not flicker, a Cracked lantern did not leak fire, and a Short-lived lantern never burned out in hand or in the world. The cause was the `MODIFIER_SCRIPT` constant in `lantern_traits.lua`, which was deleted by mistake during the chain torch work. The `---@diagnostic disable: undefined-global` line in that file hid the error from LuaLS. Fixed: the constant is restored.
+- Bug: memory leak on lanterns with modifiers. Without the script path, `AttachModifierScript` added an empty `LuaComponent` with no script. The check for an existing script never found it, so a new empty component was added on every illumination update. Every lit lantern with a modifier gained a new component every 30 frames. One test save held about 45,700 of them on 11 lanterns, and the game took a long time to save and close. Fixed by the restored constant.
 
 ## Save Cleanup
 
-- [x] Remove the leaked empty components from saves made with version 0.3.0 (`leaked_component_cleanup.lua`). Each loaded lantern is checked once per session. The cleanup removes every `LuaComponent` that has the `enabled_in_world` and `enabled_in_hand` tags and no script. Lanterns in the world are cleaned when their part of the map is loaded. The number of removed components is written to the game log.
+- Remove the leaked empty components from saves made with version 0.3.0 (`leaked_component_cleanup.lua`). Each loaded lantern is checked once per session. The cleanup removes every `LuaComponent` that has the `enabled_in_world` and `enabled_in_hand` tags and no script. Lanterns in the world are cleaned when their part of the map is loaded. The number of removed components is written to the game log.
 - The cleanup was temporary. It was removed in version 0.3.2, see [version-0.3.2.md](version-0.3.2.md#cleanup).
 
 ## Release Notes

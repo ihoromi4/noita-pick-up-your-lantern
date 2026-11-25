@@ -8,27 +8,27 @@ Your lantern now stays with you even when your hands are busy: it hangs on your 
 
 ## Belt Attachment and Passive Illumination
 
-- [x] Automatically display the first available lantern from `Quick Inventory` on the character's belt/waist when hands are holding wands, flasks, or items (reference: "Extra Backpack", Steam ID: `3807317449`).
-- [x] Emit moderate passive ambient light from the belt (dimmer than active hand holding, but brighter than unlit player vision).
-- [x] `Belt lantern light` option in Mod Settings to scale the belt light relative to the lantern in hand (0-100%, 50% by default).
-- [x] Hide the belt lantern (sprite and light) whenever any lantern is the active held item, even if other lanterns remain in the inventory.
-- [x] Synchronize belt lantern movement with player locomotion.
+- Automatically display the first available lantern from `Quick Inventory` on the character's belt/waist when hands are holding wands, flasks, or items (reference: "Extra Backpack", Steam ID: `3807317449`).
+- Emit moderate passive ambient light from the belt (dimmer than active hand holding, but brighter than unlit player vision).
+- `Belt lantern light` option in Mod Settings to scale the belt light relative to the lantern in hand (0-100%, 50% by default).
+- Hide the belt lantern (sprite and light) whenever any lantern is the active held item, even if other lanterns remain in the inventory.
+- Synchronize belt lantern movement with player locomotion.
 
 ## Lantern Properties and Dynamic States
 
-- [x] Distinct properties per lantern: light radius, fog of war hole size, light color, and durability differ between lantern types and are declared in the lantern XML files. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
-- [x] Lantern quality tiers rolled on spawn, with better tiers becoming more likely in deeper biomes; tier is described by an atmospheric sentence in the item description. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
-- [x] Rare lantern modifiers rolled independently of the tier, each described by a sentence in the item description: Flickering (20% wider but unstable light) and Short-lived (leaks a drop of oil every 5 seconds, fades over its limited burn time and goes out).
-- [x] `Lantern progression` option in Mod Settings to turn tiers and modifiers off (enabled by default).
-- [x] Oil-soaked state: diving into oil with a lantern in hand makes its light and fog of war hole 30% wider until it is submerged in water. The state is described by a sentence in the item description. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
-- [x] Wet state: diving under water with a closed oil lantern in hand leaves it lit, but makes its light and fog of war hole 20% narrower until it is submerged in oil. The state is described by a sentence in the item description.
-- [x] Unlit in-hand and belt sprites: burned-out lanterns switch to dark container sprites (`*_in_hand_out.xml`) without flame animations when held in hand or carried on the belt.
+- Distinct properties per lantern: light radius, fog of war hole size, light color, and durability differ between lantern types and are declared in the lantern XML files. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
+- Lantern quality tiers rolled on spawn, with better tiers becoming more likely in deeper biomes; tier is described by an atmospheric sentence in the item description. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
+- Rare lantern modifiers rolled independently of the tier, each described by a sentence in the item description: Flickering (20% wider but unstable light) and Short-lived (leaks a drop of oil every 5 seconds, fades over its limited burn time and goes out).
+- `Lantern progression` option in Mod Settings to turn tiers and modifiers off (enabled by default).
+- Oil-soaked state: diving into oil with a lantern in hand makes its light and fog of war hole 30% wider until it is submerged in water. The state is described by a sentence in the item description. Details: [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md).
+- Wet state: diving under water with a closed oil lantern in hand leaves it lit, but makes its light and fog of war hole 20% narrower until it is submerged in oil. The state is described by a sentence in the item description.
+- Unlit in-hand and belt sprites: burned-out lanterns switch to dark container sprites (`*_in_hand_out.xml`) without flame animations when held in hand or carried on the belt.
 
 ## Known Issues and Next Steps
 
-- [x] Flame sprite desync: the flame was flipped away from the glass container after throwing a held lantern while facing left. Details: [Holding and Belt](../dev/holding-and-belt.md).
-- [x] Limited vision lost after polymorph: vision stayed almost vanilla after returning to normal form until mod settings were changed. Details: [Vision and Lighting](../dev/vision-and-lighting.md).
-- [x] Separate `Polymorphed vision` option in Mod Settings for the polymorphed form (`Same as player` by default). Details: [Vision and Lighting](../dev/vision-and-lighting.md).
-- [x] Chain torches in some biomes (e.g., ghostly torches in Coal Pits) did not dispel fog of war: these biomes spawn duplicate torch files from `data/entities/props/` that the mod did not patch. Details: [Lantern Entities](../dev/lantern-entities.md).
-- [x] All-Seeing Eye spell (`X_RAY`) did not work: the limited vision darkened the revealed area again. It now reveals a slowly expanding circle around the cast point at vanilla brightness. Once the circle covers the screen, the revealed lighting fades back to the previous level over 10 seconds. A repeated cast takes over the size and lighting of the active circle and brightens it back up, so rapid casting does not make the screen flicker. Details: [Vision and Lighting](../dev/vision-and-lighting.md).
-- [x] All-Seeing Eye perk (`REMOVE_FOG_OF_WAR`) did not work for the same reason: it now reveals the whole level as in vanilla. Holding Sunseed or Sunstone has the same effect.
+- Flame sprite desync: the flame was flipped away from the glass container after throwing a held lantern while facing left. Details: [Holding and Belt](../dev/holding-and-belt.md).
+- Limited vision lost after polymorph: vision stayed almost vanilla after returning to normal form until mod settings were changed. Details: [Vision and Lighting](../dev/vision-and-lighting.md).
+- Separate `Polymorphed vision` option in Mod Settings for the polymorphed form (`Same as player` by default). Details: [Vision and Lighting](../dev/vision-and-lighting.md).
+- Chain torches in some biomes (e.g., ghostly torches in Coal Pits) did not dispel fog of war: these biomes spawn duplicate torch files from `data/entities/props/` that the mod did not patch. Details: [Lantern Entities](../dev/lantern-entities.md).
+- All-Seeing Eye spell (`X_RAY`) did not work: the limited vision darkened the revealed area again. It now reveals a slowly expanding circle around the cast point at vanilla brightness. Once the circle covers the screen, the revealed lighting fades back to the previous level over 10 seconds. A repeated cast takes over the size and lighting of the active circle and brightens it back up, so rapid casting does not make the screen flicker. Details: [Vision and Lighting](../dev/vision-and-lighting.md).
+- All-Seeing Eye perk (`REMOVE_FOG_OF_WAR`) did not work for the same reason: it now reveals the whole level as in vanilla. Holding Sunseed or Sunstone has the same effect.
