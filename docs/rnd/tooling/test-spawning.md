@@ -1,6 +1,6 @@
 # Spawning Fixtures for In-Game Tests
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 Many light fixtures spawn only in a few biomes, often far from the start (for example, the mining lamp: `hills`, `winter`, `mountain_tree`, `lake`). To test a new pickable fixture quickly, the mod can spawn it at known ceiling points in the mountain hall, the entrance to the Mines, which every run passes in the first minute.
 
@@ -30,7 +30,7 @@ The spawner is a temporary test tool and is not part of the repository: create i
   - the mining lamp is spawned at `y + 6` in `hills`, `winter` and `mountain_tree`, but at `x - 4, y` in `lake`;
   - lanterns in `coalmine` are spawned at `x, y`;
   - tube lamps in `snowcastle` are spawned at `x + 5, y` or `x, y`.
-- Test both offsets when a fixture has several: the marker itself is the first air pixel under the ceiling, so a fixture spawned right at it may have its top inside the ceiling (see [Sprite Geometry and Positioning](sprite-geometry.md)).
+- Test both offsets when a fixture has several: the marker itself is the first air pixel under the ceiling, so a fixture spawned right at it may have its top inside the ceiling (see [Sprite Geometry and Positioning](../entities/sprite-geometry.md)).
 
 ## Finding a Biome in the World
 

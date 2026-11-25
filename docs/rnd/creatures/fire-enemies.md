@@ -1,8 +1,8 @@
 # Fire Enemies: Glow and Attraction to Lanterns
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
-Research on the "Fire Enemies Lighting Rework" planned for version 0.3.0 (see [version-0.3.0.md](../versions/version-0.3.0.md#fire-enemies-lighting-rework)): fire-related enemies glow brighter than other enemies so they stand out in darkness, enemies of other mods are detected automatically, and lanterns attract fire enemies.
+Research on the "Fire Enemies Lighting Rework" planned for version 0.3.0 (see [version-0.3.0.md](../../versions/version-0.3.0.md#fire-enemies-lighting-rework)): fire-related enemies glow brighter than other enemies so they stand out in darkness, enemies of other mods are detected automatically, and lanterns attract fire enemies.
 
 - [Requirements](#requirements)
 - [Vanilla Fire Enemies](#vanilla-fire-enemies)
@@ -59,7 +59,7 @@ Two options were considered:
 - **XML patches at init.** Add a `LightComponent` to each vanilla file with `ModTextFileSetContent`. Free at runtime, but a mod enemy can only be found by its file, and the virtual file system cannot be listed. Spawn lists in biome scripts could be parsed, but mods spawn enemies in many other ways.
 - **Runtime light (chosen).** Every 30 frames, enemies within 512 px of the camera that have not been checked are checked once and tagged with `pul_fire_glow_checked`. Fire-related ones get a new `LightComponent` and a fog of war hole `SpriteComponent`, both with the `pul_fire_glow` tag. Vanilla and mod enemies go through the same code, and the components can be read as they are, after `<Base>` merging and any changes by other mods.
 
-The vanilla light is left alone, and the new one is added next to it. The vanilla lights have `update_properties="0"`, so changing them at runtime would have no effect anyway (see [Vision and Lighting](../dev/vision-and-lighting.md#why-vanilla-components-are-not-enough)).
+The vanilla light is left alone, and the new one is added next to it. The vanilla lights have `update_properties="0"`, so changing them at runtime would have no effect anyway (see [Vision and Lighting](../../dev/vision-and-lighting.md#why-vanilla-components-are-not-enough)).
 
 Both the tag and the component are saved with the entity, so after loading a save the light is not added a second time.
 
@@ -101,9 +101,9 @@ An offline run of the same rules over all vanilla files (with `<Base>` merging) 
 
 - The light is centred on the hitbox (`offset_x`, `offset_y` from `EntityGetFirstHitboxCenter`), as the position of walking enemies is at their feet.
 - `update_properties="1"`: without it, a light added at runtime with `EntityAddComponent2` stayed invisible in game (a Stendari had no glow). The engine seems to create the light sprite with the default zero radius before the passed values are set. Vanilla scripts also set `update_properties` whenever they change a light at runtime (`data/scripts/gun/procedural/*.lua`). Confirmed in-game: with it, the light is visible.
-- `fade_out_time="1.0"`: the light fades out after the enemy dies, as the light of a burning entity does (see [Burning Entity Light](../dev/vision-and-lighting.md#burning-entity-light)).
+- `fade_out_time="1.0"`: the light fades out after the enemy dies, as the light of a burning entity does (see [Burning Entity Light](../../dev/vision-and-lighting.md#burning-entity-light)).
 - The light is steady. `blinking_freq` below 1 makes the light blink at random every frame, which looks like a strobe. A smooth flicker would need a radius update every frame for each fire enemy, as the flickering lantern modifier does in `lantern_traits.lua`. **[Needs verification]** whether a flicker is worth that cost.
-- Fog of war hole: the `LightComponent` only lifts the darkness added by the mod shader (see [Darkness Around the Player](../dev/vision-and-lighting.md#darkness-around-the-player)). The vanilla fog of war of unexplored areas stays, so an enemy far in a new cave was hidden in it. Each fire enemy also gets a `SpriteComponent` with `fog_of_war_hole="1"` (`data/particles/fog_of_war_hole_64.xml`, alpha 0.55, centred on the hitbox), as lanterns have. Vanilla does the same for `wraith_glowing.xml`. The hole scale keeps the lantern proportion (1.2 for a 280 px light): `radius * 1.2 / 280`, multiplied by the `Illuminated area size` setting. It follows the `Illuminate the darkness` setting: when that is off, fire enemies get only the light.
+- Fog of war hole: the `LightComponent` only lifts the darkness added by the mod shader (see [Darkness Around the Player](../../dev/vision-and-lighting.md#darkness-around-the-player)). The vanilla fog of war of unexplored areas stays, so an enemy far in a new cave was hidden in it. Each fire enemy also gets a `SpriteComponent` with `fog_of_war_hole="1"` (`data/particles/fog_of_war_hole_64.xml`, alpha 0.55, centred on the hitbox), as lanterns have. Vanilla does the same for `wraith_glowing.xml`. The hole scale keeps the lantern proportion (1.2 for a 280 px light): `radius * 1.2 / 280`, multiplied by the `Illuminated area size` setting. It follows the `Illuminate the darkness` setting: when that is off, fire enemies get only the light.
 - The glow does not carry the `pul_light_source` tag, so it does not count as a light source for the visibility API.
 
 Ideas not used:
@@ -125,7 +125,7 @@ The engine has no Lua call that sends an `AnimalAIComponent` to a point, and no 
 
 ### Design
 
-`files/scripts/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../versions/version-0.3.0.md#natural-fear-mode) mode, which attracts Hiisi and insects.
+`files/scripts/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../../versions/version-0.3.0.md#natural-fear-mode) mode, which attracts Hiisi and insects.
 
 - **Lured enemies**: root entities with the `enemy` tag within the attraction radius of a lure lantern, plus the enemies attracted earlier (to release them). An enemy is lured when:
   - `Lanterns attract fire enemies` is on and it has the `pul_fire_enemy` tag, which the glow scan adds to every enemy it lights;
@@ -187,7 +187,7 @@ Work state at the end of 2026-10-27:
 Next steps:
 
 1. Tune `LURE_ENTER_CHANCE`, `LURE_LEAVE_CHANCE`, `LEASH_DISTANCE`, `ATTRACTION_RADIUS_FACTOR` and `TRANCE_DETECTION_RANGE` by feel.
-2. Slime creatures and other monsters avoid lantern light in the [Natural Fear](../versions/version-0.3.0.md#natural-fear-mode) mode instead of being attracted (see [In-Game Findings](#in-game-findings)).
+2. Slime creatures and other monsters avoid lantern light in the [Natural Fear](../../versions/version-0.3.0.md#natural-fear-mode) mode instead of being attracted (see [In-Game Findings](#in-game-findings)).
 
 ### Open Questions
 

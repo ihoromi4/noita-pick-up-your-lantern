@@ -1,6 +1,6 @@
 # Diff Patch
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 Single-file library: `pick_up_your_lantern/files/scripts/libs/diff_patch.lua`
 

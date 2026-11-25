@@ -1,6 +1,6 @@
 # YAML Localization
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 > [!NOTE]
 > Status: **Postponed**. The idea has been analyzed but not implemented. Translations are still stored in `pick_up_your_lantern/files/translations.csv`.
@@ -24,7 +24,7 @@ The idea: keep the mod translations in a YAML file in the repository and convert
 YAML files cannot be shipped with a `.yaml` extension:
 
 - Noita's virtual file system mounts mod files only with allowed extensions (`.txt`, `.xml`, `.lua`, `.csv`, `.json`, `.frag`, `.vert`, `.png`). For a `.yaml` file `ModTextFileGetContent()` returns `nil`.
-- The Steam uploader uploads only `.lua`, `.xml`, `.png`, `.txt`, `.csv`, `.bmp`, `.frag`, `.vert`, `.bank`, `.bin`, `.plz` files (see [The Files of a Workshop Mod](../../tools/noitakit/docs/guides/cli/workshop.md#workshopxml) in the DevKit). A `.yaml` file would not reach Workshop subscribers.
+- The Steam uploader uploads only `.lua`, `.xml`, `.png`, `.txt`, `.csv`, `.bmp`, `.frag`, `.vert`, `.bank`, `.bin`, `.plz` files (see [The Files of a Workshop Mod](../../../tools/noitakit/docs/guides/cli/workshop.md#workshopxml) in the DevKit). A `.yaml` file would not reach Workshop subscribers.
 
 The file must be named `translations.yaml.txt`, following the same approach as the `*.patch.txt` files used by [Diff Patch](diff-patch.md). For syntax highlighting, add a file association in VS Code:
 

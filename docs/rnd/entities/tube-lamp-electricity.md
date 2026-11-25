@@ -1,6 +1,6 @@
 # Tube Lamp and Electricity
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 A fluorescent tube lamp cannot shine without power. Unlike oil lanterns, a pickable tube lamp shines only while it is wired to the ceiling or hit by electricity, so taking it down mostly costs the player a light source.
 
@@ -26,12 +26,12 @@ A fluorescent tube lamp cannot shine without power. Unlike oil lanterns, a picka
 1. Sword-like sprite in hand, no left-button hanging, propane-like burst. Done.
 2. Power state: the lamp shines only while it hangs, scaled to zero light and fog of war hole otherwise. Done.
 3. Lighting up from electricity, with a small capacity.
-4. Dangling cable of random length after a kick, sparking for 3 minutes. Implemented, see [Lantern Entities](../dev/lantern-entities.md#tube-lamp-cable).
-5. Cable of segments while carrying, breaking into a dangling cable. Implemented, see [Lantern Entities](../dev/lantern-entities.md#tube-lamp-cable).
+4. Dangling cable of random length after a kick, sparking for 3 minutes. Implemented, see [Lantern Entities](../../dev/lantern-entities.md#tube-lamp-cable).
+5. Cable of segments while carrying, breaking into a dangling cable. Implemented, see [Lantern Entities](../../dev/lantern-entities.md#tube-lamp-cable).
 
 ## Engine Building Blocks
 
-- **[Confirmed]** A runtime physics chain spawned by the mod got no bodies, see [Lantern Entities](../dev/lantern-entities.md#tube-lamp-cable); both cables are Lua ropes instead. Vanilla builds chains of physics segments at runtime: `data/scripts/props/temple_lantern.lua` and `hanging_wire_spawner.lua` add `PhysicsImageShapeComponent` and `PhysicsJoint2Component` (`REVOLUTE_JOINT_ATTACH_TO_NEARBY_SURFACE` for the ceiling) with `EntityAddComponent2`, then call `PhysicsBody2InitFromComponents` once. Wire segment: `data/props_breakable_gfx/wire_vertical_10_00.png`, material `metal_wire_nohit` (the player passes through it).
+- **[Confirmed]** A runtime physics chain spawned by the mod got no bodies, see [Lantern Entities](../../dev/lantern-entities.md#tube-lamp-cable); both cables are Lua ropes instead. Vanilla builds chains of physics segments at runtime: `data/scripts/props/temple_lantern.lua` and `hanging_wire_spawner.lua` add `PhysicsImageShapeComponent` and `PhysicsJoint2Component` (`REVOLUTE_JOINT_ATTACH_TO_NEARBY_SURFACE` for the ceiling) with `EntityAddComponent2`, then call `PhysicsBody2InitFromComponents` once. Wire segment: `data/props_breakable_gfx/wire_vertical_10_00.png`, material `metal_wire_nohit` (the player passes through it).
 - **[Confirmed]** `data/entities/misc/electricity_weak.xml` is a short electric discharge (`ElectricityComponent energy="50"`). The vanilla damaged tube lamp spawns it every 60 frames (`physics_tube_lamp_electricity_pulse.lua`).
 - **[Confirmed]** `ElectricityReceiverComponent` (`radius`, `active_time_frames`) calls `electricity_receiver_switched(on)` of `script_electricity_receiver_switched` when electricity reaches the entity; vanilla traps and the drill laser are powered this way.
 - **[Confirmed]** Lantern light consumers (fire enemy attraction, Natural Fear, the visibility API, belt) read the current `LightComponent` radius, so a radius of 0 turns a lamp off for all of them. The fog of war hole is scaled separately.

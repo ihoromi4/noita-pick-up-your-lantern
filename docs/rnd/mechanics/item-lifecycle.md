@@ -1,6 +1,6 @@
 # Item Lifecycle in World, Inventory, and Hands
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 - **[Confirmed]** The engine automatically toggles component states using system tags specified in the `_tags` attribute:
   - `enabled_in_world` — components are active when the lantern hangs or lies in the world, and are automatically disabled when picked up into the inventory.

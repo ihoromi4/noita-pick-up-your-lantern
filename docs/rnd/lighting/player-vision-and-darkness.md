@@ -1,6 +1,6 @@
 # Limited Player Vision and Darkness
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 Technical research and implementation overview of the Limited Player Vision system, overcoming vanilla Noita engine limitations, and creating the absolute darkness (Pitch Black 0%) mode in the **Pick Up Your Lantern** mod.
 
@@ -112,7 +112,7 @@ if (pul_vision.w > 0.5)
 
 ## Player Entity Management (ECS)
 
-Component management for the character is implemented in [player_vision.lua](../../pick_up_your_lantern/files/scripts/player_vision.lua):
+Component management for the character is implemented in [player_vision.lua](../../../pick_up_your_lantern/files/scripts/player_vision.lua):
 
 1. **`PatchPlayerBaseVision()`**:
    * Patches `data/entities/player_base.xml` on game launch.
@@ -158,7 +158,7 @@ In vanilla, the revealed area becomes visible due to the 35% underground ambient
 
 ### Implementation
 
-Handled in [all_seeing_eye.lua](../../pick_up_your_lantern/files/scripts/all_seeing_eye.lua):
+Handled in [all_seeing_eye.lua](../../../pick_up_your_lantern/files/scripts/all_seeing_eye.lua):
 
 * `PatchXRayProjectile()` adds the `pul_xray` tag to the root entity in `xray.xml`. Any mods reusing this projectile also inherit the tag.
 * `UpdateAllSeeingEye(entity)` is called every frame from `UpdatePlayerVision` for the player entity or polymorphed creature (see [Player Polymorph and Lighting System](polymorph-and-lighting.md)):
@@ -184,7 +184,7 @@ To create realistic natural illumination, a three-part system is implemented:
 
 ### Material Patching (PatchMaterialsGlow)
 
-In [patch_materials.lua](../../pick_up_your_lantern/files/scripts/patch_materials.lua), `data/materials.xml` is modified during game startup:
+In [patch_materials.lua](../../../pick_up_your_lantern/files/scripts/patch_materials.lua), `data/materials.xml` is modified during game startup:
 
 * **Flames and fire**: `flame` ($400$), `fire` ($500$), `fire_blue` ($400$, blue glow tint), `liquid_fire` ($450$), `liquid_fire_weak` ($300$), `burning_powder` ($350$).
 * **Molten metals and lava**: `lava` ($450$), `gold_molten`, `metal_molten`, `steel_molten`, `copper_molten`, `brass_molten`, `silver_molten`, `aluminium_molten` ($400$), `glass_molten` ($350$).

@@ -242,4 +242,4 @@ The effect entity follows its host, so a burning enemy or player lights the cave
 
 Every enemy that gets the light is also tagged with `pul_fire_enemy` (`FIRE_ENEMY_TAG` in `utils.lua`). `files/scripts/lantern_attraction.lua` uses the tag to draw fire enemies to lit lanterns in the world by moving the home of their AI.
 
-Research, the vanilla list, the heuristic and the attraction: [Fire Enemies](../rnd/fire-enemies.md).
+Research, the vanilla list, the heuristic and the attraction: [Fire Enemies](../rnd/creatures/fire-enemies.md).

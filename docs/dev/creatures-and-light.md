@@ -60,7 +60,7 @@ The radius of a source is the current `radius` of its tagged `LightComponent`. F
 
 ## Luring Enemies to Lanterns
 
-Lit lanterns in the world lure some enemies: the enemies gather around a lantern and do not attack it. Research and in-game findings are in [Fire Enemies](../rnd/fire-enemies.md#attraction-to-lanterns).
+Lit lanterns in the world lure some enemies: the enemies gather around a lantern and do not attack it. Research and in-game findings are in [Fire Enemies](../rnd/creatures/fire-enemies.md#attraction-to-lanterns).
 
 The engine has no call that sends an AI to a point. So the attraction moves the home of the AI (`AnimalAIComponent.mHomePosition`) to the lantern and sets a leash (`max_distance_to_move_from_home`). The AI then walks or flies there with its own path finding.
 
@@ -104,7 +104,7 @@ The enemy also gets the `pul_lantern_attracted` tag. When the enemy leaves by ch
 
 ## Natural Fear
 
-With `Natural Fear` on, enemies that lanterns never lure fear lantern light. Research, the AI state table and the rejected options are in [Natural Fear](../rnd/natural-fear.md).
+With `Natural Fear` on, enemies that lanterns never lure fear lantern light. Research, the AI state table and the rejected options are in [Natural Fear](../rnd/creatures/natural-fear.md).
 
 Setting an AI state from Lua does not start its path finding: such an enemy stands still. So the mod deals a tiny fire damage instead. The AI reacts to it as to burning, and runs with its own path finding.
 

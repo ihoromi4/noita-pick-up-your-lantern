@@ -1,6 +1,6 @@
 # Two Physics Systems of Noita
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 - **[Confirmed]** Noita's inventory item system (`ItemComponent`, `AbilityComponent` with `throw_as_item="1"`, `PhysicsThrowableComponent`, `ProjectileComponent`, `VelocityComponent`) is compatible **only with the legacy `PhysicsBodyComponent`** and does not work with `PhysicsBody2Component`.
 - **[Confirmed]** If `PhysicsBody2Component` is left on the item:

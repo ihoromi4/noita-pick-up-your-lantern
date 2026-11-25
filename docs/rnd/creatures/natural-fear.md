@@ -1,8 +1,8 @@
 # Natural Fear: Creatures Avoid Lantern Light
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
-Research on the light avoidance part of the [Natural Fear](../versions/version-0.3.0.md#natural-fear-mode) mode: creatures that lanterns do not attract keep out of lantern light. The attraction part (Hiisi and insects) is described in [Fire Enemies](fire-enemies.md#attraction-to-lanterns).
+Research on the light avoidance part of the [Natural Fear](../../versions/version-0.3.0.md#natural-fear-mode) mode: creatures that lanterns do not attract keep out of lantern light. The attraction part (Hiisi and insects) is described in [Fire Enemies](fire-enemies.md#attraction-to-lanterns).
 
 - [Requirements](#requirements)
 - [Vanilla Burning and AI States](#vanilla-burning-and-ai-states)

@@ -44,7 +44,7 @@ Only the right mouse button throws. `UpdateLanternHang` in `lantern_hang.lua` ru
 - Without a hit, the vanilla throw still happens: clearing `mButtonDownFire` in `OnWorldPreUpdate` does not stop it. The `script_throw_item` callback in `lantern_throw.lua` treats a throw as a left-button throw when `mButtonFrameFire` is newer than `mButtonFrameThrow` and at most 60 frames old, and the inventory window is closed. It stores the lantern ID in the player's `pul_return_lantern_id` storage, and on the next frame `UpdateLanternHang` picks the lantern up with `GamePickUpInventoryItem` and puts it back in hand. The throw animation and sound still play.
 - After the throw the engine has already equipped the first wand. The lantern is put back in hand by setting `mActiveItem` only, so the engine unequips the wand properly. Resetting `mActualActiveItem` here would leave the wand stuck in its in-hand state under the player's feet.
 
-Research notes: [Hanging the Lantern on LMB](../rnd/throwing-mechanics-and-controls.md#hanging-the-lantern-on-lmb).
+Research notes: [Hanging the Lantern on LMB](../rnd/mechanics/throwing-mechanics-and-controls.md#hanging-the-lantern-on-lmb).
 
 ## Flight Physics
 

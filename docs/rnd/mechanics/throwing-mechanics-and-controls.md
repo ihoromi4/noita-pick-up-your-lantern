@@ -1,6 +1,6 @@
 # Lantern Throwing Mechanics and Controls
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 This report documents the attempts to implement throwing a lantern exclusively with the right mouse button (RMB) while preserving vanilla physics, visual effects, and a clean user interface. None of the tested approaches solved all issues simultaneously.
 
@@ -194,7 +194,7 @@ Instead of blocking LMB (version 0.3.0), the left button is given its own action
 `UpdateLanternHang()` in `files/scripts/lantern_hang.lua` is called from `OnWorldPreUpdate()`:
 
 1. **[Confirmed by testing]** A click is detected via `mButtonFrameFire`: a 1-frame lag is permitted, and the last processed frame is cached so each click triggers only once. The vanilla throw only starts after the throw animation completes, allowing the hanging logic to run first so there is nothing left to throw.
-2. A new joint cannot be created on an already-thrown body (`mRefreshed`, see [ceiling-anchors-and-kicking.md](ceiling-anchors-and-kicking.md)). Therefore, hanging is done via substitution:
+2. A new joint cannot be created on an already-thrown body (`mRefreshed`, see [ceiling-anchors-and-kicking.md](../entities/ceiling-anchors-and-kicking.md)). Therefore, hanging is done via substitution:
    - `EntityLoad` of the same XML file (`EntityGetFilename`, or by `ItemComponent.ui_sprite` after world streaming) 4 px below the raycast hit point;
    - Copying all `VariableStorageComponent` instances by `name` (tier, modifier, fuel, extinguish state, liquid state, base description, and base illumination) and `DamageModelComponent.hp`;
    - `EnsureLanternTraits` (tier is already present, so no re-roll occurs), followed by `ExtinguishLantern` or an immediate `ApplyLanternIllumination`, because the copied `lantern_illumination_scale` does not match the XML values of the fresh components;

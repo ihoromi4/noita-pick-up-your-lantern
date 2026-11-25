@@ -8,7 +8,7 @@ Spell modifiers that change the projectile lifetime now also change how long the
 
 ## All-Seeing Eye Spell
 
-- [x] Bug: spell modifiers that change the projectile lifetime did not change how long the All-Seeing Eye spell (`X_RAY`) revealed the area. The reveal circle now keeps its full strength for 10 seconds, plus 5 frames for each frame of lifetime that the modifiers add. Then it fades over 10 seconds as before. Details: [Vision and Lighting](../dev/vision-and-lighting.md#all-seeing-eye) and [All-Seeing Eye Projectile Lifetime](../rnd/all-seeing-eye-lifetime.md).
+- [x] Bug: spell modifiers that change the projectile lifetime did not change how long the All-Seeing Eye spell (`X_RAY`) revealed the area. The reveal circle now keeps its full strength for 10 seconds, plus 5 frames for each frame of lifetime that the modifiers add. Then it fades over 10 seconds as before. Details: [Vision and Lighting](../dev/vision-and-lighting.md#all-seeing-eye) and [All-Seeing Eye Projectile Lifetime](../rnd/lighting/all-seeing-eye-lifetime.md).
 - [x] Change: the reveal circle stays at full strength while the player stays near the cast point. The reveal timer starts to count down only when the player first moves farther than 64 px from the cast point. Coming back does not pause it again. A repeated cast moves the circle to the new cast point, and the timer waits again.
 
 ## Cleanup

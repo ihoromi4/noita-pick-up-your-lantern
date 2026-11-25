@@ -1,12 +1,12 @@
 # Lantern Properties and Dynamic States
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 Internal progression concept: lanterns differ from each other in properties and alter them depending on environmental conditions affecting the player or the lantern itself. The goal is to give the player a reason to search for a "better" lantern and intentionally interact with liquids in the world.
 
 ## Current State
 
-- Each lantern type (see [Vanilla Light Fixture Types](vanilla-lantern-types.md)) has its own base light radius, color, fog of war hole size, and durability defined in its XML.
+- Each lantern type (see [Vanilla Light Fixture Types](../entities/vanilla-lantern-types.md)) has its own base light radius, color, fog of war hole size, and durability defined in its XML.
 - On top of this base, quality tiers, modifiers, and the global `illumination_scale` setting are applied (see [Lantern Progression](lantern-progression.md)).
 
 | File | `radius` | Fog Hole | `r`, `g`, `b` | `hp` |
@@ -56,7 +56,7 @@ For parameters without native fields (modifier chances, burn duration, liquid ef
 - **Difference between types.** The large lantern (`physics_lantern.xml`) shines brighter than smaller ones. The simplest approach without RNG — strictly XML edits.
 - **Quality tiers.** When a lantern spawns in the world, an initialization script determines its tier (e.g., "Dim", "Common", "Bright", "Masterwork") and applies a multiplier to parameters. The tier is stored in `VariableStorageComponent` to persist through world → inventory → hand transitions.
 - **Depth dependency.** Higher tier chances increase with biome depth (`y` coordinate or biome name from `BiomeMapGetName`). This constitutes progression: the deeper you go, the better lanterns you find.
-- **Special lanterns.** Rare unique specimens in the Holy Mountain or secret locations (see also "magical and hermetic lanterns" under Version 1.0.0 in the [Backlog](../backlog.md#extinguishing-and-submersion)).
+- **Special lanterns.** Rare unique specimens in the Holy Mountain or secret locations (see also "magical and hermetic lanterns" under Version 1.0.0 in the [Backlog](../../backlog.md#extinguishing-and-submersion)).
 
 ### Player Presentation
 

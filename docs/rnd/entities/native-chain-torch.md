@@ -1,6 +1,6 @@
 # Native Physics Chain for Chain Torches
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 Whether a pickable chain torch can hang on a real Box2D chain built the way the vanilla duplicates build theirs, instead of the Lua chain of `lantern_chain.lua`.
 
@@ -14,7 +14,7 @@ Whether a pickable chain torch can hang on a real Box2D chain built the way the 
 
 ## Why
 
-The chain torches hang on a Lua rope ([Hanging Ropes](../dev/lantern-entities.md#hanging-ropes)), and every step of fitting the torch body to it needed a workaround:
+The chain torches hang on a Lua rope ([Hanging Ropes](../../dev/lantern-entities.md#hanging-ropes)), and every step of fitting the torch body to it needed a workaround:
 
 - Holding the torch body from Lua (`HoldBodyOnHangingRope()`) turned its heavy bowl upside down; the cause was not found.
 - So the torch is pinned by its own `nail_to_wall` joint in the air at the end of the chain, which needs the torch to be spawned again at that point.
@@ -30,7 +30,7 @@ The vanilla duplicates `data/entities/props/physics_chain_torch*.xml` already ha
 - `data/scripts/props/physics_chain_torch.lua` runs once and adds 3 links as bodies of the same entity with `PhysicsAddBodyImage()`, joins them to each other and to the head with `PhysicsAddJoint()`, and joins the top link to the world (body `-1`).
 - `data/scripts/props/physics_chain_torch_damaged.lua` (`script_physics_body_modified`) kills the whole torch when any of its bodies is damaged.
 
-The chains that failed before were `PhysicsBody2Component` chains built at runtime (see [Tube Lamp Cable](../dev/lantern-entities.md#tube-lamp-cable)). `PhysicsAddBodyImage()` and `PhysicsAddJoint()` belong to the other family and were not tried.
+The chains that failed before were `PhysicsBody2Component` chains built at runtime (see [Tube Lamp Cable](../../dev/lantern-entities.md#tube-lamp-cable)). `PhysicsAddBodyImage()` and `PhysicsAddJoint()` belong to the other family and were not tried.
 
 ## Experiment
 

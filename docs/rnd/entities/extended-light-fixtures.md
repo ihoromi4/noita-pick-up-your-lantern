@@ -1,8 +1,8 @@
 # Extended Light Fixtures
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
-Results of the version 0.3.0 item "Extended Light Fixture Support" ([version-0.3.0.md](../versions/version-0.3.0.md#extended-light-fixture-support)): making the mining lamp, the tube lamp, the temple lantern and the chain torches pickable like lanterns. All of them are pickable and checked in game. How they are built now is described in [Lantern Entities](../dev/lantern-entities.md); this page keeps what was learned on the way and why the final design was chosen.
+Results of the version 0.3.0 item "Extended Light Fixture Support" ([version-0.3.0.md](../../versions/version-0.3.0.md#extended-light-fixture-support)): making the mining lamp, the tube lamp, the temple lantern and the chain torches pickable like lanterns. All of them are pickable and checked in game. How they are built now is described in [Lantern Entities](../../dev/lantern-entities.md); this page keeps what was learned on the way and why the final design was chosen.
 
 ## Contents
 
@@ -28,11 +28,11 @@ All fixtures share the lantern features: quality tiers and modifiers, the belt, 
 
 ## Entities and Physics
 
-- **[Confirmed]** The item system works only with `PhysicsBodyComponent`, not with `PhysicsBody2Component`. Fixtures built on `PhysicsBody2Component` in vanilla (temple lantern, tube lamp, chain torches) are full overrides with one `PhysicsBodyComponent` body. See [Physics System](../dev/lantern-entities.md#physics-system).
+- **[Confirmed]** The item system works only with `PhysicsBodyComponent`, not with `PhysicsBody2Component`. Fixtures built on `PhysicsBody2Component` in vanilla (temple lantern, tube lamp, chain torches) are full overrides with one `PhysicsBodyComponent` body. See [Physics System](../../dev/lantern-entities.md#physics-system).
 - **[Confirmed]** A body material with `platform_type="1"` makes the player bump into the fixture and stand on it. The vanilla mining lamp is made of `wood_prop`, so its override uses `wood_prop_noplayerhit`. Check `data/materials.xml` before choosing a body material.
 - **[Confirmed]** The mining lamp keeps its vanilla origin in the centre, 6 px below its joint, so it declares its own ceiling check distance (`lantern_ceiling_check_distance`) for `lantern_anchor.lua`.
 - **[Confirmed]** The light of the chain torches, their `TorchComponent` and particles sit in a nested `Entity` in vanilla. The illumination, belt and modifier code reads the components of the lantern entity itself, so they had to move to the root.
-- **[Confirmed]** Each chain torch exists in two files that different biomes spawn: `physics/chain_torch*.xml` and the older duplicates `physics_chain_torch*.xml`. Both paths are overridden; a duplicate only includes the `physics/` variant of its colour with `<Base>`. See [Duplicate Torch Entities](../dev/lantern-entities.md#duplicate-torch-entities).
+- **[Confirmed]** Each chain torch exists in two files that different biomes spawn: `physics/chain_torch*.xml` and the older duplicates `physics_chain_torch*.xml`. Both paths are overridden; a duplicate only includes the `physics/` variant of its colour with `<Base>`. See [Duplicate Torch Entities](../../dev/lantern-entities.md#duplicate-torch-entities).
 - **[Confirmed]** Chain torches are unbreakable in vanilla (no `DamageModelComponent`). With the durability of a glass lantern (`hp="0.5"`, `speed_threshold="85"`) they broke from a fall. With `hp="1.0"`, `speed_threshold="120"` and `damage_multiplier="0.002"` they survive falls and throws and still break from projectiles and explosions.
 
 ## Chains and Cables
@@ -64,7 +64,7 @@ All fixtures share the lantern features: quality tiers and modifiers, the belt, 
 - Keep everything a lantern needs on its root entity, and keep its state in storages that are saved with the entity. Do not let the engine respawn a lantern from its file: no `CameraBoundComponent`.
 - Simulate chains and cables in Lua and hold the lantern on them from Lua: one model for all chained fixtures, with saving through anchor entities.
 - Replace vanilla behaviour that does not fit an item (`TorchComponent`, emitters in hand) with Lua rather than tune around it.
-- Test rare fixtures with a temporary debug spawner in the mountain hall, see [Spawning Fixtures for In-Game Tests](test-spawning.md), and check both a save and reload and walking far away and back.
+- Test rare fixtures with a temporary debug spawner in the mountain hall, see [Spawning Fixtures for In-Game Tests](../tooling/test-spawning.md), and check both a save and reload and walking far away and back.
 
 ## Open Issues
 
@@ -77,4 +77,4 @@ All fixtures share the lantern features: quality tiers and modifiers, the belt, 
 
 ## Later Ideas
 
-- Version 0.4.0 plans a magic liquid modifier for the temple lantern: a rare dark lantern that spills Concentrated Mana, Flummoxium or Unstable Teleportatium when it breaks. See the [Backlog](../backlog.md#temple-lantern-modifiers).
+- Version 0.4.0 plans a magic liquid modifier for the temple lantern: a rare dark lantern that spills Concentrated Mana, Flummoxium or Unstable Teleportatium when it breaks. See the [Backlog](../../backlog.md#temple-lantern-modifiers).

@@ -1,6 +1,6 @@
 # Ceiling Anchors, Kicking, and Support Destruction
 
-[← Back to R&D Index](README.md)
+[← Back to R&D Index](../README.md)
 
 - **[Confirmed by documentation and testing]** A dedicated script to detach the lantern from the ceiling upon pickup (`item_pickup`) **is not needed**: when the player picks up a lantern, `PhysicsBodyComponent` (`_tags="enabled_in_world"`) is disabled. According to `component_documentation.txt` (*"if is_enabled is set to false, will destroy the physics body"*), this automatically destroys the Box2D body along with its `b2Joint` connection. When thrown from inventory later, a new physics body is created without a joint (since the `mRefreshed` flag in `PhysicsBodyComponent` only initializes the joint once upon initial spawn).
 - **[Confirmed by testing]** Contrary to initial expectations, the `breakable="1"` attribute in the legacy `PhysicsJointComponent` **does not allow** detaching the lantern via kicking (`kick`): the mass of the glass lantern is too small for a kick impulse to generate sufficient reaction force on the joint to exceed the hardcoded engine breaking threshold.
