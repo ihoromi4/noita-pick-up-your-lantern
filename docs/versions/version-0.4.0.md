@@ -25,3 +25,8 @@ Tracking document for completed work in **Version 0.4.0**. All releases are list
 
 - Excluded robots and fire-immune creatures from Natural Fear reactions so they neither fear lantern light nor gather around lanterns (fire-related robots such as flamethrower robots remain lured when fire enemy attraction is enabled).
 - Included the `healer` herd in Natural Fear attraction so organic support Hiisi (`scavenger_heal`, `scavenger_invis`, `scavenger_shield`) and cowards (`coward`) gather around lanterns while healer drones (`healerdrone_physics`) and Hiisi machines (`tank`, `turret`) are filtered out as robots. Details: [Lanterns](../guides/lanterns.md#scaring-creatures) and [Creatures and Light](../dev/creatures-and-light.md#natural-fear).
+
+### Temple Lantern Magic Liquid Modifier
+
+- Added the **Magic Liquid** modifier for temple lanterns when `Lantern progression` is enabled, giving each spawned temple lantern a 5% chance to hold Concentrated Mana, Flummoxium, or Unstable Teleportatium instead of plasma.
+- A magic-liquid temple lantern emits no light or particles, uses a dark look, hides its exact contents in the item description, and shatters without sparks or explosion so Unstable Teleportatium does not ignite. Details: [Lantern Quality and States](../guides/lantern-quality-and-states.md#rare-modifiers) and [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md#modifiers).

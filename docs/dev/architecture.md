@@ -26,7 +26,7 @@ All mod files live in `pick_up_your_lantern/`:
   - `patches/`: startup patchers for vanilla files (`patch_lighting.lua`, `patch_materials.lua`, `patch_light_sources.lua`, `patch_item_radar.lua`) and their injected hooks (`light_source_tag.lua`, `item_radar_filter.lua`).
   - `vision/`: player limited vision, All-Seeing Eye reveal, and snowy biome ambient light (`player_vision.lua`, `all_seeing_eye.lua`, `biome_ambient.lua`).
   - `creatures/`: enemy reactions to light and fire enemy glow (`enemy_ai_home.lua`, `fire_enemy_glow.lua`, `lantern_attraction.lua`, `lantern_fear.lua`).
-  - `lanterns/properties/`: lantern configuration, progression traits, modifiers, damage cracking, liquid states, and illumination scaling.
+  - `lanterns/properties/`: lantern configuration, progression traits, modifier effects, per-frame modifiers, damage cracking, liquid states, and illumination scaling.
   - `lanterns/mechanics/`: holding, belt attachment, ceiling anchoring, hanging, throwing, and world transform fixes.
   - `lanterns/fixtures/`: hanging ropes, lantern chains, tube lamp cables, and chain torch open-fire behavior.
   - `lanterns/death/`: destruction callbacks for each lantern type.
@@ -80,7 +80,7 @@ Scripts attached to lantern entities through `LuaComponent` (paths are relative 
 | `lanterns/fixtures/chain_torch_hot_liquid.lua` | Chain torches, on hot liquid contact | Records when a chain torch's coals touch lava or `liquid_fire` so `chain_torch_fire.lua` keeps it lit or relights it. |
 | `lanterns/death/lantern_death.lua`, `lanterns/death/lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |
 | `lanterns/death/mining_lamp_death.lua` | On death | Spills oil and fire; the explosion comes from `ExplodeOnDamageComponent`. |
-| `lanterns/death/temple_lantern_death.lua` | On death | Spills fading plasma; the explosion comes from `ExplodeOnDamageComponent`. |
+| `lanterns/death/temple_lantern_death.lua` | On death | Spills fading plasma, or a rolled fill material when a modifier overrides death. |
 | `lanterns/death/chain_torch_death.lua` | On death | Scatters fire and sparks of the torch type from the coals. |
 
 Scripts that the mod attaches to other entities at runtime:

@@ -9,15 +9,6 @@ This document lists planned tasks that are not done yet. Released versions and c
 - Never delete a finished task from this file alone. In the same edit, record it in the current release file in `docs/versions/` and update its summary in [Versions](versions/README.md).
 - When a task changes how the mod works, update [Player Guides](guides/README.md) and [Developer Documentation](dev/README.md). Those two sections are the source of truth for implemented behavior.
 
-## Temple Lantern Modifiers
-
-- Magic liquid modifier for the temple lantern (`physics/temple_lantern.xml`): with a small chance, a temple lantern is filled with a magic liquid instead of plasma.
-- A lantern with this modifier gives no light.
-- When it breaks, it spills one of the magic liquids instead of `plasma_fading`:
-  - Concentrated Mana (`magic_liquid_mana_regeneration`);
-  - Flummoxium (`material_confusion`);
-  - Unstable Teleportatium (`magic_liquid_unstable_teleportation`).
-
 ## Visual Polish and UI
 
 - Custom UI icons redesign: create dedicated pixel-art icons visually matching physical lantern props (`ui_lantern.png`, `ui_lantern_small.png`) with clear illumination.

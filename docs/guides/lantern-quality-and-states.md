@@ -50,6 +50,7 @@ About one lantern in seven is born with a modifier:
 
 - **Flickering**: its flame leaps higher, so the light is 20% wider, but it wavers and sometimes dips deeply.
 - **Short-lived**: oil leaks through a crack, one drop every 5 seconds. It burns for only a few minutes, slowly fading, then sputters and goes out for good. A burnt-out lantern gives no light, but you can still throw it. It only burns while lit: in your hand, on your belt or in the world, not inside your inventory.
+- **Magic Liquid**: temple lanterns have a 5% chance to hold an unknown magical liquid instead of plasma. Such a lantern is dark, emits no light, and cannot crack. Its description does not reveal which liquid is inside. When it breaks, it shatters without sparks or explosion and spills Concentrated Mana, Flummoxium, or Unstable Teleportatium.
 
 A lantern can also get one more modifier later:
 

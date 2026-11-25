@@ -92,17 +92,24 @@ Tier weights (1 / 2 / 3 / 4) depend on the depth `y`. Bands end at the Holy Moun
 
 ## Modifiers
 
-Modifiers are rolled independently of the tier and of each other: Flickering and Short-lived have a 7% chance each (`chance`, per mille). Cracked has `chance = 0`: it is never rolled and is acquired from damage instead. A lantern may carry several modifiers.
+Modifiers are rolled independently of the tier and of each other: Flickering and Short-lived have a 7% chance each (`chance`, per mille), and Magic Liquid has a 5% chance on temple lanterns (`lantern_types = { temple_lantern = true, }`). Cracked has `chance = 0`: it is never rolled and is acquired from damage instead. A lantern may carry several modifiers.
 
-All modifier configuration (IDs, description keys, roll chances per mille, interactions and behaviour parameters) lives in the `LANTERN_MODIFIERS` table in `lantern_properties_config.lua`. Modifiers are rolled in table order, so reordering them changes which modifiers a lantern at a given position gets. The table order is also the order of the description sentences. The field names are given in parentheses below.
+All modifier configuration (IDs, description keys, roll chances per mille, allowed `lantern_types`, interactions, declarative effect flags, and behaviour parameters) lives in the `LANTERN_MODIFIERS` table in `lantern_properties_config.lua`. Modifiers are rolled in table order, so reordering them changes which modifiers a lantern at a given position gets; modifiers whose `lantern_types` table excludes the lantern's `id` are skipped without consuming RNG calls. The table order is also the order of the description sentences. The field names are given in parentheses below.
 
 How modifiers interact is set per modifier:
 
+- `lantern_types`: map of `LanternType.id` values allowed to receive the modifier (`nil` allows all lantern types).
 - `incompatible`: IDs of modifiers it cannot be combined with. The check runs in both directions: a modifier is not added if either side lists the other.
 - `replaces`: IDs of modifiers removed from the lantern when it is added.
-- Modifiers without these fields combine, and their light factors multiply. Flickering, Short-lived and Cracked all combine.
+- Modifiers without these fields combine, and their light factors multiply. Flickering, Short-lived and Cracked all combine. Magic Liquid is incompatible with Flickering, Short-lived, and Cracked, and replaces Flickering and Short-lived if rolled on the same temple lantern.
 
-The rules apply both to rolling (`RollModifiers`) and to modifiers acquired later (`AddLanternModifier`).
+Declarative modifier flags in `lantern_properties_config.lua` are executed by `lantern_modifier_effects.lua` when traits are ensured or a modifier is added:
+
+- `disables_light`: removes `LightComponent`, the fog-of-war hole, and particle emitters, switches the in-hand sprite to `*_in_hand_out.xml` and the physics shape to `LanternType.dark_image_file`, and forces `GetLanternPowerFactor` to `0` so the belt lantern, visibility API, and creature reactions treat the lantern as dark.
+- `disables_explosion`: removes `ExplodeOnDamageComponent` and clears `DamageModelComponent.blood_material`.
+- `replaces_base_description` and `hides_tier_description`: replace the base XML description with the modifier sentence and omit the quality tier sentence.
+- `has_per_frame_behavior`: marks modifiers that require `lantern_modifier.lua` (`Flickering`, `Short-lived`, `Cracked`). Passive or death-only modifiers such as `Magic Liquid` leave this unset, so no per-frame `LuaComponent` is attached.
+- `fill_materials`: weighted pool of materials rolled once into `lantern_fill_material` by `RollLanternModifierData` and spilled on break by `TryHandleLanternModifierDeath` in `temple_lantern_death.lua`.
 
 - **Flickering**: the light radius is 20% larger (`radius_bonus`) but wavers: a sum of sine waves with rare deep dips, down to −45% (`flicker_depth`).
 - **Short-lived**: burns for 3–8 minutes (`burn_frames_min`, `burn_frames_max`). Time counts only while the lantern is lit in the world, in hand or on the belt.
@@ -113,10 +120,14 @@ The rules apply both to rolling (`RollModifiers`) and to modifiers acquired late
     - the in-hand sprite switches to `*_in_hand_out.xml`.
 - **Cracked**: a lantern that takes damage without breaking (a hard fall or throw, a weak projectile hit) cracks with a 33% chance (`crack_chance`).
   - Detected by `damage_received` in `lantern_damage.lua` (`script_damage_received` in the lantern XMLs). Damage is dealt by `PhysicsBodyCollisionDamageComponent` on impacts and by projectiles; `falling_damages` stays off.
-  - Lanterns do not crack while `Lantern progression` is off, once burnt out, or when already cracked.
+  - Lanterns do not crack while `Lantern progression` is off, once burnt out, when already cracked, or when carrying a modifier incompatible with Cracked.
   - Every 20 frames (`fire_interval_frames`), a lit cracked lantern has a 50% chance (`fire_chance`) to leak two particles (`fire_particle_count`) of gaseous fire (`GameCreateParticle("fire", ...)`) in the world or in hand, so it can set the player on fire.
+- **Magic Liquid**: temple lanterns (`temple_lantern`) have a 5% chance (`chance = 50`) to hold one of three magic liquids at equal weight (`magic_liquid_mana_regeneration`, `material_confusion`, `magic_liquid_unstable_teleportation`).
+  - The lantern emits no light or plasma particles (`disables_light`), uses `temple_lantern_out.png` and `temple_lantern_in_hand_out.xml`, and hides both its liquid type and quality tier behind `$item_description_lantern_magic_liquid`.
+  - Explosion, sparks, fire creation, and `plasma_fading` blood are disabled (`disables_explosion`) so Unstable Teleportatium (`magic_liquid_unstable_teleportation`, autoignition temperature 10) never ignites when the lantern shatters.
+  - When broken, `temple_lantern_death.lua` spills `spill_count` (100) cells of the stored `lantern_fill_material` around the rotated glass bulb (`spill_offset_y = 5`).
 
-Modifier behavior runs in `lantern_modifier.lua` through a `LuaComponent` tagged `enabled_in_world,enabled_in_hand`. It is added only to a lit lantern with modifiers, on spawn or when a modifier is acquired. Otherwise it would keep running in the inventory until the next state change.
+Modifier behavior runs in `lantern_modifier.lua` through a `LuaComponent` tagged `enabled_in_world,enabled_in_hand`. It is added only to a lit lantern with per-frame modifiers (`has_per_frame_behavior`), on spawn or when a modifier is acquired. Otherwise it would keep running in the inventory until the next state change.
 
 ## Liquid States
 
@@ -150,6 +161,7 @@ The lantern name never changes; it stays the translation key from the XML. Prope
 | Flickering | `item_description_lantern_flickering` |
 | Short-lived | `item_description_lantern_short_lived` |
 | Cracked | `item_description_lantern_cracked` |
+| Magic Liquid | `item_description_lantern_magic_liquid` |
 | Burnt out | `item_description_lantern_extinguished` |
 | Oil-soaked | `item_description_lantern_oil_soaked` |
 | Wet | `item_description_lantern_wet` |
@@ -166,7 +178,8 @@ All per-lantern state lives in `VariableStorageComponent` tagged for the world, 
 | Name | Meaning |
 | --- | --- |
 | `lantern_tier` | Quality tier, 1–4. |
-| `lantern_modifiers` | Bitmask of modifiers: bit `2^(id - 1)` per modifier, `1` Flickering, `2` Short-lived, `4` Cracked. |
+| `lantern_modifiers` | Bitmask of modifiers: bit `2^(id - 1)` per modifier, `1` Flickering, `2` Short-lived, `4` Cracked, `8` Magic Liquid. |
+| `lantern_fill_material` | Material name rolled for a Magic Liquid lantern, spilled when it breaks. |
 | `lantern_burn_frames`, `lantern_burn_frames_total` | Remaining and total burn time of a Short-lived lantern. |
 | `lantern_extinguished` | The lantern has burnt out. |
 | `lantern_liquid_state` | `0` none, `1` Oil-soaked, `2` Wet. |
@@ -177,7 +190,8 @@ All per-lantern state lives in `VariableStorageComponent` tagged for the world, 
 ## Files
 
 - `files/scripts/lanterns/properties/lantern_traits.lua`: tiers, modifiers, liquid states, rolling, fuel, descriptions, burn-out.
-- `files/scripts/lanterns/properties/lantern_properties_config.lua`: configuration of all tiers, modifiers and states.
+- `files/scripts/lanterns/properties/lantern_modifier_effects.lua`: entity-level modifier effects, fill material rolling, and modifier death spilling.
+- `files/scripts/lanterns/properties/lantern_properties_config.lua`: configuration of all lantern types, tiers, modifiers and states.
 - `files/scripts/lanterns/properties/lantern_modifier.lua`: per-frame modifier behavior.
 - `files/scripts/lanterns/properties/lantern_damage.lua`: cracking on damage.
 - `files/scripts/lanterns/properties/lantern_illumination.lua`: base values and applying the illumination scale.
