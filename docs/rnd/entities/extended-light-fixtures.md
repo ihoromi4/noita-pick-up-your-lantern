@@ -13,7 +13,7 @@ Results of the version 0.3.0 item "Extended Light Fixture Support" ([version-0.3
 - [Saving and Streaming](#saving-and-streaming)
 - [Conclusions](#conclusions)
 - [Open Issues](#open-issues)
-- [Later Ideas](#later-ideas)
+- [Follow-Up Work](#follow-up-work)
 
 ## Results
 
@@ -75,6 +75,6 @@ All fixtures share the lantern features: quality tiers and modifiers, the belt, 
 - Explosions do not break lantern chains, as the Lua chain has no bodies; the lantern itself usually breaks or is flung off.
 - Lighting up a dark tube lamp from electricity, with a small capacity between hits (stage 3 in [Tube Lamp and Electricity](tube-lamp-electricity.md#implementation-stages)), is not done.
 
-## Later Ideas
+## Follow-Up Work
 
-- Version 0.4.0 plans a magic liquid modifier for the temple lantern: a rare dark lantern that spills Concentrated Mana, Flummoxium or Unstable Teleportatium when it breaks. See the [Backlog](../../backlog.md#temple-lantern-modifiers).
+- Version 0.4.0 added the Magic Liquid modifier for the temple lantern: a rare dark lantern that spills Concentrated Mana, Flummoxium or Unstable Teleportatium when it breaks. See [Lantern Properties and Progression](../../dev/lantern-properties-and-progression.md#modifiers).

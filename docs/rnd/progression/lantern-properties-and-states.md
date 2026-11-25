@@ -56,7 +56,7 @@ For parameters without native fields (modifier chances, burn duration, liquid ef
 - **Difference between types.** The large lantern (`physics_lantern.xml`) shines brighter than smaller ones. The simplest approach without RNG — strictly XML edits.
 - **Quality tiers.** When a lantern spawns in the world, an initialization script determines its tier (e.g., "Dim", "Common", "Bright", "Masterwork") and applies a multiplier to parameters. The tier is stored in `VariableStorageComponent` to persist through world → inventory → hand transitions.
 - **Depth dependency.** Higher tier chances increase with biome depth (`y` coordinate or biome name from `BiomeMapGetName`). This constitutes progression: the deeper you go, the better lanterns you find.
-- **Special lanterns.** Rare unique specimens in the Holy Mountain or secret locations (see also "magical and hermetic lanterns" under Version 1.0.0 in the [Backlog](../../backlog.md#extinguishing-and-submersion)).
+- **Special lanterns.** Rare unique specimens in the Holy Mountain or secret locations (the magical temple lantern and the hermetic tube lamp are now implemented, see [Lantern Properties and Progression](../../dev/lantern-properties-and-progression.md#base-properties-per-type)).
 
 ### Player Presentation
 

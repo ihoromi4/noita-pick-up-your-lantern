@@ -1,6 +1,16 @@
-# Version 0.4.0
+# Version 0.4.0 - Snow, Water and Fire
 
 Tracking document for completed work in **Version 0.4.0**. All releases are listed in [Versions](README.md). Previous milestone progress is tracked in [version-0.3.2.md](version-0.3.2.md).
+
+## Summary
+
+The caves of Snowy Depths and Hiisi Base now glow with a faint blue light in the open air. In the dark, you can make out the shape of large rooms and the dark outlines of enemies beyond the reach of your lantern.
+
+Water and fire matter more for your lights. Fire and hot places dry a wet oil lantern. Tube lamps and temple lanterns no longer get wet or oil-soaked. A chain torch now survives a short dip: it hisses and reacts with the liquid for a second before it goes out.
+
+Robots and fire-immune creatures no longer fear lantern light, while support Hiisi now gather around lanterns. A rare temple lantern now holds a mysterious magical liquid instead of plasma.
+
+The Enemy Study feature is removed from this mod. It will move to a separate mod, which is not published yet.
 
 ## Completed Work
 
@@ -30,3 +40,13 @@ Tracking document for completed work in **Version 0.4.0**. All releases are list
 
 - Added the **Magic Liquid** modifier for temple lanterns when `Lantern progression` is enabled, giving each spawned temple lantern a 5% chance to hold Concentrated Mana, Flummoxium, or Unstable Teleportatium instead of plasma.
 - A magic-liquid temple lantern emits no light or particles, uses a dark look, hides its exact contents in the item description, and shatters without sparks or explosion so Unstable Teleportatium does not ignite. Details: [Lantern Quality and States](../guides/lantern-quality-and-states.md#rare-modifiers) and [Lantern Properties and Progression](../dev/lantern-properties-and-progression.md#modifiers).
+
+## Release Notes
+
+- Snowy Depths and Hiisi Base now have a faint blue glow in the open air when limited vision is active. Distant walls and enemies show as soft, dark outlines.
+- Fire, hot liquids and hot biomes now dry a wet oil lantern that you hold, with a puff of steam.
+- Only oil lanterns (Lantern, Small Lantern and Mining Lamp) now get wet or oil-soaked. Tube lamps and temple lanterns keep shining under water.
+- A chain torch now goes out only after one second in a liquid. While submerged, it hisses and reacts with the liquid like fire does. Lava and liquid fire light it again.
+- With Natural Fear enabled, robots and fire-immune creatures no longer fear lantern light or gather around it. Support Hiisi and cowards now gather around lanterns.
+- With Lantern progression enabled, a temple lantern now has a small chance to hold an unknown magical liquid. Such a lantern gives no light and spills its liquid when it breaks.
+- The Enemy Study setting is removed from this mod. It will return in a separate mod that is not published yet. Other mods can now ask this mod which places and creatures are lit.

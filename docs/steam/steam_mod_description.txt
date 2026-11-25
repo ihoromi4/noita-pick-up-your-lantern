@@ -1,4 +1,4 @@
-[quote][b]New in version 0.3.2.[/b] The All-Seeing Eye spell keeps the area bright while you stay where you cast it. Modifiers that change the projectile lifetime also change how long the area stays bright. If you still play a run started with version 0.3.0, please start a new game. Version 0.3.2 no longer cleans up the leftovers of the version 0.3.0 memory leak.[/quote]
+[quote][b]New in version 0.4.0.[/b] Snowy Depths and Hiisi Base glow with a faint blue light in the dark. Fire and hot places dry a wet lantern, and a chain torch survives a short dip in water. Robots and fire-immune creatures ignore lantern light. The Enemy Study setting is removed and will return in a separate mod later.[/quote]
 
 [h1]Noita, Pick Up Your Lantern![/h1]
 
