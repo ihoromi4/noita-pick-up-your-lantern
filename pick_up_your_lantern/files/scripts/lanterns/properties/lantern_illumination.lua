@@ -178,7 +178,8 @@ function UpdateLanternIllumination(force_refresh)
         -- The liquid state is part of the eased scale, so the lantern changes smoothly when it takes one on.
         local target_scale = setting_scale * GetLanternLiquidStateMultiplier(entity_id)
         local current_scale = GetStorageFloat(entity_id, APPLIED_SCALE_STORAGE)
-        if current_scale ~= target_scale and not IsLanternExtinguished(entity_id) then
+        if current_scale ~= target_scale and not IsLanternExtinguished(entity_id)
+            and not IsLanternLightDisabled(entity_id) then
             local next_scale = StepScale(current_scale, target_scale)
             if ApplyLanternIllumination(entity_id, next_scale) and next_scale ~= target_scale then
                 has_pending = true

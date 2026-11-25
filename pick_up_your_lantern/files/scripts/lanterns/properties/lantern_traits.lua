@@ -10,6 +10,7 @@ local MOD_ID = "pick_up_your_lantern"
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_properties_config.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_modifier_effects.lua")
 
 local PROGRESSION_SETTING_ID = MOD_ID .. ".lantern_progression"
 local TIER_STORAGE = "lantern_tier"
@@ -144,15 +145,27 @@ local function ListHasModifier(modifier_ids, modifier_id)
     return false
 end
 
+---Checks whether a modifier can appear on the given lantern type.
+---@param modifier LanternModifier
+---@param lantern_type LanternType|nil
+---@return boolean
+local function IsModifierAllowedForType(modifier, lantern_type)
+    return modifier.lantern_types == nil
+        or (lantern_type ~= nil and lantern_type.id ~= nil and modifier.lantern_types[lantern_type.id] == true)
+end
+
 ---Adds a modifier to a modifier mask according to the modifier interactions: the modifier is skipped if it is
----already present or incompatible with a present one, and the modifiers it replaces are removed.
+---already present, disallowed for the lantern type, or incompatible with a present one, and the modifiers it
+---replaces are removed.
 ---@param mask number Modifier mask.
 ---@param modifier_id number
+---@param lantern_type LanternType|nil
 ---@return number mask New modifier mask.
 ---@return boolean added Whether the modifier was added.
-local function AddModifierToMask(mask, modifier_id)
+local function AddModifierToMask(mask, modifier_id, lantern_type)
     local modifier = GetLanternModifierDefinition(modifier_id)
-    if modifier == nil or MaskHasModifier(mask, modifier_id) then
+    if modifier == nil or MaskHasModifier(mask, modifier_id)
+        or not IsModifierAllowedForType(modifier, lantern_type) then
         return mask, false
     end
 
@@ -275,11 +288,51 @@ function EmitOpenFire(open_fire, x, y, real_fire_chance)
     end
 end
 
----Returns the light multiplier of the lamp power: 0 for a lamp that needs power and has lost it, or for a doused
----open fire lantern, 1 otherwise.
+---Checks whether any active modifier on the lantern disables its light.
+---@param entity_id number Lantern entity ID.
+---@return boolean
+function IsLanternLightDisabled(entity_id)
+    local mask = GetLanternModifiers(entity_id)
+    if mask == 0 then
+        return false
+    end
+
+    for _, modifier in ipairs(LANTERN_MODIFIERS) do
+        if MaskHasModifier(mask, modifier.id) and modifier.disables_light then
+            return true
+        end
+    end
+
+    return false
+end
+
+---Checks whether the lantern carries at least one modifier with per-frame behavior.
+---@param entity_id number Lantern entity ID.
+---@return boolean
+local function HasPerFrameModifier(entity_id)
+    local mask = GetLanternModifiers(entity_id)
+    if mask == 0 then
+        return false
+    end
+
+    for _, modifier in ipairs(LANTERN_MODIFIERS) do
+        if MaskHasModifier(mask, modifier.id) and modifier.has_per_frame_behavior then
+            return true
+        end
+    end
+
+    return false
+end
+
+---Returns the light multiplier of the lamp power: 0 for a lantern whose modifier disables light, a lamp that
+---needs power and has lost it, or a doused open fire lantern; 1 otherwise.
 ---@param entity_id number Lantern entity ID.
 ---@return number
 function GetLanternPowerFactor(entity_id)
+    if IsLanternLightDisabled(entity_id) then
+        return 0
+    end
+
     local _, lantern_type = GetLanternType(entity_id)
     if lantern_type.open_fire ~= nil and IsLanternDoused(entity_id) then
         return 0
@@ -300,21 +353,6 @@ function IsLanternHanging(entity_id)
         and EntityGetFirstComponentIncludingDisabled(entity_id, "PhysicsJointComponent") ~= nil
 end
 
----Switches the in-hand sprite of a lantern to its dark variant (`*_in_hand.xml` to `*_in_hand_out.xml`).
----@param entity_id number Lantern entity ID.
----@return nil
-local function ShowDarkHandSprite(entity_id)
-    for _, sprite_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "SpriteComponent") or {}) do
-        local image_file = ComponentGetValue2(sprite_comp, "image_file")
-        if image_file:find("_in_hand%.xml$") then
-            ComponentSetValue2(sprite_comp, "image_file", (image_file:gsub("_in_hand%.xml$", "_in_hand_out.xml")))
-            if ComponentGetIsEnabled(sprite_comp) then
-                EntityRefreshSprite(entity_id, sprite_comp)
-            end
-        end
-    end
-end
-
 ---Cuts the power of a lamp that needs it, for good: its light and fog of war hole go to 0 once the illumination
 ---is applied again, its in-hand sprite and inventory icon turn dark, and the physics image is switched to the
 ---unpowered one, which the engine uses for the next physics body, after the lamp is thrown or dropped. Called by tube_lamp_cable.lua
@@ -333,11 +371,7 @@ function CutLanternPower(entity_id)
     if item_comp ~= nil and lantern_type.unpowered_ui_sprite ~= nil then
         ComponentSetValue2(item_comp, "ui_sprite", lantern_type.unpowered_ui_sprite)
     end
-    if lantern_type.unpowered_image_file ~= nil then
-        for _, shape_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "PhysicsImageShapeComponent") or {}) do
-            ComponentSetValue2(shape_comp, "image_file", lantern_type.unpowered_image_file)
-        end
-    end
+    SwitchLanternPhysicsImage(entity_id, lantern_type.unpowered_image_file)
 
     return true
 end
@@ -528,27 +562,46 @@ local function RollTier(y)
     return 2
 end
 
----Rolls each modifier independently in table order, applying the modifier interactions.
+---Rolls each modifier independently in table order for the lantern type, applying modifier interactions.
+---Disallowed modifiers are skipped without consuming RNG calls so rolls for other types stay unchanged.
+---@param lantern_type LanternType|nil
 ---@return number mask Modifier mask, 0 for none.
-local function RollModifiers()
+local function RollModifiers(lantern_type)
     local mask = 0
     for _, modifier in ipairs(LANTERN_MODIFIERS) do
-        if modifier.chance > 0 and Random(1, 1000) <= modifier.chance then
-            mask = AddModifierToMask(mask, modifier.id)
+        if modifier.chance > 0 and IsModifierAllowedForType(modifier, lantern_type)
+            and Random(1, 1000) <= modifier.chance then
+            mask = AddModifierToMask(mask, modifier.id, lantern_type)
         end
     end
 
     return mask
 end
 
----Lists the description sentences of the current lantern properties: quality tier, modifiers, then liquid state.
+---Lists the description sentences of the current lantern properties and optional base description replacement.
 ---@param entity_id number Lantern entity ID.
----@return string[] descriptions Translation keys.
+---@return string[] descriptions Translation keys appended after the base description.
+---@return string|nil base_override Replacement base description key from an active modifier, if any.
 local function GetLanternPropertyDescriptions(entity_id)
     local descriptions = {}
+    local base_override = nil
+    local hides_tier = false
+
+    if not IsLanternExtinguished(entity_id) then
+        for _, modifier in ipairs(LANTERN_MODIFIERS) do
+            if HasLanternModifier(entity_id, modifier.id) then
+                if modifier.replaces_base_description and base_override == nil then
+                    base_override = modifier.description
+                end
+                if modifier.hides_tier_description then
+                    hides_tier = true
+                end
+            end
+        end
+    end
 
     local tier = LANTERN_TIERS[GetLanternTier(entity_id)]
-    if tier ~= nil then
+    if tier ~= nil and not hides_tier then
         table.insert(descriptions, tier.description)
     end
 
@@ -556,7 +609,7 @@ local function GetLanternPropertyDescriptions(entity_id)
         table.insert(descriptions, LANTERN_EXTINGUISHED_DESCRIPTION)
     else
         for _, modifier in ipairs(LANTERN_MODIFIERS) do
-            if HasLanternModifier(entity_id, modifier.id) then
+            if HasLanternModifier(entity_id, modifier.id) and modifier.description ~= base_override then
                 table.insert(descriptions, modifier.description)
             end
         end
@@ -567,7 +620,7 @@ local function GetLanternPropertyDescriptions(entity_id)
         table.insert(descriptions, liquid_state.description)
     end
 
-    return descriptions
+    return descriptions, base_override
 end
 
 ---Translates a text if it is a translation key.
@@ -598,13 +651,25 @@ function UpdateLanternDescription(entity_id)
         SetStorageString(entity_id, BASE_DESCRIPTION_STORAGE, base_description)
     end
 
-    local description = TranslateText(base_description)
-    for _, property_description in ipairs(GetLanternPropertyDescriptions(entity_id)) do
+    local property_descriptions, base_override = GetLanternPropertyDescriptions(entity_id)
+    local description = TranslateText(base_override or base_description)
+    for _, property_description in ipairs(property_descriptions) do
         description = description .. "\n" .. TranslateText(property_description)
     end
 
     if ComponentGetValue2(item_comp, "ui_description") ~= description then
         ComponentSetValue2(item_comp, "ui_description", description)
+    end
+end
+
+---Removes the per-frame modifier LuaComponent from the lantern if present.
+---@param entity_id number Lantern entity ID.
+---@return nil
+local function RemoveModifierScript(entity_id)
+    for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "LuaComponent") or {}) do
+        if ComponentGetValue2(comp, "script_source_file") == MODIFIER_SCRIPT then
+            EntityRemoveComponent(entity_id, comp)
+        end
     end
 end
 
@@ -629,8 +694,9 @@ local function RollLanternTraits(entity_id)
     local x, y = EntityGetTransform(EntityGetRootEntity(entity_id))
     SetRandomSeed(math.floor(x), math.floor(y))
 
+    local _, lantern_type = GetLanternType(entity_id)
     local tier = RollTier(y)
-    local modifiers = RollModifiers()
+    local modifiers = RollModifiers(lantern_type)
 
     SetStorageFloat(entity_id, TIER_STORAGE, tier)
     SetStorageFloat(entity_id, MODIFIERS_STORAGE, modifiers)
@@ -639,15 +705,21 @@ local function RollLanternTraits(entity_id)
         SetLanternBurnFrames(entity_id, burn_frames)
         SetStorageFloat(entity_id, BURN_FRAMES_TOTAL_STORAGE, burn_frames)
     end
+    for _, modifier in ipairs(LANTERN_MODIFIERS) do
+        if MaskHasModifier(modifiers, modifier.id) then
+            RollLanternModifierData(entity_id, modifier)
+        end
+    end
 end
 
----Attaches the modifier script to a lit lantern with modifiers.
+---Attaches the modifier script to a lit lantern with per-frame modifiers.
 ---The script is attached only while the light is enabled: a component added to a lantern in the
 ---inventory would run there until the engine toggles components on the next state change.
 ---@param entity_id number Lantern entity ID.
 ---@return nil
 local function AttachModifierScript(entity_id)
-    if GetLanternModifiers(entity_id) == 0 or IsLanternExtinguished(entity_id) then
+    if not HasPerFrameModifier(entity_id) or IsLanternExtinguished(entity_id)
+        or IsLanternLightDisabled(entity_id) then
         return
     end
 
@@ -661,7 +733,7 @@ local function AttachModifierScript(entity_id)
     end
 end
 
----Rolls lantern traits if needed, updates the description and attaches the modifier script to lit lanterns.
+---Rolls lantern traits if needed, applies modifier effects, updates the description and attaches the modifier script.
 ---@param entity_id number Lantern entity ID.
 ---@return boolean rolled Whether traits were rolled during this call.
 function EnsureLanternTraits(entity_id)
@@ -670,6 +742,11 @@ function EnsureLanternTraits(entity_id)
         RollLanternTraits(entity_id)
         rolled = true
     end
+    local modifier_mask = GetLanternModifiers(entity_id)
+    if modifier_mask ~= 0 then
+        local _, lantern_type = GetLanternType(entity_id)
+        ApplyLanternModifierEffects(entity_id, modifier_mask, lantern_type)
+    end
     UpdateLanternDescription(entity_id)
     AttachModifierScript(entity_id)
 
@@ -677,19 +754,29 @@ function EnsureLanternTraits(entity_id)
 end
 
 ---Adds a modifier acquired after the lantern appeared, according to the modifier interactions,
----then updates the description and attaches the modifier script.
+---then applies its effects, updates the description and attaches or removes the modifier script.
 ---@param entity_id number Lantern entity ID.
 ---@param modifier_id number
 ---@return boolean added Whether the modifier was added.
 function AddLanternModifier(entity_id, modifier_id)
-    local mask, added = AddModifierToMask(GetLanternModifiers(entity_id), modifier_id)
+    local _, lantern_type = GetLanternType(entity_id)
+    local mask, added = AddModifierToMask(GetLanternModifiers(entity_id), modifier_id, lantern_type)
     if not added then
         return false
     end
 
     SetStorageFloat(entity_id, MODIFIERS_STORAGE, mask)
+    local modifier = GetLanternModifierDefinition(modifier_id)
+    if modifier ~= nil then
+        RollLanternModifierData(entity_id, modifier)
+    end
+    ApplyLanternModifierEffects(entity_id, mask, lantern_type)
     UpdateLanternDescription(entity_id)
-    AttachModifierScript(entity_id)
+    if IsLanternLightDisabled(entity_id) then
+        RemoveModifierScript(entity_id)
+    else
+        AttachModifierScript(entity_id)
+    end
 
     return true
 end
@@ -700,36 +787,6 @@ end
 function ExtinguishLantern(entity_id)
     SetStorageFloat(entity_id, EXTINGUISHED_STORAGE, 1)
     UpdateLanternDescription(entity_id)
-
-    for _, light_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "LightComponent") or {}) do
-        EntityRemoveComponent(entity_id, light_comp)
-    end
-
-    for _, sprite_comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "SpriteComponent") or {}) do
-        local image_file = ComponentGetValue2(sprite_comp, "image_file")
-        local is_enabled = ComponentGetIsEnabled(sprite_comp)
-        if ComponentGetValue2(sprite_comp, "fog_of_war_hole") then
-            EntityRemoveComponent(entity_id, sprite_comp)
-        elseif image_file:find("_flame%.xml$") then
-            -- The vanilla flame sprite has an empty "out" animation.
-            ComponentSetValue2(sprite_comp, "rect_animation", "out")
-            ComponentSetValue2(sprite_comp, "next_rect_animation", "out")
-            if is_enabled then
-                EntityRefreshSprite(entity_id, sprite_comp)
-            end
-        end
-    end
-    ShowDarkHandSprite(entity_id)
-
-    for _, component_type in ipairs({ "ParticleEmitterComponent", "SpriteParticleEmitterComponent", }) do
-        for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, component_type) or {}) do
-            EntityRemoveComponent(entity_id, comp)
-        end
-    end
-
-    for _, comp in ipairs(EntityGetComponentIncludingDisabled(entity_id, "LuaComponent") or {}) do
-        if ComponentGetValue2(comp, "script_source_file") == MODIFIER_SCRIPT then
-            EntityRemoveComponent(entity_id, comp)
-        end
-    end
+    StripLanternLightAndParticles(entity_id)
+    RemoveModifierScript(entity_id)
 end

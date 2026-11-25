@@ -8,6 +8,7 @@
 -- Lantern types
 
 ---@class LanternType
+---@field id string Unique identifier of the lantern type.
 ---@field files string[] Entity files of the type; the first one is loaded to hang a held lantern.
 ---@field ui_sprite string Inventory icon; tells the type apart once the entity filename is lost.
 ---@field hang_offset_y number|nil Origin of a hung lantern below the ceiling, in pixels: the joint ends up just under
@@ -17,6 +18,8 @@
 ---once it is picked up or detached.
 ---@field unpowered_image_file string|nil Physics image of a lamp without power, used for its next physics body.
 ---@field unpowered_ui_sprite string|nil Inventory icon of a lamp without power; also tells the type apart.
+---@field dark_image_file string|nil Physics image used when the lantern has no light (e.g. an unlit modifier), applied
+---to its next physics body.
 ---@field open_fire LanternOpenFire|nil Open fire the lantern burns with, which the player carries in hand and on
 ---the belt, see chain_torch_fire.lua.
 ---@field chain LanternChainConfig|nil Chain a lantern spawned by a biome hangs on, see lantern_chain.lua.
@@ -49,6 +52,7 @@ local CHAIN_TORCH_CHAIN = {
 LANTERN_TYPES = {
     -- Lantern
     {
+        id = "lantern",
         files = { "data/entities/props/physics_lantern.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_lantern.png",
         hang_offset_y = 4,
@@ -56,6 +60,7 @@ LANTERN_TYPES = {
     },
     -- Small Lantern
     {
+        id = "lantern_small",
         files = {
             "data/entities/props/physics/lantern_small.xml",
             "data/entities/props/physics_lantern_small.xml",
@@ -66,6 +71,7 @@ LANTERN_TYPES = {
     },
     -- Mining Lamp
     {
+        id = "mining_lamp",
         files = { "data/entities/props/physics_mining_lamp.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_mining_lamp.png",
         hang_offset_y = 7,
@@ -73,6 +79,7 @@ LANTERN_TYPES = {
     },
     -- Tube Lamp: needs a power cable, so it is not hung back.
     {
+        id = "tube_lamp",
         files = { "data/entities/props/physics_tubelamp.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_tube_lamp.png",
         needs_power = true,
@@ -81,8 +88,10 @@ LANTERN_TYPES = {
     },
     -- Temple Lantern: hangs on a chain when spawned, right under the ceiling when hung back.
     {
+        id = "temple_lantern",
         files = { "data/entities/props/physics/temple_lantern.xml", },
         ui_sprite = "mods/pick_up_your_lantern/files/props_gfx/ui_temple_lantern.png",
+        dark_image_file = "mods/pick_up_your_lantern/files/props_gfx/temple_lantern_out.png",
         hang_offset_y = 1,
         -- Up to the ceiling as far as the vanilla temple_lantern.lua searches; the body is taken as a 9×11 box.
         chain = {
@@ -94,6 +103,7 @@ LANTERN_TYPES = {
     -- their own file with a joint. The duplicates in props/ spawn about 32 px below the ceiling, so the ceiling is
     -- searched for up to 48 px above.
     {
+        id = "chain_torch",
         files = {
             "mods/pick_up_your_lantern/files/entities/chain_torch_hung.xml",
             "data/entities/props/physics/chain_torch.xml",
@@ -105,6 +115,7 @@ LANTERN_TYPES = {
         chain = CHAIN_TORCH_CHAIN,
     },
     {
+        id = "chain_torch_blue",
         files = {
             "mods/pick_up_your_lantern/files/entities/chain_torch_blue_hung.xml",
             "data/entities/props/physics/chain_torch_blue.xml",
@@ -116,6 +127,7 @@ LANTERN_TYPES = {
         chain = CHAIN_TORCH_CHAIN,
     },
     {
+        id = "chain_torch_ghostly",
         files = {
             "mods/pick_up_your_lantern/files/entities/chain_torch_ghostly_hung.xml",
             "data/entities/props/physics/chain_torch_ghostly.xml",
@@ -160,13 +172,26 @@ LANTERN_TIER_WEIGHTS_BY_DEPTH = {
 LANTERN_MODIFIER_FLICKERING = 1
 LANTERN_MODIFIER_SHORT_LIVED = 2
 LANTERN_MODIFIER_CRACKED = 3
+LANTERN_MODIFIER_MAGIC_LIQUID = 4
 
 ---@class LanternModifier
 ---@field id number Modifier ID; bit `2^(id - 1)` of the `lantern_modifiers` storage.
 ---@field description string Translation key of the description sentence.
 ---@field chance number Roll chance when a lantern appears, per mille. 0 for modifiers that are never rolled.
+---@field lantern_types table<string, boolean>|nil Lantern type IDs that can receive this modifier; nil for all types.
 ---@field incompatible number[]|nil IDs of modifiers this one cannot be combined with, checked in both directions.
 ---@field replaces number[]|nil IDs of modifiers removed from the lantern when this one is added.
+---@field disables_light boolean|nil Whether the modifier removes light, fog of war hole and glow particles.
+---@field disables_explosion boolean|nil Whether the modifier disables explosion, sparks and blood material on break.
+---@field replaces_base_description boolean|nil Whether the modifier description replaces the base XML description.
+---@field hides_tier_description boolean|nil Whether the quality tier description sentence is omitted.
+---@field has_per_frame_behavior boolean|nil Whether the modifier needs the per-frame lantern_modifier.lua script.
+---@field fill_materials LanternFillMaterial[]|nil Weighted pool of materials spilled when the lantern breaks.
+
+---@class LanternFillMaterial
+---@field material string Material name spilled on break.
+---@field weight number|nil Relative selection weight; defaults to 1.
+---@field spill_count number|nil Number of cells created on break; defaults to modifier `spill_count`.
 
 ---@class LanternModifierFlickering : LanternModifier
 ---@field radius_bonus number Light radius multiplier.
@@ -187,6 +212,15 @@ LANTERN_MODIFIER_CRACKED = 3
 ---@field fire_chance number Chance to leak fire on each roll, per mille.
 ---@field fire_particle_count number Number of fire particles leaked at once.
 
+---@class LanternModifierMagicLiquid : LanternModifier
+---@field spill_count number Default number of liquid cells spawned when the lantern breaks.
+---@field spill_offset_y number Distance from the lantern origin to the glass bulb center, in pixels.
+---@field spill_spread number Maximum spawn offset around the bulb center, in pixels.
+---@field spill_vel_x number Maximum horizontal velocity of spilled liquid cells.
+---@field spill_vel_y_min number Minimum vertical velocity of spilled liquid cells.
+---@field spill_vel_y_max number Maximum vertical velocity of spilled liquid cells.
+---@field fill_materials LanternFillMaterial[] Candidate liquids spilled on break.
+
 ---Modifiers, rolled independently in table order: changing the order changes which modifiers a lantern at a given
 ---position gets. A lantern may carry several modifiers; modifiers without `incompatible` or `replaces` combine,
 ---and their light factors multiply. The order also sets the order of the description sentences.
@@ -197,6 +231,7 @@ LANTERN_MODIFIERS = {
         id = LANTERN_MODIFIER_FLICKERING,
         description = "$item_description_lantern_flickering",
         chance = 70,
+        has_per_frame_behavior = true,
         radius_bonus = 1.2,
         flicker_depth = 0.45,
     },
@@ -205,6 +240,7 @@ LANTERN_MODIFIERS = {
         id = LANTERN_MODIFIER_SHORT_LIVED,
         description = "$item_description_lantern_short_lived",
         chance = 70,
+        has_per_frame_behavior = true,
         burn_frames_min = 3 * 60 * 60,
         burn_frames_max = 8 * 60 * 60,
         fade_low_factor = 0.2,
@@ -218,10 +254,42 @@ LANTERN_MODIFIERS = {
         id = LANTERN_MODIFIER_CRACKED,
         description = "$item_description_lantern_cracked",
         chance = 0,
+        has_per_frame_behavior = true,
         crack_chance = 330,
         fire_interval_frames = 20,
         fire_chance = 500,
         fire_particle_count = 2,
+    },
+    ---@type LanternModifierMagicLiquid
+    {
+        id = LANTERN_MODIFIER_MAGIC_LIQUID,
+        description = "$item_description_lantern_magic_liquid",
+        chance = 50,
+        lantern_types = { temple_lantern = true, },
+        incompatible = {
+            LANTERN_MODIFIER_FLICKERING,
+            LANTERN_MODIFIER_SHORT_LIVED,
+            LANTERN_MODIFIER_CRACKED,
+        },
+        replaces = {
+            LANTERN_MODIFIER_FLICKERING,
+            LANTERN_MODIFIER_SHORT_LIVED,
+        },
+        disables_light = true,
+        disables_explosion = true,
+        replaces_base_description = true,
+        hides_tier_description = true,
+        spill_count = 100,
+        spill_offset_y = 5,
+        spill_spread = 2,
+        spill_vel_x = 35,
+        spill_vel_y_min = -45,
+        spill_vel_y_max = 10,
+        fill_materials = {
+            { material = "magic_liquid_mana_regeneration", },
+            { material = "material_confusion", },
+            { material = "magic_liquid_unstable_teleportation", },
+        },
     },
 }
 
