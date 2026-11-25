@@ -69,4 +69,4 @@ Lua style:
 - Do not add position numbering in headings.
 - Use section links `[Link Text](#anchor-name)`.
 - Use relative file links inside docs `[Other File Name](.../other-file.md)`.
-- After you edit Markdown files, check them with `scripts/mdlint <files>` and fix the reported problems. Without arguments, the script checks all Markdown files of the repository. The configuration lives in `.markdownlint-cli2.jsonc`.
+- After you edit Markdown files, check them with `scripts/mdlint <files>` and fix the reported problems. Without arguments, the script checks all Markdown files of the repository. The script wraps the linter of the DevKit, so the configuration lives in `tools/noitakit/.markdownlint-cli2.jsonc`.
