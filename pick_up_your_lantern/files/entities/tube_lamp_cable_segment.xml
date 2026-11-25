@@ -2,7 +2,7 @@
 
     <!--
         One segment of a tube lamp cable.
-        Placed, turned and stretched every frame by files/scripts/tube_lamp_cable.lua: the origin is the upper end.
+        Placed, turned and stretched every frame by files/scripts/lanterns/fixtures/tube_lamp_cable.lua: the origin is the upper end.
     -->
 
     <!-- Player is drawn at 0.6, higher values are drawn behind it. -->

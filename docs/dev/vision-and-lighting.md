@@ -128,7 +128,7 @@ Under limited vision, large open caverns and long-range enemies in Snowy Depths 
 
 ### Biome Detection
 
-[biome_ambient.lua](../../pick_up_your_lantern/files/scripts/biome_ambient.lua) runs every frame from `UpdatePlayerVision()` in [player_vision.lua](../../pick_up_your_lantern/files/scripts/player_vision.lua):
+[biome_ambient.lua](../../pick_up_your_lantern/files/scripts/vision/biome_ambient.lua) runs every frame from `UpdatePlayerVision()` in [player_vision.lua](../../pick_up_your_lantern/files/scripts/vision/player_vision.lua):
 
 - `SampleViewportAmbient()` calls `BiomeMapGetName()` at five points around the camera center: the center itself and four offsets (`±160 px` horizontally, `±90 px` vertically).
 - Both `$biome_snowcave` and `$biome_snowcastle` map to `SNOW_AMBIENT` (`r = 0.032`, `g = 0.060`, `b = 0.100`, `strength = 1.0`). The target strength is the fraction of sampled points that fall inside a matching biome.
@@ -167,7 +167,7 @@ Both vanilla reveal mechanics work through the fog of war grid:
 
 In vanilla, the revealed area becomes visible thanks to the 35% ambient. The mod's shader blocks do not use the fog of war grid: they darken by distance from the player, scale the ambient and darken the background, so the revealed area went dark again.
 
-`files/scripts/all_seeing_eye.lua` fixes this:
+`files/scripts/vision/all_seeing_eye.lua` fixes this:
 
 - `PatchXRayProjectile()` adds the `pul_xray` tag to the root of `xray.xml`. Mods that reuse the projectile get the tag too.
 - `UpdateAllSeeingEye(entity)` runs every frame from `UpdatePlayerVision`, for the player or the polymorphed creature:
@@ -232,7 +232,7 @@ The effect entity follows its host, so a burning enemy or player lights the cave
 
 ## Fire Enemy Glow
 
-`files/scripts/fire_enemy_glow.lua` gives fire-related enemies a bright light and a fog of war hole, so they stand out in darkness. It is always on.
+`files/scripts/creatures/fire_enemy_glow.lua` gives fire-related enemies a bright light and a fog of war hole, so they stand out in darkness. It is always on.
 
 - `UpdateFireEnemyGlow()` runs from `OnWorldPreUpdate` every 30 frames and checks root entities with the `enemy`, `boss` or `boss_dragon` tag within 512 px of the camera.
 - Each enemy is checked once and gets the `pul_fire_glow_checked` tag. The tag is saved with the entity, so the light is not added again after loading.
@@ -240,6 +240,6 @@ The effect entity follows its host, so a burning enemy or player lights the cave
 - The light is a new `LightComponent` with the `pul_fire_glow` tag, centred on the hitbox, with `fade_out_time="1.0"` and `update_properties="1"` (without it, a light added at runtime stays invisible). The vanilla light of the enemy is left alone.
 - When `Illuminate the darkness` is on, a fog of war hole `SpriteComponent` (`fog_of_war_hole_64.xml`, alpha 0.55, `pul_fire_glow` tag) is added at the same offset. Its scale is `radius * 1.2 / 280` (the lantern proportion) times `GetIlluminationScale()`. Without it, the light lifts only the mod darkness, and the enemy stays hidden in the vanilla fog of war of unexplored areas.
 
-Every enemy that gets the light is also tagged with `pul_fire_enemy` (`FIRE_ENEMY_TAG` in `utils.lua`). `files/scripts/lantern_attraction.lua` uses the tag to draw fire enemies to lit lanterns in the world by moving the home of their AI.
+Every enemy that gets the light is also tagged with `pul_fire_enemy` (`FIRE_ENEMY_TAG` in `utils.lua`). `files/scripts/creatures/lantern_attraction.lua` uses the tag to draw fire enemies to lit lanterns in the world by moving the home of their AI.
 
 Research, the vanilla list, the heuristic and the attraction: [Fire Enemies](../rnd/creatures/fire-enemies.md).

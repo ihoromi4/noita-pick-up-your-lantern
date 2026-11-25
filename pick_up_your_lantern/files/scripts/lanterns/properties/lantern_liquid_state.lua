@@ -7,8 +7,8 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_traits.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_illumination.lua")
 local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
 
 local LANTERN_TAG = "lantern"

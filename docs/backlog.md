@@ -12,12 +12,12 @@ This document lists planned tasks that are not done yet. Released versions and c
 ## Natural Fear Mode
 
 - The Giant Laser-Drone (Jättilaser-lennokki, `drone_lasership`) fears lantern light in the Natural Fear mode, but it should not. The drone is a robot, and robots are immune to fire. The guides say that creatures immune to fire do not fear the light.
-  - Cause: the immunity is never checked in code. `IsFearful` in `files/scripts/lantern_fear.lua` filters only by fire enemies, lured herds, and excluded enemies. The drone has the `robot` herd, so it counts as fearful.
+  - Cause: the immunity is never checked in code. `IsFearful` in `files/scripts/creatures/lantern_fear.lua` filters only by fire enemies, lured herds, and excluded enemies. The drone has the `robot` herd, so it counts as fearful.
   - The design assumed that fire immunity alone stops the reaction. In fact, immunity only cancels the `LIGHT_BURN_DAMAGE` fire damage and the panic that it starts. `Scorch` still adds `FEAR_PUSH_SPEED` to the velocity of the drone, and `SetScared` still gives it the look of fear. The rage branch also works, because it does not use damage at all.
   - The drone inherits the `fire="0.0"` damage multiplier from `data/entities/base_enemy_robot.xml`. The drone is light (mass 0.8) and flies, so the push moves it along both axes and is easy to notice.
   - The same bug likely affects every creature immune to fire: other robots, ghosts, and others. The fix should skip enemies whose fire damage multiplier is 0 in `IsFearful`.
 - The Hiisi Healer (Parantajahiisi, `scavenger_heal`) fears lantern light in the Natural Fear mode, but it should not. It is a Hiisi, and lanterns should attract Hiisi.
-  - Cause: the Natural Fear mode recognizes Hiisi only by the `orcs` herd. The list is `NATURAL_FEAR_LURED_HERDS` in `files/scripts/enemy_ai_home.lua`. In vanilla data, the Hiisi Healer has the `healer` herd instead of `orcs`.
+  - Cause: the Natural Fear mode recognizes Hiisi only by the `orcs` herd. The list is `NATURAL_FEAR_LURED_HERDS` in `files/scripts/creatures/enemy_ai_home.lua`. In vanilla data, the Hiisi Healer has the `healer` herd instead of `orcs`.
   - As a result, `IsNaturalFearLuredHerd` returns false for the Hiisi Healer. `IsFearful` then counts it as a fearful enemy, so the light scorches it.
   - Two other Hiisi have the `healer` herd too: the invisibility Hiisi (`scavenger_invis`) and the shield Hiisi (`scavenger_shield`). They likely have the same bug. The `healer` herd also has the coward (`coward`) and the healer drone (`healerdrone_physics`), which need a check.
   - A whole `healer` herd in the lured list would also attract the healer drone, which is a robot. The fix may need to recognize these Hiisi by their file names instead of the herd.

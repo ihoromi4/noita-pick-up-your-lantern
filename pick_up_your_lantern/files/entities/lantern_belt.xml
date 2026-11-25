@@ -1,7 +1,7 @@
 <Entity name="pul_belt_lantern" tags="pul_belt" >
 
     <!--
-        Belt lantern visual, spawned by files/scripts/lantern_belt.lua as a child of the player.
+        Belt lantern visual, spawned by files/scripts/lanterns/mechanics/lantern_belt.lua as a child of the player.
         The sprite, light and fog of war hole are added from Lua, copied from the carried lantern.
     -->
 
@@ -19,7 +19,7 @@
     <!-- Same pendulum as the lantern in hand, driven by the player velocity. -->
     <LuaComponent
         execute_every_n_frame="1"
-        script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_in_hand.lua"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/lanterns/mechanics/lantern_in_hand.lua"
     ></LuaComponent>
 
 </Entity>

@@ -7,7 +7,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_traits.lua")
 
 local SCALE_SETTING_ID = MOD_ID .. ".illumination_scale"
 local LANTERN_TAG = "lantern"

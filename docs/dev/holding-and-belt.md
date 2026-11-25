@@ -28,7 +28,7 @@ The vanilla `lantern_small.png` and `lantern.png` show a dark glass without a fl
 
 ## Swinging
 
-`files/scripts/lantern_in_hand.lua` runs every frame while the lantern is held (`_tags="enabled_in_hand"`). It is a damped spring pendulum integrated per frame:
+`files/scripts/lanterns/mechanics/lantern_in_hand.lua` runs every frame while the lantern is held (`_tags="enabled_in_hand"`). It is a damped spring pendulum integrated per frame:
 
 - reads the player velocity from `CharacterDataComponent.mVelocity` or `VelocityComponent`;
 - tilts the lantern against the direction of movement, adds a sine sway for steps, and lets the swing die down after the player stops;
@@ -43,7 +43,7 @@ In the world, the glass body and the flame sprite are separate: the glass follow
 
 The engine mirrors a held item through the transform scale, for example `scale_y = -1` while facing left. After a throw or drop, the physics body controls only position and rotation, so the mirrored scale stays and flips the flame away from the glass.
 
-`files/scripts/lantern_in_world.lua`, tagged `enabled_in_world`, resets the transform scale to `1`. It runs once each time the lantern enters the world: after the check it disables its own component, and the engine enables it again through the tag on the next throw or drop.
+`files/scripts/lanterns/mechanics/lantern_in_world.lua`, tagged `enabled_in_world`, resets the transform scale to `1`. It runs once each time the lantern enters the world: after the check it disables its own component, and the engine enables it again through the tag on the next throw or drop.
 
 ## Belt Lantern
 
@@ -69,7 +69,7 @@ player
 
 ### Update Loop
 
-`UpdateLanternBelt()` in `files/scripts/lantern_belt.lua` runs from `OnWorldPostUpdate`, so mirroring is applied in the same frame before rendering:
+`UpdateLanternBelt()` in `files/scripts/lanterns/mechanics/lantern_belt.lua` runs from `OnWorldPostUpdate`, so mirroring is applied in the same frame before rendering:
 
 - If the held item is any lantern, all `pul_belt` entities are killed. The belt shows nothing even if other lanterns are in the inventory.
 - Otherwise the lantern with the lowest `ItemComponent.inventory_slot` in `inventory_quick` is used.

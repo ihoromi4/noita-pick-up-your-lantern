@@ -84,7 +84,7 @@ Quality tiers and modifiers are implemented and detailed in a separate note: [La
 
 ### Submersion Detection
 
-- `files/scripts/lantern_liquid_state.lua`, `UpdateLanternLiquidState` is called from `OnWorldPostUpdate` and checks once every 10 frames.
+- `files/scripts/lanterns/properties/lantern_liquid_state.lua`, `UpdateLanternLiquidState` is called from `OnWorldPostUpdate` and checks once every 10 frames.
 - Held lantern — `Inventory2Component.mActiveItem` of the player with the `lantern` tag (`FindPlayer`, `GetHeldItem` in `utils.lua`).
 - Submersion — `DamageModelComponent.mAirAreWeInWater` of the player (same check used for drowning), liquid material — `CellFactory_GetName(mLiquidMaterialWeAreIn)`.
 - **[Needs verification]** Whether `mAirAreWeInWater` and `mLiquidMaterialWeAreIn` reliably update for the player; fallback option is sampling material at the player's head position.

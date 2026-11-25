@@ -5,7 +5,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 local RADAR_ITEM_PATH = "data/scripts/perks/radar_item.lua"
-local FILTER_LINE = 'local EntityGetInRadiusWithTag = dofile_once("mods/' .. MOD_ID .. '/files/scripts/item_radar_filter.lua")\n'
+local FILTER_LINE = 'local EntityGetInRadiusWithTag = dofile_once("mods/' .. MOD_ID .. '/files/scripts/patches/item_radar_filter.lua")\n'
 
 ---Prepends the lantern filter to the Item Radar perk script.
 function PatchItemRadar()

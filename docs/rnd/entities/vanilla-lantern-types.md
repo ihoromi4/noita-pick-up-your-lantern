@@ -10,7 +10,7 @@ The game files (`data/entities/props/`) contain three main entities for hanging 
 
 ## Duplicate Torch Entities
 
-In vanilla Noita, chain torches have two separate files with different paths, and different biomes spawn different variants. Previously, the lighting patch ([patch_lighting.lua](../../../pick_up_your_lantern/files/scripts/patch_lighting.lua)) only added a fog of war hole to the variants under `physics/`, so, for instance, ghostly torches in the Coal Pits did not pierce the fog of war. Now both variants are patched.
+In vanilla Noita, chain torches have two separate files with different paths, and different biomes spawn different variants. Previously, the lighting patch ([patch_lighting.lua](../../../pick_up_your_lantern/files/scripts/patches/patch_lighting.lua)) only added a fog of war hole to the variants under `physics/`, so, for instance, ghostly torches in the Coal Pits did not pierce the fog of war. Now both variants are patched.
 
 | Variant under `physics/` | Duplicate in `props/` | Where duplicate spawns |
 | --- | --- | --- |

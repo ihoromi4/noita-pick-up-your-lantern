@@ -21,10 +21,10 @@ The first iteration is implemented and tested in-game (commit `a25be6b`).
 
 ### Files
 
-- `files/scripts/lantern_properties_config.lua` — configuration of all tiers, modifiers and states: IDs, multipliers, description keys, roll chances and weights, behaviour parameters.
-- `files/scripts/lantern_traits.lua` — tier and modifier roll, oil consumption, description, extinguishing.
-- `files/scripts/lantern_modifier.lua` — modifier behaviors (flickering, burn timer).
-- `files/scripts/lantern_illumination.lua` — applying the tier multiplier to light and fog of war hole.
+- `files/scripts/lanterns/properties/lantern_properties_config.lua` — configuration of all tiers, modifiers and states: IDs, multipliers, description keys, roll chances and weights, behaviour parameters.
+- `files/scripts/lanterns/properties/lantern_traits.lua` — tier and modifier roll, oil consumption, description, extinguishing.
+- `files/scripts/lanterns/properties/lantern_modifier.lua` — modifier behaviors (flickering, burn timer).
+- `files/scripts/lanterns/properties/lantern_illumination.lua` — applying the tier multiplier to light and fog of war hole.
 - `files/props_gfx/lantern_in_hand_out.xml`, `lantern_small_in_hand_out.xml` — sprites for an extinguished lantern in hand.
 
 ### Tier and Modifier Roll

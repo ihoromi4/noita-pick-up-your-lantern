@@ -70,7 +70,7 @@ player
 ```
 
 - `files/entities/lantern_belt.xml` — entity with attachment and pendulum; sprite, light, and fog hole are injected dynamically by Lua based on the specific lantern's data.
-- `files/scripts/lantern_belt.lua` — `UpdateLanternBelt()` is called from `OnWorldPostUpdate` so that mirroring is applied in the same frame right before rendering.
+- `files/scripts/lanterns/mechanics/lantern_belt.lua` — `UpdateLanternBelt()` is called from `OnWorldPostUpdate` so that mirroring is applied in the same frame right before rendering.
   - If any lantern is held in hands, all `pul_belt` entities are killed.
   - Otherwise, the lantern with the lowest `inventory_slot` in `inventory_quick` is selected.
   - The belt entity stores the lantern ID and lit/unlit state. If they do not match current values (different lantern, lantern extinguished, player reloaded or reverted from polymorph), the entity is recreated.

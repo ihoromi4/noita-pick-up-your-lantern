@@ -18,7 +18,7 @@ Investigation of the interaction between the limited vision and lighting systems
 
 After the player transforms (observed with Chaotic Polymorphine) into another entity, the surrounding level becomes visible, and upon returning to the original form, visibility remains near-vanilla. Darkness is restored only after modifying mod settings. The bug reproduces across different biomes and is biome-independent. The bug is tracked in [version-0.2.0.md](../../versions/version-0.2.0.md#known-issues-and-next-steps).
 
-The root cause lies in `UpdatePlayerVision` ([player_vision.lua](../../../pick_up_your_lantern/files/scripts/player_vision.lua)), which is called every frame from `OnWorldPreUpdate`:
+The root cause lies in `UpdatePlayerVision` ([player_vision.lua](../../../pick_up_your_lantern/files/scripts/vision/player_vision.lua)), which is called every frame from `OnWorldPreUpdate`:
 
 ```lua
 local players = EntityGetWithTag("player_unit")
@@ -143,7 +143,7 @@ Combine three approaches: pass shader uniforms every frame, reconfigure componen
 
 ## Implemented Solution
 
-The recommended combination has been implemented in [player_vision.lua](../../../pick_up_your_lantern/files/scripts/player_vision.lua). **[Confirmed]** in-game: darkness functions both during polymorph and after reverting without requiring settings changes.
+The recommended combination has been implemented in [player_vision.lua](../../../pick_up_your_lantern/files/scripts/vision/player_vision.lua). **[Confirmed]** in-game: darkness functions both during polymorph and after reverting without requiring settings changes.
 
 - **Player detection**: `FindPlayerEntity` searches for `player_unit`, and if no such entity is present, falls back to `polymorphed_player` and `polymorphed_cessation`. Returns the entity ID and a polymorph flag. The moment of polymorph is detected as a change in this flag or entity ID between frames.
 - **Shader per frame**: `ApplyShaderVision(scale)` sends `pul_vision` every frame, preventing shader state from ever getting stuck.

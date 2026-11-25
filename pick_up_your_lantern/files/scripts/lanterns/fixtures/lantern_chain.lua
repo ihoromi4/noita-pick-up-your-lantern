@@ -15,13 +15,13 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/hanging_rope.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_traits.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/fixtures/hanging_rope.lua")
 
 local LANTERN_TAG = "lantern"
 local PROJECTILE_TAG = "projectile"
 local ENTITIES_PATH = "mods/" .. MOD_ID .. "/files/entities/"
-local ANCHOR_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_anchor.lua"
+local ANCHOR_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lanterns/mechanics/lantern_anchor.lua"
 -- Set once the lantern has been seen in the world, so only a freshly spawned lantern gets a chain.
 local CHECKED_STORAGE = "lantern_chain_checked"
 -- Set while the lantern hangs on its chain; shared with lantern_chain_kick.lua.

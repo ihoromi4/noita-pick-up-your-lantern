@@ -3,8 +3,8 @@
 
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/pick_up_your_lantern/files/scripts/libs/nxml.lua")
-dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_properties_config.lua")
-dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_illumination.lua")
+dofile_once("mods/pick_up_your_lantern/files/scripts/lanterns/properties/lantern_properties_config.lua")
+dofile_once("mods/pick_up_your_lantern/files/scripts/lanterns/properties/lantern_illumination.lua")
 
 local SETTING_ID = "pick_up_your_lantern.illuminate_the_darkness"
 

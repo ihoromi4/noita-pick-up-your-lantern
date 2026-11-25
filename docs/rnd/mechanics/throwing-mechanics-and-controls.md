@@ -191,7 +191,7 @@ Instead of blocking LMB (version 0.3.0), the left button is given its own action
 
 ### Implementation
 
-`UpdateLanternHang()` in `files/scripts/lantern_hang.lua` is called from `OnWorldPreUpdate()`:
+`UpdateLanternHang()` in `files/scripts/lanterns/mechanics/lantern_hang.lua` is called from `OnWorldPreUpdate()`:
 
 1. **[Confirmed by testing]** A click is detected via `mButtonFrameFire`: a 1-frame lag is permitted, and the last processed frame is cached so each click triggers only once. The vanilla throw only starts after the throw animation completes, allowing the hanging logic to run first so there is nothing left to throw.
 2. A new joint cannot be created on an already-thrown body (`mRefreshed`, see [ceiling-anchors-and-kicking.md](../entities/ceiling-anchors-and-kicking.md)). Therefore, hanging is done via substitution:
@@ -203,7 +203,7 @@ Instead of blocking LMB (version 0.3.0), the left button is given its own action
 
 When there is no ceiling, a vanilla LMB throw occurs and is handled by a fallback path:
 
-1. A `LuaComponent` with `script_throw_item` (as in vanilla `safe_haven.xml`) calls `throw_item()` in `files/scripts/lantern_throw.lua`.
+1. A `LuaComponent` with `script_throw_item` (as in vanilla `safe_haven.xml`) calls `throw_item()` in `files/scripts/lanterns/mechanics/lantern_throw.lua`.
 2. A throw is identified as originating from LMB if `mButtonFrameFire > mButtonFrameThrow` and the click occurred no more than 60 frames ago. If the inventory is open, the throw is left untouched.
 3. The lantern ID is stored in the player's `VariableStorageComponent` named `pul_return_lantern_id`. On the next frame, `UpdateLanternHang()` returns the lantern via `GamePickUpInventoryItem` and equips it in hand without interfering with the engine mid-throw.
 4. **[Confirmed by testing]** The throw animation and sound cannot be removed: the vanilla throw plays out in full.

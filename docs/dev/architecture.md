@@ -19,10 +19,17 @@ All mod files live in `pick_up_your_lantern/`:
 
 - `init.lua`: entry point. Applies startup patches and registers frame hooks.
 - `settings.lua`: Mod Settings definitions and settings presets (`PRESETS`, each listing only the values that differ from the option defaults). Each option's `change_fn` re-syncs the `preset` setting to the matching preset or `custom`. `ModSettingsUpdate` also stores `false` defaults, which vanilla `mod_settings_update` skips. See [Settings](../guides/settings.md) for the player-facing description.
-- `data/entities/props/`: full overrides of the vanilla light fixtures that become pickable lanterns, listed in `LANTERN_TYPES` of `files/scripts/lantern_properties_config.lua`. See [Lantern Entities](lantern-entities.md).
+- `data/entities/props/`: full overrides of the vanilla light fixtures that become pickable lanterns, listed in `LANTERN_TYPES` of `files/scripts/lanterns/properties/lantern_properties_config.lua`. See [Lantern Entities](lantern-entities.md).
 - `files/entities/`: entities added by the mod. These are the belt lantern (`lantern_belt.xml`, see [Holding and Belt](holding-and-belt.md)), the chain and cable pieces and the shared chain torch base (see [Lantern Entities](lantern-entities.md)), and the looks of fear and rage (see [Creatures and Light](creatures-and-light.md)).
-- `files/scripts/`: Lua modules, entity scripts, and the exported visibility API (`visibility_api.lua`).
-- `files/scripts/libs/`: third-party and helper libraries (`nxml.lua`, `diff_patch.lua`).
+- `files/scripts/`: Lua modules and entity scripts grouped by domain, with shared helpers (`utils.lua`) and the exported visibility API (`visibility_api.lua`) at the root:
+  - `libs/`: third-party and helper libraries (`nxml.lua`, `diff_patch.lua`).
+  - `patches/`: startup patchers for vanilla files (`patch_lighting.lua`, `patch_materials.lua`, `patch_light_sources.lua`, `patch_item_radar.lua`) and their injected hooks (`light_source_tag.lua`, `item_radar_filter.lua`).
+  - `vision/`: player limited vision, All-Seeing Eye reveal, and snowy biome ambient light (`player_vision.lua`, `all_seeing_eye.lua`, `biome_ambient.lua`).
+  - `creatures/`: enemy reactions to light and fire enemy glow (`enemy_ai_home.lua`, `fire_enemy_glow.lua`, `lantern_attraction.lua`, `lantern_fear.lua`).
+  - `lanterns/properties/`: lantern configuration, progression traits, modifiers, damage cracking, liquid states, and illumination scaling.
+  - `lanterns/mechanics/`: holding, belt attachment, ceiling anchoring, hanging, throwing, and world transform fixes.
+  - `lanterns/fixtures/`: hanging ropes, lantern chains, tube lamp cables, and chain torch open-fire behavior.
+  - `lanterns/death/`: destruction callbacks for each lantern type.
 - `files/patches/`: diff patches for vanilla shaders (`vision/`, `glow/`).
 - `files/props_gfx/`: in-hand sprites, burnt-out sprites and inventory icons.
 - `files/translations.csv`: translation keys appended to `data/translations/common.csv` at startup.
@@ -34,16 +41,16 @@ All mod files live in `pick_up_your_lantern/`:
 | Function | Module | What it does |
 | --- | --- | --- |
 | `AppendTranslations` | `init.lua` | Appends `files/translations.csv` to the game translations. |
-| `PatchLighting` | `patch_lighting.lua` | Adds a fog of war hole to vanilla light sources and scales it by `Illuminated area size`. Removes the lantern fog of war holes when `Illuminate the darkness` is off. |
-| `PatchPlayerBaseVision` | `player_vision.lua` | Makes the player light adjustable at runtime and adds `FogOfWarRadiusComponent` to `player_base.xml`. |
-| `PatchShaderVision` | `player_vision.lua` | Applies the `files/patches/vision/` patches to `post_final.frag`. |
-| `PatchXRayProjectile` | `all_seeing_eye.lua` | Tags the All-Seeing Eye spell projectile with `pul_xray`. |
-| `PatchMaterialsGlow` | `patch_materials.lua` | Raises `gfx_glow` of fire, lava, molten metals, acid and sparks. |
-| `PatchBurningEntity` | `patch_materials.lua` | Adds a light to the burning effect entity. |
-| `PatchGlowShaders` | `patch_materials.lua` | Applies the `files/patches/glow/` patches to widen the glow blur. |
-| `PatchItemRadar` | `patch_item_radar.lua` | Hooks the Item Radar perk script to hide lanterns. |
-| `PatchLightSources` | `patch_light_sources.lua` | Tags the light of the Light spell modifier with `pul_light_source`, so it counts as a light source for visibility checks and creature reactions. |
-| `InitHotBiomes` | `lantern_liquid_state.lua` | Reads `_biomes_all.xml` and opens `biome_map.png` to detect hot biomes at runtime. |
+| `PatchLighting` | `patches/patch_lighting.lua` | Adds a fog of war hole to vanilla light sources and scales it by `Illuminated area size`. Removes the lantern fog of war holes when `Illuminate the darkness` is off. |
+| `PatchPlayerBaseVision` | `vision/player_vision.lua` | Makes the player light adjustable at runtime and adds `FogOfWarRadiusComponent` to `player_base.xml`. |
+| `PatchShaderVision` | `vision/player_vision.lua` | Applies the `files/patches/vision/` patches to `post_final.frag`. |
+| `PatchXRayProjectile` | `vision/all_seeing_eye.lua` | Tags the All-Seeing Eye spell projectile with `pul_xray`. |
+| `PatchMaterialsGlow` | `patches/patch_materials.lua` | Raises `gfx_glow` of fire, lava, molten metals, acid and sparks. |
+| `PatchBurningEntity` | `patches/patch_materials.lua` | Adds a light to the burning effect entity. |
+| `PatchGlowShaders` | `patches/patch_materials.lua` | Applies the `files/patches/glow/` patches to widen the glow blur. |
+| `PatchItemRadar` | `patches/patch_item_radar.lua` | Hooks the Item Radar perk script to hide lanterns. |
+| `PatchLightSources` | `patches/patch_light_sources.lua` | Tags the light of the Light spell modifier with `pul_light_source`, so it counts as a light source for visibility checks and creature reactions. |
+| `InitHotBiomes` | `lanterns/properties/lantern_liquid_state.lua` | Reads `_biomes_all.xml` and opens `biome_map.png` to detect hot biomes at runtime. |
 
 The vision and glow patches are described in [Vision and Lighting](vision-and-lighting.md).
 
@@ -58,28 +65,29 @@ The vision and glow patches are described in [Vision and Lighting](vision-and-li
 
 ## Entity Scripts
 
-Scripts attached to lantern entities through `LuaComponent`:
+Scripts attached to lantern entities through `LuaComponent` (paths are relative to `files/scripts/`):
 
 | Script | When it runs | Purpose |
 | --- | --- | --- |
-| `lantern_anchor.lua` | In the world, every 20 frames and on kick | Detaches the lantern from the ceiling when kicked or when the ceiling is destroyed, then removes itself. |
-| `lantern_chain_kick.lua` | On kick, on chained lanterns | Marks a lantern to be taken off its chain by `lantern_chain.lua` and pushes it away from the kicker. |
-| `lantern_in_world.lua` | Once each time the lantern returns to the world | Resets the mirrored transform scale after a throw or drop. |
-| `lantern_throw.lua` | On throw (`Message_ThrowItem`) | Marks a lantern thrown with the left mouse button, so `UpdateLanternHang` returns it to the hand on the next frame. Types that cannot be hung (no `hang_offset_y` in `LANTERN_TYPES`) are not marked and fly away. |
-| `lantern_in_hand.lua` | In hand, every frame | Swings the lantern like a damped pendulum. Also drives the belt lantern. |
-| `lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering, Short-lived and Cracked modifiers. |
-| `lantern_damage.lua` | On damage (`script_damage_received`) | Cracks a lantern that takes damage without breaking. |
-| `chain_torch_fire.lua` | Chain torches, every 10 frames in the world and in hand | Douses a torch whose coals are in a liquid and lights it again from fire. |
-| `lantern_death.lua`, `lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |
-| `mining_lamp_death.lua` | On death | Spills oil and fire; the explosion comes from `ExplodeOnDamageComponent`. |
-| `temple_lantern_death.lua` | On death | Spills fading plasma; the explosion comes from `ExplodeOnDamageComponent`. |
-| `chain_torch_death.lua` | On death | Scatters fire and sparks of the torch type from the coals. |
+| `lanterns/mechanics/lantern_anchor.lua` | In the world, every 20 frames and on kick | Detaches the lantern from the ceiling when kicked or when the ceiling is destroyed, then removes itself. |
+| `lanterns/fixtures/lantern_chain_kick.lua` | On kick, on chained lanterns | Marks a lantern to be taken off its chain by `lantern_chain.lua` and pushes it away from the kicker. |
+| `lanterns/mechanics/lantern_in_world.lua` | Once each time the lantern returns to the world | Resets the mirrored transform scale after a throw or drop. |
+| `lanterns/mechanics/lantern_throw.lua` | On throw (`Message_ThrowItem`) | Marks a lantern thrown with the left mouse button, so `UpdateLanternHang` returns it to the hand on the next frame. Types that cannot be hung (no `hang_offset_y` in `LANTERN_TYPES`) are not marked and fly away. |
+| `lanterns/mechanics/lantern_in_hand.lua` | In hand, every frame | Swings the lantern like a damped pendulum. Also drives the belt lantern. |
+| `lanterns/properties/lantern_modifier.lua` | In the world and in hand, only on lit lanterns with a modifier | Runs the Flickering, Short-lived and Cracked modifiers. |
+| `lanterns/properties/lantern_damage.lua` | On damage (`script_damage_received`) | Cracks a lantern that takes damage without breaking. |
+| `lanterns/fixtures/chain_torch_fire.lua` | Chain torches, every 10 frames in the world and in hand | Douses a torch whose coals are in a liquid and lights it again from fire. |
+| `lanterns/fixtures/chain_torch_hot_liquid.lua` | Chain torches, on hot liquid contact | Records when a chain torch's coals touch lava or `liquid_fire` so `chain_torch_fire.lua` keeps it lit or relights it. |
+| `lanterns/death/lantern_death.lua`, `lanterns/death/lantern_small_death.lua` | On death | Spill oil and fire and spawn the vanilla shatter particles. |
+| `lanterns/death/mining_lamp_death.lua` | On death | Spills oil and fire; the explosion comes from `ExplodeOnDamageComponent`. |
+| `lanterns/death/temple_lantern_death.lua` | On death | Spills fading plasma; the explosion comes from `ExplodeOnDamageComponent`. |
+| `lanterns/death/chain_torch_death.lua` | On death | Scatters fire and sparks of the torch type from the coals. |
 
 Scripts that the mod attaches to other entities at runtime:
 
 | Script | Attached to | Purpose |
 | --- | --- | --- |
-| `light_source_tag.lua` | The entity of the Light spell modifier | Tags the projectile with `pul_light_source`, then removes itself. |
+| `patches/light_source_tag.lua` | The entity of the Light spell modifier | Tags the projectile with `pul_light_source`, then removes itself. |
 
 ## Item Lifecycle Tags
 

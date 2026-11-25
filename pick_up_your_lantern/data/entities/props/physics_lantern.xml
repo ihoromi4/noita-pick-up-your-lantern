@@ -34,14 +34,14 @@
     <LuaComponent
         _tags="enabled_in_world"
         execute_every_n_frame="20"
-        script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_anchor.lua"
-        script_kick="mods/pick_up_your_lantern/files/scripts/lantern_anchor.lua"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/lanterns/mechanics/lantern_anchor.lua"
+        script_kick="mods/pick_up_your_lantern/files/scripts/lanterns/mechanics/lantern_anchor.lua"
     ></LuaComponent>
 
     <LuaComponent
         _tags="enabled_in_world"
         execute_every_n_frame="1"
-        script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_in_world.lua"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/lanterns/mechanics/lantern_in_world.lua"
     ></LuaComponent>
 
     <!-- Base light of this lantern type. Radius is scaled at runtime by settings, quality tier and modifier. -->
@@ -145,12 +145,12 @@
 
     <LuaComponent script_physics_body_modified="data/scripts/props/physics_lantern_damaged.lua" />
 
-    <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/lantern_death.lua" />
+    <LuaComponent script_death="mods/pick_up_your_lantern/files/scripts/lanterns/death/lantern_death.lua" />
 
-    <LuaComponent script_damage_received="mods/pick_up_your_lantern/files/scripts/lantern_damage.lua" />
+    <LuaComponent script_damage_received="mods/pick_up_your_lantern/files/scripts/lanterns/properties/lantern_damage.lua" />
 
     <LuaComponent
-        script_throw_item="mods/pick_up_your_lantern/files/scripts/lantern_throw.lua"
+        script_throw_item="mods/pick_up_your_lantern/files/scripts/lanterns/mechanics/lantern_throw.lua"
         execute_every_n_frame="-1"
     ></LuaComponent>
 
@@ -241,7 +241,7 @@
         _tags="enabled_in_hand"
         _enabled="0"
         execute_every_n_frame="1"
-        script_source_file="mods/pick_up_your_lantern/files/scripts/lantern_in_hand.lua"
+        script_source_file="mods/pick_up_your_lantern/files/scripts/lanterns/mechanics/lantern_in_hand.lua"
     ></LuaComponent>
 
 </Entity>

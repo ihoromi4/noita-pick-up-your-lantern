@@ -73,7 +73,7 @@ Three options were tried:
 
 ## Design
 
-`files/scripts/lantern_fear.lua`, every 30 frames, 5 frames after the attraction updates (`UPDATE_FRAME_OFFSET`).
+`files/scripts/creatures/lantern_fear.lua`, every 30 frames, 5 frames after the attraction updates (`UPDATE_FRAME_OFFSET`).
 
 - **Fearful enemies**: root entities with the `enemy` tag that the fire enemy glow has checked (`pul_fire_glow_checked`) and that lanterns never attract, whatever the options: without the `pul_fire_enemy` tag and with a herd other than `orcs` and `fly`. Bosses, a polymorphed player and charmed enemies are skipped. The glow check is required: in the second test, Liekkiö (`fireskull`) far from the camera was scared, as the glow scan (512 px around the camera) had not tagged it as a fire enemy yet. So the fear also works only near the camera.
 - **Fear lights**: entities with the `lantern` tag and an enabled `LightComponent` with the `pul_light_source` tag that are their own root entity (in the world) or the held item of their root entity (in hand, `GetHeldItem`). A carried lantern that is not in hand (inventory, belt) does not scare, whatever the state of its light; the belt lantern and the light of the player have no `lantern` tag, and an extinguished lantern has no enabled light. The fear radius is the lit area, 0.6 of the current light radius (`LIT_RADIUS_FACTOR`, the same share as in `visibility_api.lua`): `LightComponent.radius` is the outer edge of a soft light, and the visibly lit area is smaller. It is scaled by `FEAR_RADIUS_SCALE` (0.6, tuned by feel after the sixth test), so the fear radius is 0.36 of the light radius.
@@ -91,7 +91,7 @@ Three options were tried:
   - Enraged enemies are evaluated even outside the light, so they calm down in time.
   - The rage turns fear into a risk: lanterns in the world, vanilla hanging lanterns too, can be broken by enemies, and the darkness spreads.
 - Enemies immune to fire (`fire="0"` damage multiplier: ghosts, robots and others) take no damage and do not react.
-- The shared helpers (lured groups, excluded enemies, settings, hitbox centre) are in `files/scripts/enemy_ai_home.lua`, a module shared with the attraction (see [Fire Enemies](fire-enemies.md#implementation)).
+- The shared helpers (lured groups, excluded enemies, settings, hitbox centre) are in `files/scripts/creatures/enemy_ai_home.lua`, a module shared with the attraction (see [Fire Enemies](fire-enemies.md#implementation)).
 
 ## Constants
 
@@ -160,9 +160,9 @@ Next steps:
 
 | File | Role |
 | --- | --- |
-| `files/scripts/lantern_fear.lua` | Fear lights, fearful enemies, scorch, rage. `UpdateLanternFear()` is called from `OnWorldPreUpdate` |
+| `files/scripts/creatures/lantern_fear.lua` | Fear lights, fearful enemies, scorch, rage. `UpdateLanternFear()` is called from `OnWorldPreUpdate` |
 | `files/entities/lantern_fear_effect.xml` | Look of fear: Confusion particles without the Confusion effect |
 | `files/entities/lantern_rage_effect.xml` | Look of the rage: Berserk particles without the Berserk effect |
-| `files/scripts/enemy_ai_home.lua` | Helpers shared with the attraction: lured groups, excluded enemies, settings, hitbox centre |
+| `files/scripts/creatures/enemy_ai_home.lua` | Helpers shared with the attraction: lured groups, excluded enemies, settings, hitbox centre |
 | `files/scripts/utils.lua` | `FIRE_GLOW_CHECKED_TAG`, shared with the fire enemy glow |
 | `settings.lua`, `files/translations.csv` | The `natural_fear` description mentions the fear |

@@ -17,9 +17,9 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/hanging_rope.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_traits.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_illumination.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/fixtures/hanging_rope.lua")
 
 local LANTERN_TAG = "lantern"
 local CABLE_TAG = "pul_cable"

@@ -1,7 +1,7 @@
 <Entity name="pul_lantern_rage_effect" tags="pul_lantern_rage_effect" >
 
     <!--
-        Rage of an enemy that attacks the lantern it feared, spawned by files/scripts/lantern_fear.lua as a child of
+        Rage of an enemy that attacks the lantern it feared, spawned by files/scripts/creatures/lantern_fear.lua as a child of
         the enemy and killed when the rage passes. The look of the Berserk status effect (vanilla
         data/entities/misc/effect_berserk.xml) without its GameEffectComponent, so the enemy does not attack everyone.
     -->

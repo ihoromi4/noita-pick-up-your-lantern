@@ -125,7 +125,7 @@ The engine has no Lua call that sends an `AnimalAIComponent` to a point, and no 
 
 ### Design
 
-`files/scripts/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../../versions/version-0.3.0.md#natural-fear-mode) mode, which attracts Hiisi and insects.
+`files/scripts/creatures/lantern_attraction.lua`, every 20 frames. The same mechanism serves the [Natural Fear](../../versions/version-0.3.0.md#natural-fear-mode) mode, which attracts Hiisi and insects.
 
 - **Lured enemies**: root entities with the `enemy` tag within the attraction radius of a lure lantern, plus the enemies attracted earlier (to release them). An enemy is lured when:
   - `Lanterns attract fire enemies` is on and it has the `pul_fire_enemy` tag, which the glow scan adds to every enemy it lights;
@@ -219,9 +219,9 @@ Next steps:
 
 | File | Role |
 | --- | --- |
-| `files/scripts/fire_enemy_glow.lua` | Vanilla light table, fire detection heuristic, light and fog of war hole components, `pul_fire_enemy` tag. `UpdateFireEnemyGlow()` is called from `OnWorldPreUpdate` |
-| `files/scripts/lantern_attraction.lua` | Lure lanterns, lured enemies (fire enemies and the Natural Fear herds), AI home, leash, path finding depth and trance (detection range) of attracted enemies. `UpdateLanternAttraction()` is called from `OnWorldPreUpdate` |
-| `files/scripts/enemy_ai_home.lua` | AI home helpers shared with the [Natural Fear](natural-fear.md) light avoidance: original AI values (`pul_original_ai` storage), home with leash and path finding depth, lured groups |
+| `files/scripts/creatures/fire_enemy_glow.lua` | Vanilla light table, fire detection heuristic, light and fog of war hole components, `pul_fire_enemy` tag. `UpdateFireEnemyGlow()` is called from `OnWorldPreUpdate` |
+| `files/scripts/creatures/lantern_attraction.lua` | Lure lanterns, lured enemies (fire enemies and the Natural Fear herds), AI home, leash, path finding depth and trance (detection range) of attracted enemies. `UpdateLanternAttraction()` is called from `OnWorldPreUpdate` |
+| `files/scripts/creatures/enemy_ai_home.lua` | AI home helpers shared with the [Natural Fear](natural-fear.md) light avoidance: original AI values (`pul_original_ai` storage), home with leash and path finding depth, lured groups |
 | `files/scripts/utils.lua` | `FIRE_ENEMY_TAG` |
 | `settings.lua`, `files/translations.csv` | `fire_enemy_attraction` and `natural_fear` options in the `Gameplay` category, marked `preset_excluded = true` |
 

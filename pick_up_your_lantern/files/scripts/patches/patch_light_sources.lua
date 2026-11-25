@@ -8,7 +8,7 @@ local MOD_ID = "pick_up_your_lantern"
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
 local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
 
-local TAG_SCRIPT_PATH = "mods/" .. MOD_ID .. "/files/scripts/light_source_tag.lua"
+local TAG_SCRIPT_PATH = "mods/" .. MOD_ID .. "/files/scripts/patches/light_source_tag.lua"
 
 -- Light of the Light spell modifier (`LIGHT`), added to projectiles as an extra entity.
 local LIGHT_SOURCE_PATHS = {

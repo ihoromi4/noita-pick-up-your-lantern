@@ -10,7 +10,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-local enemy_ai_home = dofile_once("mods/" .. MOD_ID .. "/files/scripts/enemy_ai_home.lua")
+local enemy_ai_home = dofile_once("mods/" .. MOD_ID .. "/files/scripts/creatures/enemy_ai_home.lua")
 
 local NATURAL_FEAR_SETTING_ID = MOD_ID .. ".natural_fear"
 -- How often lantern light burns an enemy in it.

@@ -1,7 +1,7 @@
 <Entity name="pul_lantern_fear_effect" tags="pul_lantern_fear_effect" >
 
     <!--
-        Fear of an enemy scorched by lantern light, spawned by files/scripts/lantern_fear.lua as a child of the enemy
+        Fear of an enemy scorched by lantern light, spawned by files/scripts/creatures/lantern_fear.lua as a child of the enemy
         and killed once it is out of the light. The particles of the Confusion status effect (vanilla
         data/entities/misc/effect_confusion.xml) without its GameEffectComponent, so the enemy is not confused.
     -->

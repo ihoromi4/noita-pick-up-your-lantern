@@ -143,9 +143,9 @@ On each update, an enemy in the light flies into a rage with a 5% chance (`RAGE_
 | File | Role |
 | --- | --- |
 | `files/scripts/visibility_api.lua` | Exported visibility API (`IsPointVisible`, `IsEntityVisible`) for other mods |
-| `files/scripts/patch_light_sources.lua`, `files/scripts/light_source_tag.lua` | Mark the Light spell modifier as a light source |
-| `files/scripts/lantern_attraction.lua` | Lure lanterns, lured enemies, home, leash and trance |
-| `files/scripts/enemy_ai_home.lua` | Original AI values, home with leash, lured groups and exclusions, shared by the attraction and the fear |
-| `files/scripts/lantern_fear.lua` | Fear lights, fearful enemies, scorch and rage |
+| `files/scripts/patches/patch_light_sources.lua`, `files/scripts/patches/light_source_tag.lua` | Mark the Light spell modifier as a light source |
+| `files/scripts/creatures/lantern_attraction.lua` | Lure lanterns, lured enemies, home, leash and trance |
+| `files/scripts/creatures/enemy_ai_home.lua` | Original AI values, home with leash, lured groups and exclusions, shared by the attraction and the fear |
+| `files/scripts/creatures/lantern_fear.lua` | Fear lights, fearful enemies, scorch and rage |
 | `files/entities/lantern_fear_effect.xml`, `files/entities/lantern_rage_effect.xml` | Looks of fear and rage |
-| `files/scripts/fire_enemy_glow.lua` | Fire enemy glow and the `pul_fire_enemy` and `pul_fire_glow_checked` tags |
+| `files/scripts/creatures/fire_enemy_glow.lua` | Fire enemy glow and the `pul_fire_enemy` and `pul_fire_glow_checked` tags |

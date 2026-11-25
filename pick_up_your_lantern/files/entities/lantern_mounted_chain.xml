@@ -1,7 +1,7 @@
 <Entity name="pul_lantern_mounted_chain" tags="pul_mounted_chain" >
 
     <!--
-        Lantern chain with a ceiling mount at its ceiling anchor, spawned by files/scripts/lantern_chain.lua.
+        Lantern chain with a ceiling mount at its ceiling anchor, spawned by files/scripts/lanterns/fixtures/lantern_chain.lua.
         Keeps the link count in a storage; the links are sprite entities simulated in Lua.
     -->
 

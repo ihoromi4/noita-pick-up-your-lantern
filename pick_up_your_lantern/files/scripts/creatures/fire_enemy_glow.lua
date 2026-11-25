@@ -8,7 +8,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_illumination.lua")
 
 ---@class FireGlow
 ---@field radius number Light radius in world pixels.

@@ -2,7 +2,7 @@
 
     <!--
         Top link of a mounted lantern chain: the vanilla ceiling mount sprite of a chain torch.
-        Placed and turned every frame by files/scripts/lantern_chain.lua: the origin is the upper end.
+        Placed and turned every frame by files/scripts/lanterns/fixtures/lantern_chain.lua: the origin is the upper end.
     -->
 
     <!-- Player is drawn at 0.6, higher values are drawn behind it. -->

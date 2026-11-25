@@ -1,7 +1,7 @@
 <Entity name="pul_tube_lamp_cable" tags="pul_cable" >
 
     <!--
-        Power cable of a tube lamp at its ceiling anchor, spawned by files/scripts/tube_lamp_cable.lua.
+        Power cable of a tube lamp at its ceiling anchor, spawned by files/scripts/lanterns/fixtures/tube_lamp_cable.lua.
         Keeps the segment count and age in storages; the segments are sprite entities simulated in Lua.
     -->
 

@@ -176,10 +176,10 @@ All per-lantern state lives in `VariableStorageComponent` tagged for the world, 
 
 ## Files
 
-- `files/scripts/lantern_traits.lua`: tiers, modifiers, liquid states, rolling, fuel, descriptions, burn-out.
-- `files/scripts/lantern_properties_config.lua`: configuration of all tiers, modifiers and states.
-- `files/scripts/lantern_modifier.lua`: per-frame modifier behavior.
-- `files/scripts/lantern_damage.lua`: cracking on damage.
-- `files/scripts/lantern_illumination.lua`: base values and applying the illumination scale.
-- `files/scripts/lantern_liquid_state.lua`: liquid state detection.
+- `files/scripts/lanterns/properties/lantern_traits.lua`: tiers, modifiers, liquid states, rolling, fuel, descriptions, burn-out.
+- `files/scripts/lanterns/properties/lantern_properties_config.lua`: configuration of all tiers, modifiers and states.
+- `files/scripts/lanterns/properties/lantern_modifier.lua`: per-frame modifier behavior.
+- `files/scripts/lanterns/properties/lantern_damage.lua`: cracking on damage.
+- `files/scripts/lanterns/properties/lantern_illumination.lua`: base values and applying the illumination scale.
+- `files/scripts/lanterns/properties/lantern_liquid_state.lua`: liquid state detection.
 - `files/props_gfx/lantern_in_hand_out.xml`, `lantern_small_in_hand_out.xml`: burnt-out in-hand sprites.

@@ -16,9 +16,9 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_illumination.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/hanging_rope.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_traits.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_illumination.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/fixtures/hanging_rope.lua")
 
 -- Coals below the top of the bail, which is the torch origin, in the world and in hand, where the sprite is drawn
 -- at 60% of its size.

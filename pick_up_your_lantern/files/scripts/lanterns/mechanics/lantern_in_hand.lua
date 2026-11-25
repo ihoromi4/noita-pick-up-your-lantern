@@ -36,7 +36,7 @@
 local MOD_ID = "pick_up_your_lantern"
 dofile_once("data/scripts/lib/utilities.lua")
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_traits.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_traits.lua")
 
 -- Spring-damper pendulum tuning constants
 local SPRING_K = 0.05

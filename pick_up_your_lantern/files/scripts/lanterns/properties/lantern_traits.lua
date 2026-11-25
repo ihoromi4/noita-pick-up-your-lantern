@@ -9,7 +9,7 @@ local MOD_ID = "pick_up_your_lantern"
 
 ---@diagnostic disable: undefined-global
 dofile_once("mods/" .. MOD_ID .. "/files/scripts/utils.lua")
-dofile_once("mods/" .. MOD_ID .. "/files/scripts/lantern_properties_config.lua")
+dofile_once("mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_properties_config.lua")
 
 local PROGRESSION_SETTING_ID = MOD_ID .. ".lantern_progression"
 local TIER_STORAGE = "lantern_tier"
@@ -21,7 +21,7 @@ local BASE_DESCRIPTION_STORAGE = "lantern_base_description"
 local LIQUID_STATE_STORAGE = "lantern_liquid_state"
 local POWER_LOST_STORAGE = "lantern_power_lost"
 local DOUSED_STORAGE = "lantern_doused"
-local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lantern_modifier.lua"
+local MODIFIER_SCRIPT = "mods/" .. MOD_ID .. "/files/scripts/lanterns/properties/lantern_modifier.lua"
 
 -- Open fire of a torch carried by the player, as the vanilla torch emitters (data/entities/base_torch_particle.xml).
 -- Visual particles are cosmetic ones that rise on a negative gravity, as fire does; GameCreateParticle with

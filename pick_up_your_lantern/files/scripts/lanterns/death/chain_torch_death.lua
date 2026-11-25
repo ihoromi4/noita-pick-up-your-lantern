@@ -2,7 +2,7 @@
 ---Scatters the burning coals as fire and sparks of the torch type; the pop itself comes from ExplodeOnDamageComponent.
 
 dofile_once("data/scripts/lib/utilities.lua")
-dofile_once("mods/pick_up_your_lantern/files/scripts/lantern_traits.lua")
+dofile_once("mods/pick_up_your_lantern/files/scripts/lanterns/properties/lantern_traits.lua")
 
 local FIRE_COUNT = 8
 local SPARK_COUNT = 12
