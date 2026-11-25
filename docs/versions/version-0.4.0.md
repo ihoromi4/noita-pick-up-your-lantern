@@ -20,3 +20,8 @@ Tracking document for completed work in **Version 0.4.0**. All releases are list
 ### Visibility API and Enemy Study Migration
 
 - [x] Moved the **Enemy Study** mechanic, its settings, markers, and documentation to the **In Game Wiki** mod. Exported `files/scripts/visibility_api.lua` (`IsPointVisible`, `IsEntityVisible`, `GetLitAreas`) calibrated at `0.35` of the light radius, covering lanterns in the world, in hand, on the player's belt (at its reduced `belt_light_scale` radius), and projectiles with the Light spell modifier. Details: [Creatures and Light](../dev/creatures-and-light.md#visibility-api).
+
+### Natural Fear Creature Filtering
+
+- [x] Excluded robots and fire-immune creatures from Natural Fear reactions so they neither fear lantern light nor gather around lanterns (fire-related robots such as flamethrower robots remain lured when fire enemy attraction is enabled).
+- [x] Included the `healer` herd in Natural Fear attraction so organic support Hiisi (`scavenger_heal`, `scavenger_invis`, `scavenger_shield`) and cowards (`coward`) gather around lanterns while healer drones (`healerdrone_physics`) and Hiisi machines (`tank`, `turret`) are filtered out as robots. Details: [Lanterns](../guides/lanterns.md#scaring-creatures) and [Creatures and Light](../dev/creatures-and-light.md#natural-fear).

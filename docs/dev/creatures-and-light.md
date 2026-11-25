@@ -69,7 +69,8 @@ The engine has no call that sends an AI to a point. So the attraction moves the 
 `UpdateLanternAttraction()` runs every 20 frames.
 
 - An enemy is lured when `Lanterns attract fire enemies` is on and it has the `pul_fire_enemy` tag. The fire enemy glow adds this tag, see [Fire Enemy Glow](vision-and-lighting.md#fire-enemy-glow).
-- An enemy is also lured when `Natural Fear` is on and its herd is `orcs` (Hiisi with their tanks and turrets) or `fly` (insects).
+- An enemy is also lured when `Natural Fear` is on and `IsNaturalFearLured` in `enemy_ai_home.lua` accepts it. It accepts non-robot enemies whose herd is `orcs` (Hiisi), `healer` (support Hiisi and cowards), or `fly` (insects).
+- Robots (`IsRobot` in `enemy_ai_home.lua`: entities with the `robot` tag or `robot` herd, such as Hiisi tanks, turrets, healer drones, and monks) are not lured by `Natural Fear`.
 - Bosses, charmed enemies and a polymorphed player are never lured (`EXCLUDED_TAGS` in `enemy_ai_home.lua`).
 - A lure lantern is an entity with the `lantern` tag that is its own root entity and has an enabled light with the `pul_light_source` tag. So a lantern in hand, in the inventory or on the belt does not lure. Vanilla hanging lanterns lure too.
 - The attraction radius is 1.5 times the current light radius (`ATTRACTION_RADIUS_FACTOR`).
@@ -112,8 +113,8 @@ Setting an AI state from Lua does not start its path finding: such an enemy stan
 
 `UpdateLanternFear()` runs every 30 frames, 5 frames after the attraction updates (`UPDATE_FRAME_OFFSET`).
 
-- A fearful enemy is a root entity with the `enemy` tag that the fire enemy glow has already checked (`pul_fire_glow_checked`). It has no `pul_fire_enemy` tag, and its herd is neither `orcs` nor `fly`. The glow check is needed, because otherwise a fire enemy far from the camera would be scared before the glow scan tags it.
-- Bosses, charmed enemies and a polymorphed player are skipped. Enemies without an `AnimalAIComponent` are left alone.
+- A fearful enemy is a root entity with the `enemy` tag that the fire enemy glow has already checked (`pul_fire_glow_checked`). It has no `pul_fire_enemy` tag, and `IsNaturalFearLured`, `IsRobot`, `IsFireImmune`, and `IsExcluded` in `enemy_ai_home.lua` all return `false` for it. The glow check is needed, because otherwise a fire enemy far from the camera would be scared before the glow scan tags it.
+- Fire-immune enemies (`damage_multipliers.fire <= 0`, missing `DamageModelComponent`, or `PROTECTION_FIRE` / `PROTECTION_ALL` effects), robots (`robot` tag or `robot` herd), bosses, charmed enemies and a polymorphed player are skipped. Enemies without an `AnimalAIComponent` are left alone.
 - A fear light is an entity with the `lantern` tag and an enabled light with the `pul_light_source` tag. It is either its own root entity (in the world) or the held item of its root entity (in hand). A lantern in the inventory or on the belt does not scare.
 - The fear radius is 0.36 of the light radius: the lit share `LIT_RADIUS_FACTOR` (0.6) times `FEAR_RADIUS_SCALE` (0.6).
 - An enemy is lit only by a lantern it sees. The ray stops 10 px before the lantern (`SIGHT_MARGIN`), so light does not pass through walls.
@@ -126,7 +127,7 @@ On each update, a fearful enemy in a fear light is scorched:
 - It is pushed away from the light that lights it the most: `FEAR_PUSH_SPEED` (60) is added to `CharacterDataComponent.mVelocity`. Walking enemies are pushed only along X.
 - It gets the `pul_lantern_scared` tag and the look of fear: a child entity `lantern_fear_effect.xml` (tag `pul_lantern_fear_effect`) with the particles of the Confusion status, without the Confusion effect. The look is removed once the enemy is out of the light.
 
-Enemies immune to fire, such as ghosts and robots, take no damage and do not react. Fear beats hunting, because the damage interrupts any job.
+Fear beats hunting, because the damage interrupts any job. Robots and fire-immune enemies are filtered out in `IsFearful` before reaching scorch or rage.
 
 ### Rage
 

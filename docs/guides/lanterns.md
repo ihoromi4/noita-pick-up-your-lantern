@@ -92,14 +92,14 @@ Fire creatures, such as Stendari and Liekkiö, are drawn to a lit lantern hangin
 - Throw or hang a lantern to lead fire creatures away, or to gather them in one place.
 - Once a creature is lured, it stays near the lantern even if it loses sight of it for a moment.
 - The `Lanterns attract fire enemies` setting turns this off. See [Settings](settings.md#lanterns-attract-fire-enemies).
-- With the `Natural Fear` setting, Hiisi and insects are lured the same way. See [Settings](settings.md#natural-fear).
+- With the `Natural Fear` setting, organic Hiisi (including healers and support Hiisi), cowards, and insects are lured the same way. Machines such as tanks, turrets, and robots ignore lantern light. See [Settings](settings.md#natural-fear).
 
 ## Scaring Creatures
 
-With the `Natural Fear` setting, the creatures that lanterns do not lure, such as zombies and Limanuljaska, fear lantern light. See [Settings](settings.md#natural-fear).
+With the `Natural Fear` setting, most creatures that lanterns do not lure, such as zombies and Limanuljaska, fear lantern light. See [Settings](settings.md#natural-fear).
 
 - The light scorches them: a creature in it sparkles as if confused, panics as if it were on fire and backs away from the light. It takes no real damage.
-- Creatures immune to fire, such as ghosts and robots, do not fear the light.
+- Robots (such as drones, tanks, turrets, healer drones, and monks) and other creatures immune to fire (such as ghosts) ignore lantern light. They neither fear it nor gather around it.
 - The lantern in your hands scares them too, so melee creatures keep their distance. Ranged ones still shoot from the darkness. A lantern on your belt or in your inventory does not scare them.
 - They fear the light even while fighting you.
 - Now and then a scared creature flies into a rage (it looks berserk) and attacks the lantern it feared, or you if the lantern is in your hands. The rage passes after a few seconds. An enraged creature can break a lantern, and the darkness spreads.
