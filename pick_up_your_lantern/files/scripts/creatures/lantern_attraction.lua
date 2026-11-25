@@ -6,7 +6,7 @@
 --- hunts, the lantern is gone, picked up, extinguished or out of range, or the option is turned off.
 --- Two groups of enemies are attracted, each with its own option:
 --- - fire-related enemies (`Lanterns attract fire enemies`), marked by the fire enemy glow;
---- - Hiisi and insects (`Natural Fear`), by their herd.
+--- - Hiisi (excluding their machines), healers and insects (`Natural Fear`), by their herd.
 
 local MOD_ID = "pick_up_your_lantern"
 
@@ -95,12 +95,12 @@ end
 ---@param enemy_id number Enemy entity ID.
 ---@param ai_comp number AnimalAIComponent of the enemy.
 ---@param is_fire_enabled boolean Whether fire enemies are attracted.
----@param is_natural_fear_enabled boolean Whether the Natural Fear herds are attracted.
+---@param is_natural_fear_enabled boolean Whether Natural Fear attraction is enabled.
 ---@return boolean
 local function IsLured(enemy_id, ai_comp, is_fire_enabled, is_natural_fear_enabled)
     -- Most enemies near lanterns belong to no lured group, so this check goes first.
     local is_in_lured_group = (is_fire_enabled and enemy_ai_home.IsFireEnemy(enemy_id))
-        or (is_natural_fear_enabled and enemy_ai_home.IsNaturalFearLuredHerd(enemy_id))
+        or (is_natural_fear_enabled and enemy_ai_home.IsNaturalFearLured(enemy_id))
     if not is_in_lured_group or enemy_ai_home.IsExcluded(enemy_id) then
         return false
     end

@@ -24,11 +24,16 @@ local WALKING_LEASH_MARGIN = 16
 -- walking enemies stood still in the going home state even with the home on their own level.
 local HOME_PATHFINDING_DEPTH = 200
 
--- Herds attracted in the Natural Fear mode: Hiisi (with their tanks and turrets) and insects.
+-- Herds attracted in the Natural Fear mode: Hiisi, healers (including support Hiisi and cowards), and insects.
+-- Robots in these herds (such as Hiisi tanks, turrets and healer drones) are skipped by IsNaturalFearLured.
 local NATURAL_FEAR_LURED_HERDS = {
     orcs = true,
+    healer = true,
     fly = true,
 }
+
+local ROBOT_TAG = "robot"
+local ROBOT_HERD = "robot"
 
 -- Bosses keep their own behaviour, and a polymorphed player is controlled by the player.
 local EXCLUDED_TAGS = {
@@ -82,16 +87,49 @@ function enemy_ai_home.IsFireEnemy(enemy_id)
     return EntityHasTag(enemy_id, FIRE_ENEMY_TAG)
 end
 
----Checks whether an enemy belongs to a herd that the Natural Fear mode attracts to lanterns.
----@param enemy_id number Enemy entity ID.
----@return boolean
-function enemy_ai_home.IsNaturalFearLuredHerd(enemy_id)
-    local genome_comp = EntityGetFirstComponentIncludingDisabled(enemy_id, "GenomeDataComponent")
+---Returns the herd name of an entity, or nil if it has no GenomeDataComponent.
+---@param entity_id number Entity ID.
+---@return string|nil
+local function GetHerdName(entity_id)
+    local genome_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "GenomeDataComponent")
     if genome_comp == nil then
-        return false
+        return nil
     end
 
-    return NATURAL_FEAR_LURED_HERDS[HerdIdToString(ComponentGetValue2(genome_comp, "herd_id"))] == true
+    return HerdIdToString(ComponentGetValue2(genome_comp, "herd_id"))
+end
+
+---Checks whether an enemy is a robot, by the `robot` tag or the `robot` herd (which covers `monk` too).
+---@param enemy_id number Enemy entity ID.
+---@return boolean
+function enemy_ai_home.IsRobot(enemy_id)
+    return EntityHasTag(enemy_id, ROBOT_TAG) or GetHerdName(enemy_id) == ROBOT_HERD
+end
+
+---Checks whether an enemy is immune to fire: by fire protection effects, missing DamageModelComponent,
+---or a non-positive fire damage multiplier.
+---@param enemy_id number Enemy entity ID.
+---@return boolean
+function enemy_ai_home.IsFireImmune(enemy_id)
+    if GameGetGameEffectCount(enemy_id, "PROTECTION_FIRE") > 0
+        or GameGetGameEffectCount(enemy_id, "PROTECTION_ALL") > 0 then
+        return true
+    end
+
+    local damage_comp = EntityGetFirstComponentIncludingDisabled(enemy_id, "DamageModelComponent")
+    if damage_comp == nil then
+        return true
+    end
+
+    local fire_mult = ComponentObjectGetValue2(damage_comp, "damage_multipliers", "fire")
+    return fire_mult ~= nil and fire_mult <= 0
+end
+
+---Checks whether an enemy is lured by lanterns in the Natural Fear mode (non-robot members of lured herds).
+---@param enemy_id number Enemy entity ID.
+---@return boolean
+function enemy_ai_home.IsNaturalFearLured(enemy_id)
+    return not enemy_ai_home.IsRobot(enemy_id) and NATURAL_FEAR_LURED_HERDS[GetHerdName(enemy_id)] == true
 end
 
 ---Checks whether an enemy keeps its own AI home: bosses, a polymorphed player and charmed enemies.

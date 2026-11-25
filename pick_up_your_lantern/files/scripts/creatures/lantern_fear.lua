@@ -109,14 +109,17 @@ local function CollectCandidates(lights)
     return candidates
 end
 
----Checks whether an enemy fears lantern light: any enemy that lanterns do not attract, whatever the options.
----Only enemies checked by the fire enemy glow count, as an unchecked fire enemy has no fire tag yet.
+---Checks whether an enemy fears lantern light: any enemy that lanterns do not attract, except robots, fire-immune
+---creatures and excluded enemies. Only enemies checked by the fire enemy glow count, as an unchecked fire enemy has
+---no fire tag yet.
 ---@param enemy_id number Enemy entity ID.
 ---@return boolean
 local function IsFearful(enemy_id)
     return EntityHasTag(enemy_id, FIRE_GLOW_CHECKED_TAG)
         and not enemy_ai_home.IsFireEnemy(enemy_id)
-        and not enemy_ai_home.IsNaturalFearLuredHerd(enemy_id)
+        and not enemy_ai_home.IsNaturalFearLured(enemy_id)
+        and not enemy_ai_home.IsRobot(enemy_id)
+        and not enemy_ai_home.IsFireImmune(enemy_id)
         and not enemy_ai_home.IsExcluded(enemy_id)
 end
 
