@@ -4,3 +4,4 @@ noita/
 tmp/
 noita
 .claude/settings.local.json
+__pycache__/
