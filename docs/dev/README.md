@@ -9,3 +9,4 @@ Technical documentation for contributors to the **Pick Up Your Lantern** mod for
 - [Lantern Properties and Progression](lantern-properties-and-progression.md): base properties per type, quality tiers, modifiers, liquid states and the item description.
 - [Vision and Lighting](vision-and-lighting.md): limited vision shader patch, vision presets, polymorph, the All-Seeing Eye, glowing materials and the fire enemy glow.
 - [Creatures and Light](creatures-and-light.md): light sources, the visibility API, luring enemies to lanterns and Natural Fear.
+- [Workshop Media](workshop-media.md): recording GIFs in the game, converting them for the size limit of the Steam Workshop, and the game recordings of Steam.
