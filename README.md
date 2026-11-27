@@ -23,4 +23,11 @@ luajit tests/run.lua -v
 luajit tests/run.lua -p TestApplyPatch
 luajit tests/run.lua -p TestRenderPatchTemplate
 luajit tests/run.lua -p TestApplyPatchBatch
+luajit tests/run.lua -p TestShaderPatches
+```
+
+The shader patches have their own check. It builds the patched shaders from the unpacked game files in `noita/` and compiles them with glslang:
+
+```bash
+scripts/check-shaders
 ```

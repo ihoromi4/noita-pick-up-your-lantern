@@ -6,6 +6,7 @@ local MOD_ID = "pick_up_your_lantern"
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
 local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
+local SHADER_PATCHES = dofile_once("mods/" .. MOD_ID .. "/files/scripts/patches/shader_patches.lua")
 
 local SETTING_ID = MOD_ID .. ".player_vision"
 local POLYMORPH_SETTING_ID = MOD_ID .. ".polymorph_vision"
@@ -16,16 +17,6 @@ local POLYMORPHED_TAGS = {
     "polymorphed_cessation",
 }
 local PLAYER_BASE_PATH = "data/entities/player_base.xml"
-local POST_FINAL_SHADER_PATH = "data/shaders/post_final.frag"
-
-local PATCH_DIR = "mods/" .. MOD_ID .. "/files/patches/vision/"
-local VISION_SHADER_PATCHES = {
-    PATCH_DIR .. "01_uniforms.patch.txt",
-    PATCH_DIR .. "02_fog_restriction.patch.txt",
-    PATCH_DIR .. "03_ambient_baseline.patch.txt",
-    PATCH_DIR .. "04_bg_leakage.patch.txt",
-    PATCH_DIR .. "05_biome_ambient.patch.txt",
-}
 
 local VANILLA_FOG_RADIUS = 256
 local VANILLA_LIGHT_RADIUS = 350
@@ -138,13 +129,8 @@ local shader_patch_error = nil
 ---- Darken background cutouts in caves when fog of war is active.
 ---@return nil
 function PatchShaderVision()
-    local shader_config = {
-        GLOW_BOOST = "1.5",
-        LIGHT_CLAMP_MULT = "2.0",
-        AMBIENT_BASE = "0.35",
-    }
-
-    local ok, err = DiffPatch.PatchFileBatch(POST_FINAL_SHADER_PATH, VISION_SHADER_PATCHES, shader_config)
+    local job = SHADER_PATCHES.vision
+    local ok, err = DiffPatch.PatchFileBatch(job.target, job.patches, job.config)
     if not ok then
         shader_patch_error = err
         print(string.format("[%s] ERROR: %s", MOD_ID, err))

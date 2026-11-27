@@ -6,14 +6,10 @@ local MOD_ID = "pick_up_your_lantern"
 ---@diagnostic disable: undefined-global
 local nxml = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/nxml.lua")
 local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
+local SHADER_PATCHES = dofile_once("mods/" .. MOD_ID .. "/files/scripts/patches/shader_patches.lua")
 
 local MATERIALS_PATH = "data/materials.xml"
 local EFFECT_ON_FIRE_PATH = "data/entities/misc/effect_on_fire.xml"
-local POST_GLOW1_PATH = "data/shaders/post_glow1.frag"
-local POST_GLOW2_PATH = "data/shaders/post_glow2.frag"
-local GLOW_PATCH_DIR = "mods/" .. MOD_ID .. "/files/patches/glow/"
-local POST_GLOW1_PATCH_PATH = GLOW_PATCH_DIR .. "post_glow1.patch.txt"
-local POST_GLOW2_PATCH_PATH = GLOW_PATCH_DIR .. "post_glow2.patch.txt"
 
 ---Table of materials to patch with enhanced glow and glow colors.
 ---@type table<string, {gfx_glow: string, gfx_glow_color?: string}>
@@ -121,21 +117,10 @@ end
 ---Patches post_glow1.frag and post_glow2.frag to increase blur radius to 10.0.
 ---@return nil
 function PatchGlowShaders()
-    local config1 = {
-        BLUR_RADIUS = "10.0",
-        DECAY_MULT = "0.05",
-    }
-    local ok1, err1 = DiffPatch.PatchFile(POST_GLOW1_PATH, POST_GLOW1_PATCH_PATH, config1)
-    if not ok1 then
-        print(string.format("[%s] ERROR: %s", MOD_ID, err1))
-    end
-
-    local config2 = {
-        BLUR_RADIUS = "10.0",
-        DECAY_MULT = "1.0 / 23.0",
-    }
-    local ok2, err2 = DiffPatch.PatchFile(POST_GLOW2_PATH, POST_GLOW2_PATCH_PATH, config2)
-    if not ok2 then
-        print(string.format("[%s] ERROR: %s", MOD_ID, err2))
+    for _, job in ipairs({ SHADER_PATCHES.glow1, SHADER_PATCHES.glow2, }) do
+        local ok, err = DiffPatch.PatchFileBatch(job.target, job.patches, job.config)
+        if not ok then
+            print(string.format("[%s] ERROR: %s", MOD_ID, err))
+        end
     end
 end

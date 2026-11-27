@@ -48,7 +48,7 @@ flowchart TD
 
 ## Shader Patch
 
-`PatchShaderVision()` applies five patches from `files/patches/vision/` to `post_final.frag` with the [Diff Patch Library](architecture.md#diff-patch-library).
+`PatchShaderVision()` applies five patches from `files/patches/vision/` to `post_final.frag` with the [Diff Patch Library](architecture.md#diff-patch-library). The list of patches and the values of their placeholders live in the entry `vision` of [shader_patches.lua](../../pick_up_your_lantern/files/scripts/patches/shader_patches.lua).
 
 ### Uniforms
 
@@ -96,6 +96,26 @@ Where the foreground alpha is below one, the vanilla shader shows the background
 ```glsl
 color = mix(color, color * fog_of_war, fade * (1.0 - pul_vision.z));
 ```
+
+### Checking the Shader Patches
+
+The game hides shader errors. A `post_final.frag` that fails to compile leaves a white world under the GUI, and `logger.txt` has no line about it. A patch can also stop applying after a game update, when the vanilla lines around it change. So the shader patches are checked outside the game:
+
+```bash
+scripts/check-shaders
+```
+
+The script builds the patched shaders as the mod does at startup. [shader_build.lua](../../scripts/shader_build.lua) replaces `ModTextFileGetContent` and `ModTextFileSetContent` with functions that read the unpacked game files from `noita/` and keep the results in memory. It then calls the real [Diff Patch Library](architecture.md#diff-patch-library) with the entries of `shader_patches.lua` and writes the results to `tmp/shaders/`. Finally, `noitacli check-shader` of the DevKit compiles them with glslang. glslang also compiles the variant with `#define TRIPPY`, which the game adds to `post_final.frag` in some sessions.
+
+The script needs LuaJIT or Lua 5.1 and the unpacked game files. The variable `NOITA_DATA_DIR` points to another folder of game files.
+
+An entry can list `extra_configs`: other value sets that the mod can use, for example under other settings. The build makes one shader for each value set, named like `post_final.<name>.frag`.
+
+The test [test_shader_patches.lua](../../tests/test_shader_patches.lua) checks the values of the placeholders without glslang:
+
+- Each value set gives a value to every placeholder, and has no unused key.
+- Each number in a value is a float literal, such as `2.0`. GLSL 1.10 has no implicit conversion from `int` to `float`, so `2` breaks the shader on strict drivers, such as Mesa.
+- Every entry applies to the vanilla shader and leaves no placeholder. This test runs only when `noita/` has the game files.
 
 ## Player Entity
 
@@ -224,7 +244,7 @@ The effect entity follows its host, so a burning enemy or player lights the cave
 
 ### Wider Glow Blur
 
-`PatchGlowShaders()` applies `files/patches/glow/` to the glow blur shaders:
+`PatchGlowShaders()` applies `files/patches/glow/` to the glow blur shaders. Its entries `glow1` and `glow2` in `shader_patches.lua` hold the values:
 
 - The blur radius in `post_glow1.frag` (horizontal) and `post_glow2.frag` (vertical) grows from 5.0 to 10.0 pixels (`BLUR_RADIUS`), widening the halo around fire, lava and sparks.
 - In `post_glow1.frag`, the normalization changes from `0.1` to `0.05` (21 samples instead of 11), so the glow does not get brighter.

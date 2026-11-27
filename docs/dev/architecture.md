@@ -126,12 +126,13 @@ Vanilla lanterns have a `TorchComponent` that ignites nearby pixels and goes out
 
 ```lua
 local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
+local SHADER_PATCHES = dofile_once("mods/" .. MOD_ID .. "/files/scripts/patches/shader_patches.lua")
 
-local ok, err = DiffPatch.PatchFileBatch(POST_FINAL_SHADER_PATH, SHADER_PATCHES, {
-    GLOW_BOOST = "1.5",
-    LIGHT_CLAMP_MULT = "2.0",
-})
+local job = SHADER_PATCHES.vision
+local ok, err = DiffPatch.PatchFileBatch(job.target, job.patches, job.config)
 ```
+
+The shader patches live in one table, [shader_patches.lua](../../pick_up_your_lantern/files/scripts/patches/shader_patches.lua). Each entry names the vanilla shader, the patch files, and the values of the placeholders. The mod and the offline check read the same table, as [Checking the Shader Patches](vision-and-lighting.md#checking-the-shader-patches) describes.
 
 > [!IMPORTANT]
 > The Noita virtual file system only mounts mod files with known extensions (`.txt`, `.xml`, `.lua`, `.csv`, `.json`, `.frag`, `.vert`, `.png`). A `.patch` file is invisible to the engine and `ModTextFileGetContent()` returns `nil`. Name patch files `*.patch.txt`.

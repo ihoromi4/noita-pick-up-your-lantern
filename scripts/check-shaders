@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Build the patched shaders of the mod outside the game and compile them with glslang.
+# The game hides shader errors: a broken post_final.frag gives a white world and no log line.
+#
+# Usage: scripts/check-shaders
+# NOITA_DATA_DIR  folder with the unpacked game files (default: noita)
+# NOITACLI        command that runs noitacli (default: the DevKit submodule or noitacli on PATH)
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+lua=""
+for candidate in luajit lua5.1 lua; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        lua="$candidate"
+        break
+    fi
+done
+if [ -z "$lua" ]; then
+    echo "Error: LuaJIT or Lua 5.1 is required (for example: sudo apt install lua5.1)." >&2
+    exit 1
+fi
+
+if [ -n "${NOITACLI:-}" ]; then
+    read -r -a cli <<< "$NOITACLI"
+elif [ -f tools/noitakit/src/noitakit/check_shader.py ]; then
+    cli=(uv run tools/noitakit/src/noitakit/noitacli.py)
+elif command -v noitacli >/dev/null 2>&1 && noitacli check-shader --help >/dev/null 2>&1; then
+    cli=(noitacli)
+else
+    echo "Error: 'noitacli check-shader' was not found. Update the submodule tools/noitakit," >&2
+    echo "or set NOITACLI to a noitacli that has the command." >&2
+    exit 1
+fi
+
+out=tmp/shaders
+rm -rf "$out"
+mkdir -p "$out"
+
+"$lua" scripts/shader_build.lua "${NOITA_DATA_DIR:-noita}" "$out"
+echo
+"${cli[@]}" check-shader "$out"
