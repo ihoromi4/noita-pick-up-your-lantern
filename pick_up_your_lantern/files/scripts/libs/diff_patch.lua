@@ -1,10 +1,16 @@
 --- Single-file Unified Diff Patcher & Template Engine for Noita Mods.
 --- Supports {{var}} interpolation, strict variable validation, CRLF/LF preservation,
 --- idempotency checks, and batch patching.
+--- Version: 0.1.0
+--- Source: noitakit, skills/noita-modding/assets/diff_patch/diff_patch.lua
 
 ---@diagnostic disable: undefined-global
 
-local DiffPatch = {}
+local VERSION = "0.1.0"
+
+local DiffPatch = {
+    VERSION = VERSION,
+}
 
 --- Removes trailing whitespace (spaces and tabs) from a line for fallback matching.
 ---@param s string

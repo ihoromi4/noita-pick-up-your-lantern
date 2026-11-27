@@ -20,11 +20,10 @@ luajit tests/run.lua
 luajit tests/run.lua -v
 
 # Run a specific test suite or test pattern
-luajit tests/run.lua -p TestApplyPatch
-luajit tests/run.lua -p TestRenderPatchTemplate
-luajit tests/run.lua -p TestApplyPatchBatch
 luajit tests/run.lua -p TestShaderPatches
 ```
+
+The tests of the diff patch library live in the DevKit, next to the original file of the library. Run them from `tools/noitakit` with `luajit tests/lua/run.lua`.
 
 The shader patches have their own check. It builds the patched shaders from the unpacked game files in `noita/` and compiles them with glslang:
 
