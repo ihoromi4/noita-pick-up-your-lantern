@@ -51,6 +51,6 @@ Features planned for the next versions are listed in the [Backlog](../backlog.md
 
 ### Tooling and Infrastructure
 
-- [Diff Patch](tooling/diff-patch.md) - single-file library for applying unified diff patches to VFS files and shaders with variable replacement.
+- [Diff Patch](tooling/diff-patch.md) - pointer to the page of the DevKit skill about the diff patch library, which applies unified diff patches with placeholders to files and shaders.
 - [Spawning Fixtures for In-Game Tests](tooling/test-spawning.md) - a temporary debug spawner for rare light fixtures, spawn rules, finding biomes and ceiling points in pixel scenes, tested points in the mountain hall at the entrance to the Mines.
 - [YAML Localization](tooling/yaml-localization.md) - postponed idea of storing translations in YAML (`.yaml.txt`) and converting them to CSV at startup via `tinyyaml`; limitations, pros and cons.

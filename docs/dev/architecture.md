@@ -122,7 +122,7 @@ Vanilla lanterns have a `TorchComponent` that ignites nearby pixels and goes out
 
 ## Diff Patch Library
 
-`files/scripts/libs/diff_patch.lua` applies unified diff patches to vanilla text files through `ModTextFileGetContent` and `ModTextFileSetContent`. Patches can contain `{{NAME}}` placeholders filled from a config table; unused config keys are ignored.
+`files/scripts/libs/diff_patch.lua` applies unified diff patches to vanilla text files through `ModTextFileGetContent` and `ModTextFileSetContent`. Patches can contain `{{NAME}}` placeholders filled from a config table; unused config keys are ignored. The file is a copy of the library of the DevKit, and the page [Diff Patches](../../tools/noitakit/skills/noita-modding/references/diff-patch.md) of the noita-modding skill describes it in full.
 
 ```lua
 local DiffPatch = dofile_once("mods/" .. MOD_ID .. "/files/scripts/libs/diff_patch.lua")
@@ -135,7 +135,7 @@ local ok, err = DiffPatch.PatchFileBatch(job.target, job.patches, job.config)
 The shader patches live in one table, [shader_patches.lua](../../pick_up_your_lantern/files/scripts/patches/shader_patches.lua). Each entry names the vanilla shader, the patch files, and the values of the placeholders. The mod and the offline check read the same table, as [Checking the Shader Patches](vision-and-lighting.md#checking-the-shader-patches) describes.
 
 > [!IMPORTANT]
-> The Noita virtual file system only mounts mod files with known extensions (`.txt`, `.xml`, `.lua`, `.csv`, `.json`, `.frag`, `.vert`, `.png`). A `.patch` file is invisible to the engine and `ModTextFileGetContent()` returns `nil`. Name patch files `*.patch.txt`.
+> Name patch files `*.patch.txt`. The mod loads its patches with this extension, and it works in the game. It is not confirmed that the virtual file system ignores a file with the extension `.patch`, because no test has checked it yet. The library also tries the names with `.txt` when a path ends with `.patch`.
 
 ## Item Radar Filter
 
